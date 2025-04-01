@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# AppControl_Config modification script
+config_file_app="/root/system_data/config/parameter/AppControl_Config"
+
+cp "$config_file_app" "$config_file_app.bak"
+
+new_modelName="PSCSA-P1021-S02-R007-N001"
+new_versionNo="241007"
+new_update_date="241007"
+
+export new_modelName new_versionNo new_update_date
+
+awk -v new_modelName="$new_modelName" 'BEGIN {
+    FS = ":"
+    OFS = ":"
+}
+$1 ~ /modelName/ {
+    # Replace model name with new_modelName, ensuring that the correct part is replaced
+    sub(/PSCSA-[^-]+-[^-]+-[^-]+-[^-]+/, new_modelName, $2); 
+    print;
+    next
+}
+$1 ~ /versionNo/ {
+    print "versionNo           :   " ENVIRON["new_versionNo"];
+    next
+}
+$1 ~ /update_date/ {
+    print "update_date         :   " ENVIRON["new_update_date"];
+    next
+}
+{
+    # Print other lines as is without altering them
+    print
+}' "$config_file_app.bak" > "$config_file_app.tmp"
+
+mv "$config_file_app.tmp" "$config_file_app"
+
+rm -rf "$config_file_app.bak"
+
+echo "AppControl_Config fix."
+
+config_file_m="/root/system_data/config/parameter/mControl_Config"
+
+cp "$config_file_m" "$config_file_m.bak"
+
+awk 'BEGIN {
+    FS = ":"
+    OFS = ":"
+}
+$1 ~ /multi_temp_cali/ {
+    # Print the existing line as is
+    print;
+    # Add the new 'BreakDownCheck' line with a proper tab after ':'
+    printf "BreakDownCheck      :   1\n";
+    next
+}
+{
+    # Print other lines as is, without changing them
+    print
+}' "$config_file_m.bak" > "$config_file_m.tmp"
+
+mv "$config_file_m.tmp" "$config_file_m"
+
+rm -rf "$config_file_m.bak"
+
+echo "BreakDownCheck added to mControl_Config."
+
+cd /project/system_mcts
+
+rm -rf current
+
+cd /root/update/backup_program
+
+mv current_backup /project/system_mcts/current
+
+cd /project/system_mcts/current/
+
+cd App/AppControl
+
+make all_coa
+
+./clear
+
+echo "current_update done"
+
+rm -rf /root/update/ok.txt
+
+#Reboot system
+reboot

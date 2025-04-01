@@ -1,0 +1,11 @@
+io_Control_Flag			:	0
+watchdogFlag			:	1
+sensCount				:	1
+ioDelay					:	3000
+scan_period				:	10
+powerSwitchTimeout		:	3000
+forcePowerSwitchTimeout	:	10000
+resetSwitchTimeout		:	5000
+powerFailTimeout1		:	0
+powerFailTimeout2		:	10000
+upsBatteryFailTimeout	:	2000

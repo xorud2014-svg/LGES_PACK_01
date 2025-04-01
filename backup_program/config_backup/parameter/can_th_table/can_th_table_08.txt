@@ -1,0 +1,15 @@
+CAN_TH_02
+10kOhms_25degreeC		
+R_tolerance_1percent		
+3455K_25_85degreeC		
+B_tolerance_1percent		
+		
+Bias_type	:	0
+		
+temp_degreeC	V_Out	
+-10	10.00
+-5	8.00
+0	6.00
+5	4.00
+10	2.00
+9999

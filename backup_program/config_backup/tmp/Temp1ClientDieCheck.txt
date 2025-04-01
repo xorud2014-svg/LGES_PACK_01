@@ -1,0 +1,3 @@
+  989 ttyp0    S      0:00 ./Temp1Client
+ 1052 ttyp0    S      0:00 sh -c ps -ax | grep ./Temp1Client > /root/system_data
+ 1054 ttyp0    S      0:00 grep ./Temp1Client

@@ -1,0 +1,91 @@
+COA1_Client_Receive_Data_V100F_TimeSch
+
+TestCond_Header
+totalStep : 7
+totalPatternCount : 0
+totalTimeSchCount : 0
+reserved : 0
+reserverd1[2] : 0, 0
+
+TestCond_Step
+
+Step_Header : 1
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 2
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 3
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 4
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 5
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 6
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 7
+type : 6
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+TestCond_ETC
+test_cond_file_size : 0
+test_cond_file_checksum : 0

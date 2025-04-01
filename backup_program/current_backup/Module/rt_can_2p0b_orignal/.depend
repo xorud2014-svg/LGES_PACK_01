@@ -1,0 +1,20 @@
+rt_com.o: \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_sync.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_conf.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_core.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_sync.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_core.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_sync.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_time.h \
+   rt_com.h \
+   rt_comP.h
+rt_com_posix.o: \
+   /usr/src/rtlinux-3.2-pre2/include/rtl.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_fifo.h \
+   rt_com.h
+rt_comP.h:  \
+   $(wildcard /usr/src/rtlinux-3.2-pre2/include/config/smp.h)
+	@touch rt_comP.h
+.PRECIOUS:	rt_comP.h \
+

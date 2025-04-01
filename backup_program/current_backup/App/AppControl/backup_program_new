@@ -1,0 +1,31 @@
+#!/bin/bash
+DATE="`date '+%y%m%d_t%H%M'`"
+MODEL_NAME_FILE=/root/system_data/config/parameter/AppControl_Config
+
+echo "backup_program_new start"
+
+cd /project/system_mcts
+mkdir backup_program
+cd backup_program
+
+mkdir current_backup
+cp -rf ../current/* current_backup/
+tar cfz current_backup.tar.gz current_backup/*
+rm -rf current_backup
+echo "current_backup end."
+sleep 1
+
+mkdir config_backup
+cp -rf /root/system_data/config/* config_backup/
+tar cfz config_backup.tar.gz config_backup/*
+rm -rf config_backup
+echo "config_backup end."
+sleep 1
+
+cd /project/system_mcts
+#tar cvfz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_backup_program_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE''_new.tar.gz backup_program/*
+tar cvfz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE''_new.tar.gz backup_program/*
+rm -rf backup_program
+mv *.tar.gz BACKUP/
+echo "backup_program_new end."
+

@@ -1,0 +1,3 @@
+  851 ttyp0    S      0:00 ./DataSave
+  888 ttyp0    S      0:00 sh -c ps -ax | grep ./DataSave > /root/system_data/co
+  890 ttyp0    S      0:00 grep ./DataSave

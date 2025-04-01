@@ -1,0 +1,17 @@
+functionType		:	2 3 1 0 0 0 0 0
+functionModel		:	0 3 0 0 0 0 0 0
+comPortId			:	1 2 1 0 0 0 0 0
+comBps				:	19200 9600 9600 0 0 0 0 0
+commType			:	0 0 1 0 0 0 0 0
+externPort			:	3 0 0 0 0 0 0 0
+CmdSendLog			:	0 0 0 0 0 0 0 0
+CmdRcvLog			:	0 0 0 0 0 0 0 0
+CmdSendLog_Hex		:	0 0 0 0 0 0 0 0
+CmdRcvLog_Hex		:	0 0 0 0 0 0 0 0
+CommCheckLog		:	0 0 0 0 0 0 0 0
+autoStart			:	1 1 0 0 0 0 0 0
+countMeter			:	2 4 0 0 0 0 0 0
+readType			:	0 0 0 0 0 0 0 0
+measureI			:	0 0 2 0 0 0 0 0
+reserved1			:	0 0 0 0 0 0 0 0
+reserved2			:	0 0 0 0 0 0 0 0

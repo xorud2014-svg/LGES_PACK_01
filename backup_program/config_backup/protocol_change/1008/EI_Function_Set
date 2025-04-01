@@ -1,0 +1,80 @@
+No	Bit	Use	H/L	Ch	Function				Description
+byte1(in)	0
+0	0	0	1	0	I_EXTERNAL1				EXTERNAL1
+1	1	0	1	0	I_EXTERNAL2				EXTERNAL2
+2	2	0	1	0	spare					spare
+3	3	0	1	0	spare					spare
+4	4	0	1	0	spare					spare
+5	5	0	1	0	spare					spare
+6	6	0	1	0	spare					spare
+7	7	0	1	0	spare					spare
+
+byte2(in)	0
+8	0	0	1	0	spare					spare
+9	1	0	1	0	spare					spare
+10	2	0	1	0	spare					spare
+11	3	0	1	0	spare					spare
+12	4	0	1	0	spare					spare
+13	5	0	1	0	spare					spare
+14	6	0	1	0	spare					spare
+15	7	0	1	0	spare					spare
+
+byte3(in)	0
+16	0	0	1	0	spare					spare
+17	1	0	1	0	spare					spare
+18	2	0	1	0	spare					spare
+19	3	0	1	0	spare					spare
+20	4	0	1	0	spare					spare
+21	5	0	1	0	spare					spare
+22	6	0	1	0	spare					spare
+23	7	0	1	0	spare					spare
+
+byte4(in)	0
+24	0	0	1	0	spare					spare
+25	1	0	1	0	spare					spare
+26	2	0	1	0	spare					spare
+27	3	0	1	0	spare					spare
+28	4	0	1	0	spare					spare
+29	5	0	1	0	spare					spare
+30	6	0	1	0	spare					spare
+31	7	0	1	0	spare					spare
+
+byte5(in)	0
+32	0	0	1	0	spare					spare
+33	1	0	1	0	spare					spare
+34	2	0	1	0	spare					spare
+35	3	0	1	0	spare					spare
+36	4	0	1	0	spare					spare
+37	5	0	1	0	spare					spare
+38	6	0	1	0	spare					spare
+39	7	0	1	0	spare					spare
+
+byte6(in)	0
+40	0	0	1	0	spare					spare
+41	1	0	1	0	spare					spare
+42	2	0	1	0	spare					spare
+43	3	0	1	0	spare					spare
+44	4	0	1	0	spare					spare
+45	5	0	1	0	spare					spare
+46	6	0	1	0	spare					spare
+47	7	0	1	0	spare					spare
+
+byte7(in)	0
+48	0	0	1	0	spare					spare
+49	1	0	1	0	spare					spare
+50	2	0	1	0	spare					spare
+51	3	0	1	0	spare					spare
+52	4	0	1	0	spare					spare
+53	5	0	1	0	spare					spare
+54	6	0	1	0	spare					spare
+55	7	0	1	0	spare					spare
+
+byte8(in)	0
+56	0	0	1	0	spare					spare
+57	1	0	1	0	spare					spare
+58	2	0	1	0	spare					spare
+59	3	0	1	0	spare					spare
+60	4	0	1	0	spare					spare
+61	5	0	1	0	spare					spare
+62	6	0	1	0	spare					spare
+63	7	0	1	0	spare					spare

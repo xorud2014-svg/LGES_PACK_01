@@ -1,0 +1,180 @@
+#!/bin/bash
+
+#Comment Area-----------------------------------------------------------------
+#Date: 2025-02-04
+#version: 1.0
+#Editor: ksh
+#purpose: update to 1025 with changing the can_comm context
+#-----------------------------------------------------------------------------
+
+###Script Area----------------------------------------------------------------
+
+##variable
+flag_process=0
+flag_directory=0
+tmp=0
+
+
+##Check current, config directory--------------------------------------------
+
+
+#Check current directory
+cd /project/system_mcts/
+
+if [ -e "current" ]; then
+	echo "Check current directory complete"
+else
+	echo "It doesen't exist current directory"
+	echo "Check current directory"
+	exit 1 #end script
+fi
+
+#Check config directory
+cd /root/system_data
+
+if [ -e "config" ]; then
+	echo "Check config directory complete"
+else
+	echo "It doesen't exist config directory"
+	echo "Check config directory"
+	exit 1 #end script
+fi
+
+#exit 1 //end script
+
+##----------------------------------------------------------------------------
+
+##Check process
+lsmod > CheckProcess
+check_process=$(grep -c "rt*" CheckProcess)
+rm -f CheckProcess
+if [[ $check_process -ne 0 ]] #'ne' == '!='
+then
+	flag_process=1
+fi
+##----------------------------------------------------------------------------
+
+
+##Check common directory------------------------------------------------------
+
+#001 Check log directory
+cd /root/system_data
+if [[ -e log ]] #-e : if file is exist, it is true
+then
+	#echo "Checking log directory is done"
+	tmp=0
+else
+	flag_directory=2
+fi
+
+#002 Check pattern directory
+cd /root/system_data/config
+if [[ -e pattern ]] #-s : if file is not empty, it is true
+then
+	#echo "Checking pattern directory is done"
+	tmp=0
+else
+	flag_directory=3
+fi
+
+#003 Check resultData directory
+cd /extended_partition
+if [[ -e resultData ]] 
+then
+	#echo "Checking resultData directory is done"
+	tmp=0
+else
+	flag_directory=4
+fi
+
+#004 Check monitoringData directory
+cd /extended_partition
+if [[ -e monitoringData ]] 
+then
+	#echo "Checking monitoringData directory is done"
+	tmp=0
+else
+	flag_directory=5
+fi
+
+#005 Check START_INFO
+cd /root
+if [[ -e START_INFO ]]
+then
+	#echo "Checking START_INFO directory is done"
+	tmp=0
+else
+	flag_directory=6
+fi
+
+#exit 1 //end script
+
+##-------------------------------------------------------------------------------
+
+##Clear SBC Set(ChAttribute, AuxSetData, can_comm)-------------------------------
+
+#redirection ChAttribute
+#cd /root/system_data/config/parameter
+
+#> ChAttribute
+
+#echo "Clear ChAttribute complete"
+
+#redirection AuxSetData
+#cd /root/system_data/config/parameter
+
+#> AuxSetData
+
+#echo "Clear AuxSetData complete"
+
+#redirection AuxSetData
+cd /root/system_data/config/parameter/can_comm
+
+for i in $(seq 1 8); do
+#for i in {1..8}; do
+	> CanReceiveSetData0$i
+	> CanTransmitSetData0$i
+done
+
+echo "Clear can_comm complete"
+#exit 1 //end script
+##------------------------------------------------------------------------------- 
+
+
+##Bash Setting-------------------------------------------------------------------
+
+cd /root/system_data/config/parameter
+
+cp -rf bashrc /root/.bashrc
+
+#added 24-10-14
+
+##-------------------------------------------------------------------------------
+
+
+##Judge to run forceStart
+cd /project/system_mcts/current/App/AppControl 
+
+if [[ $flag_process -eq 1 ]]
+then
+echo "forceStart is already running"
+elif [[ $flag_directory -gt 1 && $flag_process -eq 0 ]]
+then
+echo "Run 'dir_create' before 'forceStart' "
+./dir_create
+./mcts 0
+else
+./mcts 0
+fi
+
+###------------------------------------------------------------------------------
+
+##Debug Area
+#echo "check_flag: $check_flag"
+#echo "process: $check_process"
+#echo "log: $check_log"
+#echo "pattern : $check_pattern" 
+#echo "resultData: $check_resultData" 
+#echo "monitoringData: $check_monitoringData" 
+#echo "START_INFO: $CheckStartInfo" 
+#echo "check_flag: $check_flag"

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CHANNELMAP ID="3" MERGE="0" START="kjg1_a">
+	<SCHEDULELIST>
+		<SCHEDULE SEQ="49" NAME="kjg1_a" WORKGROUP="37">
+			<SAFETYLIST>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CHANNEL" group="CHARGE" range="" target="V" op="&gt;=" value="1234"/>
+					<CHILD device="CHANNEL" group="CHARGE" range="" target="I" op="&gt;=" value="3452g"/>
+					<CHILD device="CHANNEL" group="CHARGE" range="" target="W" op="&gt;=" value="434"/>
+					<CHILD device="CHANNEL" group="CHARGE" range="" target="WH" op="&gt;=" value="4523"/>
+					<CHILD device="CHANNEL" group="CHARGE" range="" target="AH" op="&gt;=" value="2345"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CHANNEL" group="DISCHARGE" range="" target="V" op="&lt;=" value="45"/>
+					<CHILD device="CHANNEL" group="DISCHARGE" range="" target="I" op="&gt;=" value="4344"/>
+					<CHILD device="CHANNEL" group="DISCHARGE" range="" target="W" op="&gt;=" value="2342"/>
+					<CHILD device="CHANNEL" group="DISCHARGE" range="" target="WH" op="&gt;=" value="234"/>
+					<CHILD device="CHANNEL" group="DISCHARGE" range="" target="AH" op="&gt;=" value="532"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="DAQ" group="V_LINE" range="ALL" target="V" op="&gt;=" value="54325"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="DAQ" group="TEMP_LINE" range="ALL" target="TEMP" op="&gt;=" value="4532"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="V" op="&gt;=" value="5432"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="I" op="&gt;=" value="543"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="W" op="&gt;=" value="4543"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="WH" op="&gt;=" value="56321"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="AH" op="&gt;=" value="657"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="SOC" op="&gt;=" value="453"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="MAXCELLV" op="&gt;=" value="8765"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="MINCELLV" op="&lt;=" value="54"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="MAXTEMP" op="&gt;=" value="76543"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="PACK" range="" target="MINTEMP" op="&lt;=" value="65"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="MODULE" range="ALL" target="V" op="&gt;=" value="443"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="MODULE" range="ALL" target="TEMP" op="&gt;=" value="5454"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="CELL" range="ALL" target="V" op="&gt;=" value="254"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="CELL" range="ALL" target="TEMP" op="&gt;=" value="6545"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="FLAG" range="" target="BMSFAULT" op="==" value="1"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="FLAG" range="" target="BMSWARNING" op="==" value="1"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="FLAG" range="" target="BMSNORMAL" op="&lt;&gt;" value="1"/>
+				</CONDITION>
+				<CONDITION action="" action_value="" action_return="">
+					<CHILD device="CAN" group="FLAG" range="" target="RELAYSTATE" op="==" value="1"/>
+				</CONDITION>
+			</SAFETYLIST>
+			<LOOPLIST>
+				<LOOP START="1" END="1" COUNT="2"/>
+			</LOOPLIST>
+			<STEPLIST>
+				<STEP NUMBER="1" TYPE="CHARGE" MODE="CC/CV" VALUE1="4200" VALUE2="2400">
+					<FINISHLIST>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="CHANNEL" group="BASE" range="" target="V" op="&gt;=" value="1234"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="CHANNEL" group="BASE" range="" target="I" op="&gt;=" value="3232"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="CHANNEL" group="BASE" range="" target="W" op="&gt;=" value="4242"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="CHANNEL" group="BASE" range="" target="WH" op="&gt;=" value="45"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="CHANNEL" group="BASE" range="" target="AH" op="&gt;=" value="34"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="DATA" group="STEP" range="1" target="SOC" op="&gt;=" value="56"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="DATA" group="TIME" range="" target="STEPTIME" op="==" value="3  12000000"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="DATA" group="TIME" range="" target="SCHEDULETIME" op="&gt;=" value=" 2300000000"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="DAQ" group="V_LINE" range="ALL" target="V" op="&gt;=" value="4321"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="DAQ" group="TEMP_LINE" range="ALL" target="TEMP" op="&gt;=" value="453"/>
+						</CONDITION>
+						<CONDITION action="NEXT" action_value="" action_return="">
+							<CHILD device="CAN" group="PACK" range="" target="V" op="&gt;=" value="43"/>
+						</CONDITION>
+					</FINISHLIST>
+					<SAFETYLIST>
+						<CONDITION action="" action_value="" action_return="">
+							<CHILD device="CHANNEL" group="CHARGE" range="" target="V" op="&gt;=" value="544543"/>
+						</CONDITION>
+					</SAFETYLIST>
+					<RECORDLIST>
+						<CONDITION action="" action_value="" action_return="">
+							<CHILD device="DATA" group="TIME" range="" target="RUNTIME" op="==" value="       1100"/>
+						</CONDITION>
+					</RECORDLIST>
+				</STEP>
+			</STEPLIST>
+		</SCHEDULE>
+	</SCHEDULELIST>
+</CHANNELMAP>

@@ -1,0 +1,6 @@
+checkStepUse	:	1
+refV			:	4200000
+refI			: 	50000
+endTime			:	5000
+lowerV			:	1000000
+lowerI			:	10000

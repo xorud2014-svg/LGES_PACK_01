@@ -1,0 +1,3 @@
+ 2820 tty1     R      0:00 ./COA1_Client
+ 2891 tty1     S      0:00 sh -c ps -ax | grep ./COA1_Client > /root/system_data
+ 2893 tty1     R      0:00 sh -c ps -ax | grep ./COA1_Client > /root/system_data

@@ -1,0 +1,90 @@
+installedBd			:	1
+installedCh			:	2
+chPerBd				:	4
+chInGroup			:	2	0	0	0	0	0	0	0
+bdInGroup			:	1	0	0	0	0	0	0	0
+chInBd				:	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+chCheckDelayTime	:	500
+rangeV				:	2
+rangeI				:	3
+maxV				:	1000000		500000		0			0
+minV				:	0			0			0			0
+maxI				:	600000		300000		100000		0
+minI				:	-600000		-300000		-100000		0
+maxP				:	50000000	100000000	0			0
+ratioV				:	1
+ratioI				:	1
+ratioP				:	2
+adRatioV			:	1.0	1.0	1.0	1.0
+adRatioI			:	1.0	1.0	1.0	1.0
+daRatioV			:	1.0	1.0	1.0	1.0
+daRatioI			:	1.0	1.0	1.0	1.0
+shuntR				:	1.0	1.0	1.0	1.0
+scan_period			:	10
+ad_count			:	3
+filter_ad_count		:	4
+tmp_avg_count		:	50
+dcr_t1_cnt1_t2_cnt2	:	5000 400 100 100
+installedTemp		:	40
+installedAuxV		:	100
+installedTH			:	12
+installedHumidity   :   0
+installedGas		:	0
+installedCAN		:	4
+installedCOM		:	2
+daq_type			:	10
+soft_feed1_v_i_w_r	:	0 1 1 1
+soft_feed2_i_w		:	1 1
+step_0time_save     :   0
+cable_check         :   0
+division_CAN        :   0
+out_precharging_V	:	50000
+out_capacitance		:	5500
+out_prechg_ratio	:	1.1
+use_leakage_curr	:	1
+leakage_curr_I		:	10000
+out_relay_delay		:	1000
+da_max				:	10000.000
+main_amp			:	1.494
+v_feed(vfb)			:	5000.0		5000.0		0.0			0.0
+i_feed(ad_HCT)		:	6000.0		6000.0		6000.0		0.0
+i_ref(dcdc)			:	7979.035262	8008.056226	7994.186047	0.0
+caliV_rangeI		:	3
+caliV_cmdI(ratio)	:	50
+multi_temp_cali		:	1
+BreakDownCheck		:	1
+
+============================Description============================
+ratioV				=====>	0:uV, 1:mV, 2:V	//kjh_211021
+ratioI				=====>	0:uA, 1:mA, 2:A	//kjh_211021
+ratioP				=====>	0:no, 1:mW, 2:W	//kjh_211021
+
+out_precharging_V	=====>	100000	//kjh_211021
+							100000uV	(ratioV = 0)	//kjh_211021
+							100000mV	(ratioV = 1)	//kjh_211021
+							100000V		(ratioV = 2)	//kjh_211021
+out_capacitance		=====>	uF	//kjh_211021
+out_prechg_rati		=====>	ratio	//kjh_211021
+use_leakage_curr	=====>	0:no use, 1:use	//kjh_211021
+leakage_curr_I		=====>	1000	//kjh_211021
+							1000uA		(ratioV = 0)	//kjh_211021
+							1000mA		(ratioV = 1)	//kjh_211021
+							1000A		(ratioV = 2)	//kjh_211021
+out_relay_delay		=====>	msec	//kjh_211021
+da_max				=====>	10000.000	//kjh_211021
+							10000.000uV	(ratioV = 0)	//kjh_211021
+							10000.000mV	(ratioV = 1)	//kjh_211021
+							10000.000V	(ratioV = 2)	//kjh_211021
+main_amp			=====>	1.494		(Interface B/D)	//kjh_211021
+v_feed(vfb)			=====>	6000.000	//kjh_211021
+							6000.000uV	(ratioV = 0)	//kjh_211021
+							6000.000mV	(ratioV = 1)	//kjh_211021
+							6000.000V	(ratioV = 2)	//kjh_211021
+i_feed(ad_HCT)		=====>	6000.000	//kjh_211021
+							6000.000uV	(ratioV = 0)	//kjh_211021
+							6000.000mV	(ratioV = 1)	//kjh_211021
+							6000.000V	(ratioV = 2)	//kjh_211021
+caliV_rangeI		=====>	1~4 select(1:high, 4:low)	//kjh_211021
+caliV_cmdI(ratio)	=====>	1 ~ 100%(selected RangeI MaxI * %)	//kjh_211021
+multi_temp_cali     =====>  Auto_Temp_Cali Function 0:no use 1: use //shh_211221
+

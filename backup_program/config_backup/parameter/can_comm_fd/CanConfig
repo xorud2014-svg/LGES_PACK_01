@@ -1,0 +1,22 @@
+CmdSendLog		:	0
+CmdRcvdLog		:	0
+CmdSendLog_Hex	:	0
+CmdRcvdLog_Hex	:	0
+CommCheckLog	:	0
+commType		:	1
+rx_file_format	:	3
+tx_file_format	:	3
+can_delay		:	2
+reserved2		:	0
+reserved3		:	0
+reserved4		:	0
+reserved5		:	0
+reserved6		:	0
+reserved7		:	0
+reserved8		:	0
+reserved9		:	0
+reserved10		:	0
+
+============================Description============================
+commType		:	0: can2b0, 1:canFD_A, 2:canFD_B (not use)
+can_delay		=====>	sec	//kjh_211021	

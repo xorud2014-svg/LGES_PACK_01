@@ -1,0 +1,2 @@
+10788 ttyp2    S      0:00 sh -c ps -ax | grep ./AnalogMeter > /root/cycler_data
+10790 ttyp2    S      0:00 grep ./AnalogMeter

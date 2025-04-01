@@ -1,0 +1,43 @@
+DAQ		Load	Description
+Use		1		Use_Flag
+P1		1		PNE_Org
+P2		0		reserved
+P3		0		reserved
+P4		0		reserved
+P5		0		reserved
+P6		0		reserved
+P7		0		reserved
+P8		0		reserved
+
+CAN		Load	Description
+Use		0		Use_Flag
+P1		1		PNE_Org
+P2		0		reserved
+P3		0		reserved
+P4		0		reserved
+P5		0		reserved
+P6		0		reserved
+P7		0		reserved
+P8		0		reserved
+
+COM		Load	Description
+Use		1		Use_Flag
+P1		0		Cali_Meter
+P2		1		Display_Comm
+P3		1		Analog_Meter
+P4		0		BCR_Comm
+P5		0		Calibrator
+P6		0		IO_Comm
+P7		0		reserved
+P8		0		reserved
+
+Proc(No)	COA	COB	COC	COD	JIG	ETC	Description(ETC)
+P1			1	0	0	0	0	1	DataSave
+P2			0	0	0	0	0	0	CaliServer
+P3			0	0	0	0	0	0	TimeSchedule
+P4			0	0	0	0	0	0	Temp1Client
+P5			0	0	0	0	0	0	Temp2Client
+P6			0	0	0	0	0	0	reserved
+P7			0	0	0	0	0	0	reserved
+P8			0	0	0	0	0	1	mControl
+

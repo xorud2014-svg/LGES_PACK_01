@@ -1,0 +1,6 @@
+1. ChannelControl.c AMPARE_HOUR_RATE, WATT_HOUR_RATE idxStepNo2-1 -> end_091130
+2. COA_Client config data_interval 1sec -> 1000ms
+3. pattern loading time, run check
+4. endV_upper, lower step check for DAEWOO motor
+5. ccTime increment
+6. CAN ignition set_param for LGC_400V_60A

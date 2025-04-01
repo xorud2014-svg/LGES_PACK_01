@@ -1,0 +1,44 @@
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+#common_system
+alias system='cd /project/system_mcts'
+alias System='cd /project/system_mcts'
+alias BACKUP='cd /project/system_mcts/BACKUP'
+
+alias parameter='cd /root/system_data/config/parameter'
+alias sharedMemory='cd /root/system_data/config/sharedMemory'
+alias pattern='cd /root/system_data/config/pattern/group1'
+alias caliData='cd /root/system_data/config/caliData'
+alias log='cd /root/system_data/log'
+#alias resultData='cd /root/system_data/resultData/group1'
+alias resultData='cd /root/system_data/resultData'
+alias monitoringData='cd /root/system_data/monitoringData/group1'
+alias resultData2='cd /root/system_data/resultData/group2'
+alias monitoringData2='cd /root/system_data/monitoringData/group2'
+
+alias hwTest_v1='cd /project/system_mcts/current/hwTest/hwTest_v1'
+alias INC='cd /project/system_mcts/current/INC'
+alias AppControl='cd /project/system_mcts/current/App/AppControl'
+alias DataSave='cd /project/system_mcts/current/App/DataSave'
+alias DumpMonitor='cd /project/system_mcts/current/App/DumpMonitor'
+alias DebugMonitor='cd /project/system_mcts/current/App/DebugMonitor'
+alias COA_Client='cd /project/system_mcts/current/App/COA_Client'
+alias COB_Client='cd /project/system_mcts/current/App/COB_Client'
+alias COC_Client='cd /project/system_mcts/current/App/COC_Client'
+alias Jig_Control='cd /project/system_mcts/current/App/Jig_Control'
+alias mControl='cd /project/system_mcts/current/Module/mControl'
+alias rt_com='cd /project/system_mcts/current/Module/rt_com'
+alias rt_can='cd /project/system_mcts/current/Module/rt_can'
+
+alias fchTest_v1='cd /project/system_mcts/current/hwTest/fchTest_v1'

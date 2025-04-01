@@ -1,0 +1,77 @@
+#!/bin/bash
+DATE="`date '+%y%m%d_t%H%M'`"
+MODEL_NAME_FILE=/root/system_data/config/parameter/AppControl_Config
+
+#echo "backup_mcts start (all)"
+#echo "backup_mcts start (program)"
+#echo "backup_mcts start (program_new)"
+echo "backup_mcts start (log)"
+
+cd /extended_partition
+mkdir backup_mcts
+cd backup_mcts
+
+#mkdir current_backup
+#cp -rf /project/system_mcts/current/* current_backup
+#tar cfz current_backup.tar.gz current_backup/*
+#rm -rf current_backup
+#echo "current_backup end"
+#sleep 1
+
+mkdir config_backup
+cp -rf /root/system_data/config/* config_backup
+tar cfz config_backup.tar.gz config_backup/*
+rm -rf config_backup
+echo "config_backup end"
+sleep 1
+
+cp -rf /root/system_data/log log_backup
+tar cfz log_backup.tar.gz log_backup
+rm -rf log_backup
+echo "log_backup end"
+sleep 1
+
+mkdir resultData_backup
+cp -rf /root/system_data/resultData/* resultData_backup
+tar cfz resultData_backup.tar.gz resultData_backup/*
+rm -rf resultData_backup
+echo "resultData_backup end"
+sleep 1
+
+mkdir monitoringData_backup
+cp -rf /root/system_data/monitoringData/* monitoringData_backup
+tar cfz monitoringData_backup.tar.gz monitoringData_backup/*
+rm -rf monitoringData_backup
+echo "monitoringData_backup end"
+sleep 1
+
+mkdir os_log_backup
+cp -rf /var/log/boot* os_log_backup/
+cp -rf /var/log/cron* os_log_backup/
+cp -rf /var/log/dmesg os_log_backup/
+cp -rf /var/log/ksyms* os_log_backup/
+cp -rf /var/log/messages* os_log_backup/
+cp -rf /var/log/secure* os_log_backup/
+cp -rf /var/log/xferlog os_log_backup/
+tar cfz os_log_backup.tar.gz os_log_backup/*
+rm -rf os_log_backup
+echo "os_log_backup end"
+sleep 1
+
+cd /extended_partition
+tar cvfz backup_mcts.tar.gz backup_mcts/*
+
+#mv backup_mcts.tar.gz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_backup_mcts_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE''_all.tar.gz
+#mv backup_mcts.tar.gz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_backup_mcts_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE''_program.tar.gz
+#mv backup_mcts.tar.gz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_backup_mcts_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE''_program_new.tar.gz
+mv backup_mcts.tar.gz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_backup_mcts_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE''_log.tar.gz
+
+rm -rf backup_mcts
+#cp -rf *.tar.gz ./Auto_BACKUP/
+mv *.tar.gz /project/system_mcts/BACKUP/
+
+#echo "backup_mcts end (all)"
+#echo "backup_mcts end (program)"
+#echo "backup_mcts end (program_new)"
+echo "backup_mcts end (log)"
+

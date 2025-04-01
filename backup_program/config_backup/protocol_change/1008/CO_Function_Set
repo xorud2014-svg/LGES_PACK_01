@@ -1,0 +1,80 @@
+No	Bit	Use	H/L	Ch	Function				Description
+byte1(out)	620
+0	0	1	1	1	O_CONVERTER_RUN			CONVERTER_RUN
+1	1	1	1	1	O_CONVERTER_RESET		CONVERTER_RESET
+2	2	1	1	1	O_CONVERTER_CHARGE		CONVERTER_CHARGE
+3	3	1	1	1	O_CONVERTER_DISCHARGE	CONVERTER_DISCHARGE
+4	4	1	1	1	O_SELECT_VO_VS			SELECT_VO_VS
+5	5	1	1	1	O_I_RANGE1				I_RANGE1
+6	6	1	1	1	O_I_RANGE2				I_RANGE2
+7	7	1	1	1	O_PARALLEL				PARALLEL
+
+byte2(out)	621
+8	0	1	1	2	O_CONVERTER_RUN			CONVERTER_RUN
+9	1	1	1	2	O_CONVERTER_RESET		CONVERTER_RESET
+10	2	1	1	2	O_CONVERTER_CHARGE		CONVERTER_CHARGE
+11	3	1	1	2	O_CONVERTER_DISCHARGE	CONVERTER_DISCHARGE
+12	4	1	1	2	O_SELECT_VO_VS			SELECT_VO_VS
+13	5	1	1	2	O_I_RANGE1				I_RANGE1
+14	6	1	1	2	O_I_RANGE2				I_RANGE2
+15	7	1	1	2	O_PARALLEL				PARALLEL
+
+byte3(out)	0
+16	0	0	1	0	spare					spare
+17	1	0	1	0	spare					spare
+18	2	0	1	0	spare					spare
+19	3	0	1	0	spare					spare
+20	4	0	1	0	spare					spare
+21	5	0	1	0	spare					spare
+22	6	0	1	0	spare					spare
+23	7	0	1	0	spare					spare
+
+byte4(out)	0
+24	0	0	1	0	spare					spare
+25	1	0	1	0	spare					spare
+26	2	0	1	0	spare					spare
+27	3	0	1	0	spare					spare
+28	4	0	1	0	spare					spare
+29	5	0	1	0	spare					spare
+30	6	0	1	0	spare					spare
+31	7	0	1	0	spare					spare
+
+byte5(out)	0
+32	0	0	1	0	spare					spare
+33	1	0	1	0	spare					spare
+34	2	0	1	0	spare					spare
+35	3	0	1	0	spare					spare
+36	4	0	1	0	spare					spare
+37	5	0	1	0	spare					spare
+38	6	0	1	0	spare					spare
+39	7	0	1	0	spare					spare
+
+byte6(out)	0
+40	0	0	1	0	spare					spare
+41	1	0	1	0	spare					spare
+42	2	0	1	0	spare					spare
+43	3	0	1	0	spare					spare
+44	4	0	1	0	spare					spare
+45	5	0	1	0	spare					spare
+46	6	0	1	0	spare					spare
+47	7	0	1	0	spare					spare
+
+byte7(out)	0
+48	0	0	1	0	spare					spare
+49	1	0	1	0	spare					spare
+50	2	0	1	0	spare					spare
+51	3	0	1	0	spare					spare
+52	4	0	1	0	spare					spare
+53	5	0	1	0	spare					spare
+54	6	0	1	0	spare					spare
+55	7	0	1	0	spare					spare
+
+byte8(out)	0
+56	0	0	1	0	spare					spare
+57	1	0	1	0	spare					spare
+58	2	0	1	0	spare					spare
+59	3	0	1	0	spare					spare
+60	4	0	1	0	spare					spare
+61	5	0	1	0	spare					spare
+62	6	0	1	0	spare					spare
+63	7	0	1	0	spare					spare

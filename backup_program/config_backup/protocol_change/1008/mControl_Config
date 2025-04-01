@@ -1,0 +1,31 @@
+installedBd			:	1
+installedCh			:	2
+chPerBd				:	4
+chInGroup			:	2	0
+bdInGroup			:	1	0
+chInBd				:	2	0
+groupInJig			:	0	0
+jigInGroup[Jig1]	:	0	0
+jigInGroup[Jig2]	:	0	0
+chInTray[Group1]	:	0	0
+chInTray[Group2]	:	0	0
+chCheckDelayTime	:	500
+rangeV				:	1
+rangeI				:	2
+maxV				:	450000000	0	0	0
+minV				:	0	0	0	0
+maxI				:	200000000	10000000	0	0
+minI				:	-200000000	-10000000	0	0
+ratioV				:	0
+ratioI				:	0
+capacityType		:	0
+adRatioV			:	1.0	1.0	1.0	1.0
+adRatioI			:	1.0	1.0	1.0	1.0
+daRatioV			:	1.0	1.0	1.0	1.0
+daRatioI			:	1.0	1.0	1.0	1.0
+shuntR				:	1.0	1.0	1.0	1.0
+scan_period			:	10
+installedTemp		:	16
+installedAuxV		:	128
+installedCAN		:	4
+daq_type			:	2

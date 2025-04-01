@@ -1,0 +1,15 @@
+comPort				:	1
+comBps				:	9600
+commType			:	1
+CmdSendLog			:	0
+CmdRcvLog			:	0
+CmdSendLog_Hex		:	0
+CmdRcvLog_Hex		:	0
+CommCheckLog		:	0
+readType			:	0
+measureI			:	2
+I_offset			:	0
+functionType		:	1
+comBps2				:	19200
+commType2			:	0
+autoStart2			:	1

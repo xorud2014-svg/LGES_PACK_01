@@ -1,0 +1,80 @@
+No	Bit	Use	H/L	Ch	Group	Function				Description
+byte1(out)	622
+0	0	1	1	1	0		O_CONVERTER_RUN			CONVERTER_RUN
+1	1	1	1	1	0		O_CONVERTER_RESET		CONVERTER_RESET
+2	2	1	1	1	0		O_CONVERTER_CHARGE		CONVERTER_CHARGE
+3	3	1	1	1	0		O_SELECT_VREF			CALI_MODE
+4	4	1	1	1	0		O_SELECT_VO_VS			SELECT_VO_VS
+5	5	1	1	1	0		O_RUN_RELAY				RUN_RELAY
+6	6	1	1	1	0		O_V_RANGE2				V_RANGE2
+7	7	1	1	1	0		O_PARALLEL				PARALLEL
+
+byte2(out)	623
+8	0	1	1	2	0		O_CONVERTER_RUN			CONVERTER_RUN
+9	1	1	1	2	0		O_CONVERTER_RESET		CONVERTER_RESET
+10	2	1	1	2	0		O_CONVERTER_CHARGE		CONVERTER_CHARGE
+11	3	1	1	2	0		O_SELECT_VREF			CALI_MODE
+12	4	1	1	2	0		O_SELECT_VO_VS			SELECT_VO_VS
+13	5	1	1	2	0		O_RUN_RELAY				RUN_RELAY
+14	6	1	1	2	0		O_V_RANGE2				V_RANGE2
+15	7	0	1	1	0		spare					spare
+
+byte3(out)	619
+16	0	1	1	1	0		O_CAN_SW				CAN_SW
+17	1	1	1	1	0		O_LIN_TO_CAN_SW			LIN_TO_CAN_SW
+18	2	1	1	1	0		O_485_TO_CAN_SW			485_TO_CAN_SW
+19	3	1	1	2	0		O_CAN_SW                CAN_SW
+20	4	1	1	2	0		O_LIN_TO_CAN_SW         LIN_TO_CAN
+21	5	1	1	2	0		O_485_TO_CAN_SW         485_TO_CAN_SW
+22	6	0	1	0	0		spare                   spare
+23	7	0	1	0	0		spare					spare
+
+byte4(out)	629
+24	0	1	1	1	0		O_I_RANGE1              I_RANGE1
+25	1	1	1	1	0		O_I_RANGE2              I_RANGE2
+26	2	1	1	1	0		O_I_RANGE3              I_RANGE3
+27	3	1	1	1	0		O_I_RANGE4              I_RANGE4
+28	4	0	1	0	0		spare					spare
+29	5	0	1	0	0		spare					spare
+30	6	1	1	1	0		O_RUN_RELAY_SUB			RUN_RELAY_SUB
+31	7	0	1	0	0		spare					spare
+
+byte5(out)	62A
+32	0	1	1	2	0		O_I_RANGE1              I_RANGE1
+33	1	1	1	2	0		O_I_RANGE2              I_RANGE2
+34	2	1	1	2	0		O_I_RANGE3              I_RANGE3
+35	3	1	1	2	0		O_I_RANGE4              I_RANGE4
+36	4	0	1	0	0		spare					spare
+37	5	0	1	0	0		spare					spare
+38	6	1	1	2	0		O_RUN_RELAY_SUB			RUN_RELAY_SUB
+39	7	1	1	1	0		O_PARALLEL_SUB			PARALLEL_SUB
+
+byte6(out)	0
+40	0	0	1	0	0		spare					spare
+41	1	0	1	0	0		spare					spare
+42	2	0	1	0	0		spare					spare
+43	3	0	1	0	0		spare					spare
+44	4	0	1	0	0		spare					spare
+45	5	0	1	0	0		spare					spare
+46	6	0	1	0	0		spare					spare
+47	7	0	1	0	0		spare					spare
+
+byte7(out)	0
+48	0	0	1	0	0		spare					spare
+49	1	0	1	0	0		spare					spare
+50	2	0	1	0	0		spare					spare
+51	3	0	1	0	0		spare					spare
+52	4	0	1	0	0		spare					spare
+53	5	0	1	0	0		spare					spare
+54	6	0	1	0	0		spare					spare
+55	7	0	1	0	0		spare					spare
+
+byte8(out)	0
+56	0	0	1	0	0		spare					spare
+57	1	0	1	0	0		spare					spare
+58	2	0	1	0	0		spare					spare
+59	3	0	1	0	0		spare					spare
+60	4	0	1	0	0		spare					spare
+61	5	0	1	0	0		spare					spare
+62	6	0	1	0	0		spare					spare
+63	7	0	1	0	0		spare					spare

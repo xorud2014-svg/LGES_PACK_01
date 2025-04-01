@@ -1,0 +1,26 @@
+demo.o: \
+   mbuff.h
+kvmem.o: \
+   kvmem.h
+mbuff_alloc.o: \
+   mbuff.h
+mbuff_dealloc.o: \
+   mbuff.h
+mbuff_proc.o: \
+   mbuff.h \
+   kernel_compat.h
+mmap.o: \
+   kvmem.h \
+   mbuff.h \
+   mbuff_proc.h
+tester.o: \
+   mbuff.h
+kernel_compat.h: \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_core.h
+	@touch kernel_compat.h
+kvmem.h: \
+   kernel_compat.h
+	@touch kvmem.h
+.PRECIOUS:	kernel_compat.h \
+	kvmem.h \
+

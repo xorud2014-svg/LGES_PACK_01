@@ -1,0 +1,23 @@
+#!/bin/sh
+CAN_TYPE="`cat /root/system_data/config/parameter/can_comm/CanConfig | awk '{if(NR==6) print $3}'`"
+
+insmod /usr/src/rtlinux-3.2-pre2/modules/rtl.o
+insmod /usr/src/rtlinux-3.2-pre2/modules/rtl_time.o
+if [ -f /usr/src/rtlinux-3.2-pre2/modules/rtl_posixio.o ]; then
+	insmod /usr/src/rtlinux-3.2-pre2/modules/rtl_posixio.o
+fi
+insmod /usr/src/rtlinux-3.2-pre2/modules/rtl_fifo.o
+insmod /usr/src/rtlinux-3.2-pre2/modules/rtl_sched.o
+if [ -f /usr/src/rtlinux-3.2-pre2/modules/psc.o ]; then
+	insmod /usr/src/rtlinux-3.2-pre2/modules/psc.o
+fi
+
+insmod -f ../rt_com/rt_com.o
+if [ "$CAN_TYPE" = "0" ]; then
+	insmod -f ../rt_can/rt_can.o
+fi
+
+sleep 1
+insmod -f ./mControl
+
+exit 0

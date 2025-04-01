@@ -1,0 +1,5 @@
+jigUseFlag			:	1
+jigType				:	5
+trayType			:	5
+localRemote			:	0
+cylinderMoveTimeout	:	10000

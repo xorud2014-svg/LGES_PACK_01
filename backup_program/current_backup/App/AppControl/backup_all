@@ -1,0 +1,48 @@
+#!/bin/bash
+DATE="`date '+%y%m%d_t%H%M'`"
+MODEL_NAME_FILE=/root/system_data/config/parameter/AppControl_Config
+
+echo "backup_all start"
+
+cd /project/system_mcts
+mkdir backup_all
+cd backup_all
+
+mkdir current_backup
+cp -rf ../current/* current_backup
+tar cfz current_backup.tar.gz current_backup/*
+rm -rf current_backup
+echo "current_backup end."
+sleep 1
+
+mkdir config_backup
+cp -rf /root/system_data/config/* config_backup
+tar cfz config_backup.tar.gz config_backup/*
+rm -rf config_backup
+mv *.tar.gz BACKUP/
+echo "config_backup end."
+sleep 1
+
+cp -rf /root/system_data/log log_backup
+tar cfz log_backup.tar.gz log_backup/*
+rm -rf log_backup
+echo "log_backup end."
+sleep 1
+
+cp -rf /root/system_data/resultData resultData_backup
+tar cfz resultData_backup.tar.gz resultData_backup/*
+rm -rf resultData_backup
+echo "resultData_backup end."
+sleep 1
+
+cp -rf /root/system_data/monitoringData monitoringData_backup
+tar cvz monitoringData_backup.tar.gz monitoringData_backup/*
+rm -rf monitoringData_backup
+echo "monitoringData_backup end."
+sleep 1
+
+cd /project/system_mcts
+tar cvfz `cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_backup_all_M`cat $MODEL_NAME_FILE | awk '{if(NR==3) print $3}'`_$DATE.tar.gz backup_all/*
+rm -rf backup_all
+echo "backup_all end."
+

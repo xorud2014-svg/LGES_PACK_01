@@ -1,0 +1,8 @@
+testcom.o: \
+   /usr/src/rtlinux-3.2-pre2/include/rtl.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_fifo.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_sched.h \
+   ../rt_com.h
+testcomrtai.o: \
+   /usr/src/rtlinux-3.2-pre2/include/rtl.h \
+   /usr/src/rtlinux-3.2-pre2/include/rtl_fifo.h

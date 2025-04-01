@@ -1,0 +1,80 @@
+No	Bit	Use	H/L	Ch	Function				Description
+byte1(in)	610
+0	0	1	0	0	I_FUSE_FAIL				FUSE_FAIL
+1	1	1	1	0	I_MAIN_MC				MAIN_MC
+2	2	1	1	0	I_SUB_MC				SUB_MC
+3	3	1	1	0	I_INVERTER_HV_FAULT		INVERTER_HV_FAULT
+4	4	1	1	0	I_INVERTER_MODULE_R_FAIL	INVERTER_MODULE_R_FAIL
+5	5	1	1	0	I_INVERTER_MODULE_S_FAIL	INVERTER_MODULE_S_FAIL
+6	6	1	1	0	I_INVERTER_MODULE_T_FAIL	INVERTER_MODULE_T_FAIL
+7	7	1	1	0	I_INVERTER_PRE_CHARGE	INVERTER_PRE_CHARGE
+
+byte2(in)	611
+8	0	1	1	0	I_INVERTER_OT			INVERTER_OT
+9	1	0	0	0	I_INVERTER_RUN			INVERTER_RUN
+10	2	0	0	0	I_CABLE1_FAIL			CABLE1_FAIL
+11	3	0	1	0	I_CABLE2_FAIL			CABLE2_FAIL
+12	4	0	1	0	spare					spare
+13	5	0	1	0	spare					spare
+14	6	0	1	0	spare					spare
+15	7	0	1	0	spare					spare
+
+byte3(in)	0
+16	0	0	1	0	spare					spare
+17	1	0	1	0	spare					spare
+18	2	0	1	0	spare					spare
+19	3	0	1	0	spare					spare
+20	4	0	1	0	spare					spare
+21	5	0	1	0	spare					spare
+22	6	0	1	0	spare					spare
+23	7	0	1	0	spare					spare
+
+byte4(in)	0
+24	0	0	1	0	spare					spare
+25	1	0	1	0	spare					spare
+26	2	0	1	0	spare					spare
+27	3	0	1	0	spare					spare
+28	4	0	1	0	spare					spare
+29	5	0	1	0	spare					spare
+30	6	0	1	0	spare					spare
+31	7	0	1	0	spare					spare
+
+byte5(in)	0
+32	0	0	1	0	spare					spare
+33	1	0	1	0	spare					spare
+34	2	0	1	0	spare					spare
+35	3	0	1	0	spare					spare
+36	4	0	1	0	spare					spare
+37	5	0	1	0	spare					spare
+38	6	0	1	0	spare					spare
+39	7	0	1	0	spare					spare
+
+byte6(in)	0
+40	0	0	1	0	spare					spare
+41	1	0	1	0	spare					spare
+42	2	0	1	0	spare					spare
+43	3	0	1	0	spare					spare
+44	4	0	1	0	spare					spare
+45	5	0	1	0	spare					spare
+46	6	0	1	0	spare					spare
+47	7	0	1	0	spare					spare
+
+byte7(in)	0
+48	0	0	1	0	spare					spare
+49	1	0	1	0	spare					spare
+50	2	0	1	0	spare					spare
+51	3	0	1	0	spare					spare
+52	4	0	1	0	spare					spare
+53	5	0	1	0	spare					spare
+54	6	0	1	0	spare					spare
+55	7	0	1	0	spare					spare
+
+byte8(in)	0
+56	0	0	1	0	spare					spare
+57	1	0	1	0	spare					spare
+58	2	0	1	0	spare					spare
+59	3	0	1	0	spare					spare
+60	4	0	1	0	spare					spare
+61	5	0	1	0	spare					spare
+62	6	0	1	0	spare					spare
+63	7	0	1	0	spare					spare

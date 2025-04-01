@@ -1,0 +1,11 @@
+bootOnStart         :   0
+modelName           :   PSCSA-P1025-S01-R002-N003-I005-D11708_SC_LGC_1000V_600A_300A_100A_1MW_11_C
+moduleNo            :   1
+totalGroup          :   1
+systemModel         :   11708
+systemType          :   7
+sbcType             :   7
+osVersion           :   2
+debugType           :   0
+versionNo           :   250320
+update_date         :   250320

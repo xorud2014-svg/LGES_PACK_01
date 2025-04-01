@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!DOCTYPE catalog [
+	<!ELEMENT catalog (dvd+)>
+	<!ELEMENT dvd (title, price, director, actors, year_made)>
+		<!ATTLIST dvd asin CDATA #REQUIRED>
+	<!ELEMENT title (#PCDATA)>
+	<!ELEMENT price (#PCDATA)>
+	<!ELEMENT director (#PCDATA)>
+	<!ELEMENT actors (actor+)>
+	<!ELEMENT actor (#PCDATA)>
+	<!ELEMENT year_made (#PCDATA)>
+]>
+
+<catalog>
+	<dvd asin="0780020707">
+		<title>Grand Illusion</title>
+		<price>29.99</price>
+		<director>Jean Renoir</director>
+		<actors>
+			<actor>Jean Gabin</actor>
+		</actors>
+		<year_made>1938</year_made>
+	</dvd>
+
+	<dvd asin="0780020685">
+		<title>Seven Samurai</title>
+		<price>27.99</price>
+		<director>Akira Kurosawa</director>
+		<actors>
+			<actor>Takashi Shimura</actor>
+			<actor>Toshiro Mifune</actor>
+		</actors>
+		<year_made>1954</year_made>
+	</dvd>
+</catalog>

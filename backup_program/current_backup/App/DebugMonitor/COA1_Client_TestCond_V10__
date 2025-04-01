@@ -1,0 +1,1456 @@
+COA1_Client_Receive_Data_V10**
+
+TestCond_Header
+totalStep : 7
+totalPatternCount : 0
+reserverd1[2] : 0, 0
+
+Common_Safety
+faultLowerV : 0
+faultUpperV : 10000
+faultComp_AuxV : 100000
+faultComp_AuxV2 : 50000
+faultComp_AuxV3 : 200000
+faultComp_Aux_RefV1 : 3400000
+faultComp_Aux_RefV2 : 4100000
+faultComp_AuxV_vent : 1
+faultUpper_AuxV : 0
+faultLower_AuxV : 0
+faultUpperI : 1000
+faultLowerTemp : 0
+faultUpperTemp : 0
+faultUpper_AmpareHour : 0
+faultUpperP : 0
+faultUpper_WattHour : 0
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+V1(0), RefV1(0), V2(0), RefV2(0), V3(0), Vent(0)
+
+CAN_Common_Safety
+index, Division, Compare_Type, Data_Type, Value
+01, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0.000000
+
+Aux_Common_Safety
+index, Division, Compare_Type, Data_Type, Value
+01, 20003, 5, 1, 100000
+02, 0, 0, 0, 0
+03, 0, 0, 0, 0
+04, 0, 0, 0, 0
+05, 0, 0, 0, 0
+06, 0, 0, 0, 0
+07, 0, 0, 0, 0
+08, 0, 0, 0, 0
+09, 0, 0, 0, 0
+10, 0, 0, 0, 0
+
+reserved2[4] : 0, 0, 0, 0
+
+TestCond_Step
+
+Step_Header : 1
+type : 7
+stepNo : 1
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[0][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 0
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0, 0
+02, 0, 0, 0, 0, 0, 0
+03, 0, 0, 0, 0, 0, 0
+04, 0, 0, 0, 0, 0, 0
+05, 0, 0, 0, 0, 0, 0
+06, 0, 0, 0, 0, 0, 0
+07, 0, 0, 0, 0, 0, 0
+08, 0, 0, 0, 0, 0, 0
+09, 0, 0, 0, 0, 0, 0
+10, 0, 0, 0, 0, 0, 0
+
+Step_CompV[0]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[0]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[0][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[0][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 0
+faultCompAuxTh : 0
+faultCompAuxT : 0
+faultDelta_AuxV : 0
+faultDelta_AuxV_T : 0
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(0), CompAuxTemp(0), CompAuxTh(0), CompAuxT(0), Delta_AuxV(0)
+
+Step_Header : 2
+type : 3
+stepNo : 2
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[1][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 3000
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 251
+V_Lower_Branch_CycleCount : 251
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 251
+CVTime_Branch_AccCycleCountId : 251
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 251
+WattHour_Branch_MultiCycleCount_Branch : 251
+ValueRate_Branch : 251
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 251, 0.000000
+02, 0, 0, 0, 251, 0.000000
+03, 0, 0, 0, 251, 0.000000
+04, 0, 0, 0, 251, 0.000000
+05, 0, 0, 0, 251, 0.000000
+06, 0, 0, 0, 251, 0.000000
+07, 0, 0, 0, 251, 0.000000
+08, 0, 0, 0, 251, 0.000000
+09, 0, 0, 0, 251, 0.000000
+10, 0, 0, 0, 251, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 20012, 3, 2, 251, 100000, 0
+02, 15001, 6, 2, 251, 0, 0
+03, 0, 0, 0, 251, 0, 0
+04, 0, 0, 0, 251, 0, 0
+05, 0, 0, 0, 251, 0, 0
+06, 0, 0, 0, 251, 0, 0
+07, 0, 0, 0, 251, 0, 0
+08, 0, 0, 0, 251, 0, 0
+09, 0, 0, 0, 251, 0, 0
+10, 0, 0, 0, 251, 0, 0
+
+Step_CompV[1]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[1]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 105
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[1][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[1][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 542000
+faultLowerV : 2000
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 4000
+faultCompAuxTh : 10000000
+faultCompAuxT : 0
+faultDelta_AuxV : 2000000
+faultDelta_AuxV_T : 6000
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(0), CompAuxTemp(1), CompAuxTh(1), CompAuxT(1), Delta_AuxV(1)
+
+Step_Header : 3
+type : 8
+stepNo : 3
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[2][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 1
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0, 0
+02, 0, 0, 0, 0, 0, 0
+03, 0, 0, 0, 0, 0, 0
+04, 0, 0, 0, 0, 0, 0
+05, 0, 0, 0, 0, 0, 0
+06, 0, 0, 0, 0, 0, 0
+07, 0, 0, 0, 0, 0, 0
+08, 0, 0, 0, 0, 0, 0
+09, 0, 0, 0, 0, 0, 0
+10, 0, 0, 0, 0, 0, 0
+
+Step_CompV[2]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[2]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[2][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[2][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 0
+faultCompAuxTh : 0
+faultCompAuxT : 0
+faultDelta_AuxV : 0
+faultDelta_AuxV_T : 0
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(0), CompAuxTemp(0), CompAuxTh(0), CompAuxT(0), Delta_AuxV(0)
+
+Step_Header : 4
+type : 7
+stepNo : 4
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[3][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 0
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0, 0
+02, 0, 0, 0, 0, 0, 0
+03, 0, 0, 0, 0, 0, 0
+04, 0, 0, 0, 0, 0, 0
+05, 0, 0, 0, 0, 0, 0
+06, 0, 0, 0, 0, 0, 0
+07, 0, 0, 0, 0, 0, 0
+08, 0, 0, 0, 0, 0, 0
+09, 0, 0, 0, 0, 0, 0
+10, 0, 0, 0, 0, 0, 0
+
+Step_CompV[3]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[3]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[3][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[3][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 0
+faultCompAuxTh : 0
+faultCompAuxT : 0
+faultDelta_AuxV : 0
+faultDelta_AuxV_T : 0
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(0), CompAuxTemp(0), CompAuxTh(0), CompAuxT(0), Delta_AuxV(0)
+
+Step_Header : 5
+type : 3
+stepNo : 5
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[4][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 1000
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 251
+V_Lower_Branch_CycleCount : 251
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 251
+CVTime_Branch_AccCycleCountId : 251
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 251
+WattHour_Branch_MultiCycleCount_Branch : 251
+ValueRate_Branch : 251
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 251, 0.000000
+02, 0, 0, 0, 251, 0.000000
+03, 0, 0, 0, 251, 0.000000
+04, 0, 0, 0, 251, 0.000000
+05, 0, 0, 0, 251, 0.000000
+06, 0, 0, 0, 251, 0.000000
+07, 0, 0, 0, 251, 0.000000
+08, 0, 0, 0, 251, 0.000000
+09, 0, 0, 0, 251, 0.000000
+10, 0, 0, 0, 251, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 251, 0, 0
+02, 0, 0, 0, 251, 0, 0
+03, 0, 0, 0, 251, 0, 0
+04, 0, 0, 0, 251, 0, 0
+05, 0, 0, 0, 251, 0, 0
+06, 0, 0, 0, 251, 0, 0
+07, 0, 0, 0, 251, 0, 0
+08, 0, 0, 0, 251, 0, 0
+09, 0, 0, 0, 251, 0, 0
+10, 0, 0, 0, 251, 0, 0
+
+Step_CompV[4]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[4]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 100
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[4][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[4][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 5000
+faultCompAuxTh : 10000000
+faultCompAuxT : 0
+faultDelta_AuxV : 100000
+faultDelta_AuxV_T : 6000
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(1), CompAuxTemp(1), CompAuxTh(1), CompAuxT(1), Delta_AuxV(1)
+
+Step_Header : 6
+type : 8
+stepNo : 6
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[5][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 251
+V_Lower_Branch_CycleCount : 2
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 251
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 251, 0.000000
+02, 0, 0, 0, 251, 0.000000
+03, 0, 0, 0, 251, 0.000000
+04, 0, 0, 0, 251, 0.000000
+05, 0, 0, 0, 251, 0.000000
+06, 0, 0, 0, 251, 0.000000
+07, 0, 0, 0, 251, 0.000000
+08, 0, 0, 0, 251, 0.000000
+09, 0, 0, 0, 251, 0.000000
+10, 0, 0, 0, 251, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 251, 0, 0
+02, 0, 0, 0, 251, 0, 0
+03, 0, 0, 0, 251, 0, 0
+04, 0, 0, 0, 251, 0, 0
+05, 0, 0, 0, 251, 0, 0
+06, 0, 0, 0, 251, 0, 0
+07, 0, 0, 0, 251, 0, 0
+08, 0, 0, 0, 251, 0, 0
+09, 0, 0, 0, 251, 0, 0
+10, 0, 0, 0, 251, 0, 0
+
+Step_CompV[5]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[5]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[5][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[5][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 0
+faultCompAuxTh : 0
+faultCompAuxT : 0
+faultDelta_AuxV : 0
+faultDelta_AuxV_T : 0
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(0), CompAuxTemp(0), CompAuxTh(0), CompAuxT(0), Delta_AuxV(0)
+
+Step_Header : 7
+type : 6
+stepNo : 7
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+reserved2 : 0
+
+Step_Reference[6][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 0
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+reserved[3] : 0, 0, 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0, 0
+02, 0, 0, 0, 0, 0, 0
+03, 0, 0, 0, 0, 0, 0
+04, 0, 0, 0, 0, 0, 0
+05, 0, 0, 0, 0, 0, 0
+06, 0, 0, 0, 0, 0, 0
+07, 0, 0, 0, 0, 0, 0
+08, 0, 0, 0, 0, 0, 0
+09, 0, 0, 0, 0, 0, 0
+10, 0, 0, 0, 0, 0, 0
+
+Step_CompV[6]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[6]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[6][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[6][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+faultCompAuxV : 0
+faultCompAuxTemp : 0
+faultCompAuxTh : 0
+faultCompAuxT : 0
+faultDelta_AuxV : 0
+faultDelta_AuxV_T : 0
+faultSVDF_vent_flag : 0
+faultSVDF_count : 0
+faultSVDF_yt1 : 0
+faultSVDF_vcell_aver : 0
+faultSVDF_yt2 : 0
+faultSVDF_yt3 : 0
+faultSVDF_use_flag : 0
+faultcv_interlock_vent_flag : 0
+faultcv_interlockI : 0
+faultDropVoltage_value : 0
+faultDropVoltage_use_flag : 0
+faultDropVoltage_vent_flag : 0
+faultDropVoltage_count : 0
+faultSVDF_can_yt1 : 0
+faultSVDF_can_vcell_aver : 0
+faultSVDF_can_yt2 : 0
+faultSVDF_can_yt3 : 0
+faultSVDF_can_use_flag : 0
+faultSVDF_can_vent_flag : 0
+faultSVDF_can_count : 0
+faultDropVoltage_can_use_flag : 0
+faultDropVoltage_can_vent_flag : 0
+faultDropVoltage_can_count : 0
+faultCompCanV_use_flag : 0
+faultCompCanV_vent_flag : 0
+faultDropVoltage_can_value : 0
+faultCompCanV_value : 0
+faultSoftvent_use_flag : 0
+faultSoftvent_vent_flag : 0
+faultSoftvent_count : 0
+faultSoftvent_value : 0
+faultHardvent_use_flag : 0
+faultHardvent_vent_flag : 0
+faultHardvent_count : 0
+faultHardvent_value : 0
+faultSoftvent_can_use_flag : 0
+faultSoftvent_can_vent_flag : 0
+faultSoftvent_can_count : 0
+faultSoftvent_can_value : 0
+faultHardvent_can_use_flag : 0
+faultHardvent_can_vent_flag : 0
+faultHardvent_can_count : 0
+faultHardvent_can_value : 0
+faultVrising_time_init : 0
+faultVrising_time_check : 0
+faultVrising_value: 0
+faultCC_delta_v_time_init : 0
+faultCC_delta_v_time_period : 0
+faultCC_delta_v_reff_value: 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+fault_balance_check_flag : 0
+faultCanFreeze_use_flag : 0
+faultCanFreeze_time : 0
+faultCanFreeze_CellV : 0
+faultCanFreeze_I : 0
+vent_flag : CompAuxV(0), CompAuxTemp(0), CompAuxTh(0), CompAuxT(0), Delta_AuxV(0)
+
+TestCond_ETC
+test_cond_file_size : 32400
+test_cond_file_checksum : 24900

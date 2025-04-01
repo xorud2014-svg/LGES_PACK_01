@@ -1,0 +1,19 @@
+rm -rf /project/system_mcts/current
+
+rm -rf /root/system_data/config
+
+cd /root/update
+
+mv config_backup /root/system_data/config
+
+mv current_backup /project/system_mcts/current
+
+cd /project/system_mcts/current/
+
+cd App/AppControl
+
+make all_coa
+
+rm -rf /root/update/rollback.txt
+
+reboot

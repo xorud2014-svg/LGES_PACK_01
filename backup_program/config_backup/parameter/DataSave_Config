@@ -1,0 +1,6 @@
+resultData_saveFlag		:	1
+monitoringData_saveFlag	:	1
+moni_saveInterval[s]	:	1
+maxSaveNo[EA]			:	10
+checkData_saveFlag		:	1
+saveTimeFlag			:	1

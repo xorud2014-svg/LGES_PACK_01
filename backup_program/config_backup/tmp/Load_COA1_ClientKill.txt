@@ -1,0 +1,2 @@
+ 1354 ttyp0    S      0:00 sh -c ps -ax | grep ./Load_COA1_Client > /root/system
+ 1356 ttyp0    S      0:00 grep ./Load_COA1_Client

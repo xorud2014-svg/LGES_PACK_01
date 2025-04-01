@@ -1,0 +1,19 @@
+groupId				:	1
+groupNo				:	0
+ipAddress			:	192.168.40.38
+sendPort			:	6011	
+receivePort			:	5011	
+networkPort			:	1966
+replyTimeout		:	20
+retryCount			:	3
+netTimeout			:	120
+pingTimeout			:	120
+CmdSendLog			:	0
+CmdRcvLog			:	0
+CmdSendLog_Hex		:	1
+CmdRcvLog_Hex		:	1
+CommCheckLog		:	0
+monitorInterval		:	2
+hostid				:	1010010
+systemid			:   1110111
+

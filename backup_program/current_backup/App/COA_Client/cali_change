@@ -1,0 +1,5 @@
+/project/system_mcts/current/App/COA_Client/network.c:1823:	//unsigned char k, t,min_idx;	//ktg_230125
+/project/system_mcts/current/App/COA_Client/network.c:1824:	//long	tmp_data;	//ktg_230125
+/project/system_mcts/current/App/COA_Client/network.c:1828:	//S_CALI_TMP_COND tmp_caliCond;	//ktg_230125
+/project/system_mcts/current/App/COA_Client/network.c:1987:		/*if(myData->cali[ch].type == CALI_TYPE_CURRENT) {	//ktg_230125s
+/project/system_mcts/current/App/COA_Client/network.c:2014:		}*/	//ktg_230125e

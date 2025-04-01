@@ -1,0 +1,2 @@
+18868 ttyp0    S      0:00 sh -c ps -ax | grep ./CaliMeter > /root/cycler_data/c
+18870 ttyp0    S      0:00 grep ./CaliMeter

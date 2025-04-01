@@ -1,0 +1,9 @@
+maxRefV			:	70000000
+minRefV			:	0
+maxRefI			:	250000000
+minRefI			:	-250000000
+failDeltaV		:	20000
+failDeltaI		:	1000000
+check_lowerI	:	500000
+check_lowerOCV	:	50
+charge_lower_dv	:	280000

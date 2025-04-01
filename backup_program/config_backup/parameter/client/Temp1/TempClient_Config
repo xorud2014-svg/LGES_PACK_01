@@ -1,0 +1,39 @@
+ipAddress          		 	:   192.168.10.141
+sendPort					:	0
+receivePort					:	0
+networkPort    		    	:   2001
+retryTimeout[Sec]       	:   30
+retryCount         			:   1
+HeartbeatTimeout[Sec]   	:   5
+CmdSendLog          		:   0
+CmdRcvLog           		:   0
+CmdSendLog_Hexa        		:   0
+CmdRcvLog_Hexa         		:   0
+protocol_version    		:   1001
+CRC_TYPE	        		:   1
+installedTemp				:	130
+SensorType					:	K
+
+
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+================================================================================
+Option Setting Description
+Date : 2019.09.05
+Writer : KHK
+================================================================================
+ipAddress           => Temp Board IP
+sendPort			=>	Not use(Default : 0)
+receivePort			=>	Not use(Default : 0)
+networkPort			=> SBC <-> Temp Network Port No. (Default : 2001)
+replyTimeout		=> Cmd Reply Timeout (Default : 30)
+retryCount			=> Connection retry count (Default : 3)
+HeartTimeout		=> setValue(sec) < netTimeout(sec), TempClinet Process Kill.
+CmdSendLog          => CmdSendLog String Print Flag
+CmdRcvLog           => CmdRcvLog String Print Flag
+CmdSendLog_Hexa     => CmdSendLog Hexa Print Flag
+CmdRcvLog_Hexa      => CmdRcvLog Hexa Print Flag
+protocol_version    => SBC <-> Temp Board Protocol Version	(Default : 4102)
+CRC_Type        	=> iCRC-16-CCIT, CRC-16-POLYNOMAIL, CRC-16-MODBUS,
+instelledTemp      	=> Max 130 EA
+SensorType      	=> Thermocouple wire Type: K, T

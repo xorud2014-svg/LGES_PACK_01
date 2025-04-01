@@ -1,0 +1,2 @@
+23676 ?        S      0:00 sh -c ps -ax | grep './COA_Client 1' > /root/system_d
+23678 ?        S      0:00 grep ./COA_Client 1

@@ -1,0 +1,80 @@
+No	Cnt	Use	H/L	Ch	Group	Function				Description
+byte1(in)	622
+0	1	1	1	1	0		I_CONVERTER_OV			CONVERTER_OV
+1	1	1	1	1	0		I_CONVERTER_OC			CONVERTER_OC
+2	1	1	1	1	0		I_CONVERTER_DCOV		CONVERTER_DCOV
+3	1	1	1	1	0		I_CONVERTER_MODULE_FAULT	CONVERTER_MODULE_FAULT
+4	1	1	1	1	0		I_CONVERTER_OT			CONVERTER_OT
+5	1	1	1	1	0		I_I_RANGE1				I_RANGE1
+6	1	0	1	1	0		spare					spare
+7	1	0	1	1	0		spare					spare
+
+byte2(in)	623
+8	1	0	1	1	0		spare					spare
+9	1	0	1	1	0		spare					spare
+10	1	1	0	1	0		I_OUT_REACTOR_OT        OUT_REACTOR_OT
+11	1	0	1	1	0		spare					spare
+12	1	0	1	1	0		spare					spare
+13	1	1	1	1	0		I_PARALLEL				PARALLEL
+14	1	1	0	1	0		I_CONVERTER_IN_FUSE_FAIL	CONVERTER_IN_FUSE_FAIL
+15	1	1	0	1	0		I_OUT_FUSE_FAIL			OUT_FUSE_FAIL
+
+byte3(in)	626
+16	1	1	1	2	0		I_CONVERTER_OV			CONVERTER_OV
+17	1	1	1	2	0		I_CONVERTER_OC			CONVERTER_OC
+18	1	1	1	2	0		I_CONVERTER_DCOV		CONVERTER_DCOV
+19	1	1	1	2	0		I_CONVERTER_MODULE_FAULT	CONVERTER_MODULE_FAULT
+20	1	1	1	2	0		I_CONVERTER_OT			CONVERTER_OT
+21	1	1	1	2	0		I_I_RANGE1				I_RANGE1
+22	1	0	1	2	0		spare					spare
+23	1	0	1	2	0		spare					spare
+
+byte4(in)	627
+24	1	0	1	2	0		spare					spare
+25	1	0	1	2	0		spare					spare
+26	1	1	0	2	0		I_OUT_REACTOR_OT        OUT_REACTOR_OT
+27	1	0	1	2	0		spare					spare
+28	1	0	1	2	0		spare					spare
+29	1	0	1	2	0		spare					spare
+30	1	1	0	2	0		I_CONVERTER_IN_FUSE_FAIL	CONVERTER_IN_FUSE_FAIL
+31	1	1	0	2	0		I_OUT_FUSE_FAIL			OUT_FUSE_FAIL
+
+byte5(in)	0
+32	1	0	1	0	0		spare					spare
+33	1	0	1	0	0		spare					spare
+34	1	0	1	0	0		spare					spare
+35	1	0	1	0	0		spare					spare
+36	1	0	1	0	0		spare					spare
+37	1	0	1	0	0		spare					spare
+38	1	0	1	0	0		spare					spare
+39	1	0	1	0	0		spare					spare
+
+byte6(in)	0
+40	1	0	1	0	0		spare					spare
+41	1	0	1	0	0		spare					spare
+42	1	0	1	0	0		spare					spare
+43	1	0	1	0	0		spare					spare
+44	1	0	1	0	0		spare					spare
+45	1	0	1	0	0		spare					spare
+46	1	0	1	0	0		spare					spare
+47	1	0	1	0	0		spare					spare
+
+byte7(in)	0
+48	1	0	1	0	0		spare					spare
+49	1	0	1	0	0		spare					spare
+50	1	0	1	0	0		spare					spare
+51	1	0	1	0	0		spare					spare
+52	1	0	1	0	0		spare					spare
+53	1	0	1	0	0		spare					spare
+54	1	0	1	0	0		spare					spare
+55	1	0	1	0	0		spare					spare
+
+byte8(in)	0
+56	1	0	1	0	0		spare					spare
+57	1	0	1	0	0		spare					spare
+58	1	0	1	0	0		spare					spare
+59	1	0	1	0	0		spare					spare
+60	1	0	1	0	0		spare					spare
+61	1	0	1	0	0		spare					spare
+62	1	0	1	0	0		spare					spare
+63	1	0	1	0	0		spare					spare

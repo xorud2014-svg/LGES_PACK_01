@@ -1,0 +1,29 @@
+io_Control_Flag			:	0
+watchdogType			:	2
+sensCount				:	1
+ioDelay					:	3000
+scan_period				:	10
+powerSwitchTimeout		:	3000
+forcePowerSwitchTimeout	:	10000
+resetSwitchTimeout		:	5000
+powerFailTimeout1		:	0
+powerFailTimeout2		:	10000
+upsBatteryFailTimeout	:	2000
+logic_type				:	1
+upsBatteryFail_TypeFlag	:	3
+acPowerFail_TypeFlag	:	8
+
+
+============================Description============================
+upsBatteryFail_TypeFlag	====>	1 (I_In_FlagCheck_PowerFail_1)
+						====>	3 (I_In_FlagCheck_PowerFail_3) Default
+						
+acPowerFail_TypeFlag	====>	0 (No USE)
+						====>	1 (PNE_AC_Power_Fail_Detect_1) (0x629) & 0x80
+						====>	2 (PNE_AC_Power_Fail_Detect_2) (0x611) & 0x01
+						====>	3 (PNE_AC_Power_Fail_Detect_3) (0x610) & 0x01
+						====>	4 (PNE_AC_Power_Fail_Detect_4) (0x611) & 0x01
+						====>	5 (PNE_AC_Power_Fail_Detect_5) (0x611) & 0x04
+						====>	6 (PNE_AC_Power_Fail_Detect_6) (0x622) & 0x40
+						====>	7 (PNE_AC_Power_Fail_Detect_7) (0x621) & 0x20
+						====>	8 (PNE_AC_Power_Fail_Detect_8) multi

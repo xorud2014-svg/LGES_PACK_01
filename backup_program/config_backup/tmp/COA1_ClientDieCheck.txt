@@ -1,0 +1,3 @@
+  847 ttyp0    S      0:00 ./COA1_Client
+  884 ttyp0    S      0:00 sh -c ps -ax | grep ./COA1_Client > /root/system_data
+  886 ttyp0    S      0:00 grep ./COA1_Client

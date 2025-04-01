@@ -1,0 +1,3 @@
+  696 ?        S      0:05 ./CaliMeter
+23177 ?        S      0:00 sh -c ps -ax | grep ./CaliMeter > /root/cycler_data/c
+23179 ?        S      0:00 grep ./CaliMeter

@@ -1,0 +1,77 @@
+#!/bin/bash
+
+echo "system directory create start"
+
+cd /root/system_data; mkdir -p log
+
+cd /root/system_data/config; mkdir -p pattern
+cd pattern; rm -rf *; mkdir -p group1
+cd group1
+mkdir -p ch001 ch002 ch003 ch004 ch005 ch006 ch007 ch008 ch009 ch010
+mkdir -p ch011 ch012 ch013 ch014 ch015 ch016 ch017 ch018 ch019 ch020
+mkdir -p ch021 ch022 ch023 ch024 ch025 ch026 ch027 ch028 ch029 ch030
+mkdir -p ch031 ch032 ch033 ch034 ch035 ch036 ch037 ch038 ch039 ch040
+mkdir -p ch051 ch052 ch053 ch054 ch055 ch056 ch057 ch058 ch059 ch060
+mkdir -p ch061 ch062 ch063 ch064 ch065 ch066 ch067 ch068 ch069 ch070
+mkdir -p ch071 ch072 ch073 ch074 ch075 ch076 ch077 ch078 ch079 ch080
+mkdir -p ch081 ch082 ch083 ch084 ch085 ch086 ch087 ch088 ch089 ch090
+mkdir -p ch091 ch092 ch093 ch094 ch095 ch096 ch097 ch098 ch099 ch100
+mkdir -p ch101 ch102 ch103 ch104 ch105 ch106 ch107 ch108 ch109 ch110
+mkdir -p ch111 ch112 ch113 ch114 ch115 ch116 ch117 ch118 ch119 ch120
+mkdir -p ch121 ch122 ch123 ch124 ch125 ch126 ch127 ch128 ch129 ch130
+mkdir -p ch131 ch132 ch133 ch134 ch135 ch136 ch137 ch138 ch139 ch140
+mkdir -p ch141 ch142 ch143 ch144 ch145 ch146 ch147 ch148 ch149 ch150
+mkdir -p ch151 ch152 ch153 ch154 ch155 ch156 ch157 ch158 ch159 ch160
+mkdir -p ch161 ch162 ch163 ch164 ch165 ch166 ch167 ch168 ch169 ch170
+mkdir -p ch171 ch172 ch173 ch174 ch175 ch176 ch177 ch178 ch179 ch180
+mkdir -p ch181 ch182 ch183 ch184 ch185 ch186 ch187 ch188 ch189 ch190
+mkdir -p ch191 ch192 ch193 ch194 ch195 ch196 ch197 ch198 ch199 ch200
+mkdir -p ch201 ch202 ch203 ch204 ch205 ch206 ch207 ch208 ch209 ch210
+mkdir -p ch211 ch212 ch213 ch214 ch215 ch216 ch217 ch218 ch219 ch220
+mkdir -p ch221 ch222 ch223 ch224 ch225 ch226 ch227 ch228 ch229 ch230
+mkdir -p ch231 ch232 ch233 ch234 ch235 ch236 ch237 ch238 ch239 ch240
+mkdir -p ch241 ch242 ch243 ch244 ch245 ch246 ch247 ch248 ch249 ch250
+mkdir -p ch251 ch252 ch253 ch254 ch255 ch256
+cd /root/system_data/config/pattern; cp -rf group1 group2
+cp -rf group1 group3; cp -rf group1 group4; cp -rf group1 group5
+cp -rf group1 group6; cp -rf group1 group7; cp -rf group1 group8
+#mkdir -p ch01 ch02 ch03 ch04 ch05 ch06 ch07 ch08
+#mkdir -p ch09 ch10 ch11 ch12 ch13 ch14 ch15 ch16
+#mkdir -p ch17 ch18 ch19 ch20 ch21 ch22 ch23 ch24
+#mkdir -p ch25 ch26 ch27 ch28 ch29 ch30 ch31 ch32
+
+cd /extended_partition; mkdir resultData; cd resultData
+mkdir group1; mkdir group2; mkdir group3; mkdir group4
+mkdir group5; mkdir group6; mkdir group7; mkdir group8
+#mkdir -p ch01 ch02 ch03 ch04 ch05 ch06 ch07 ch08
+#mkdir -p ch09 ch10 ch11 ch12 ch13 ch14 ch15 ch16
+#mkdir -p ch17 ch18 ch19 ch20 ch21 ch22 ch23 ch24
+#mkdir -p ch25 ch26 ch27 ch28 ch29 ch30 ch31 ch32
+cd group1; mkdir data0
+cp -rf /root/system_data/config/pattern/group1/* data0/
+cd /extended_partition; cp -rf resultData monitoringData
+
+cd /root/system_data; ln -s /extended_partition/resultData resultData
+ln -s /extended_partition/monitoringData monitoringData
+
+cd /root/system_data/resultData
+ln -s /root/system_data/resultData/group1/data0/ch001 ch01
+ln -s /root/system_data/resultData/group1/data0/ch002 ch02
+ln -s /root/system_data/resultData/group1/data0/ch003 ch03
+ln -s /root/system_data/resultData/group1/data0/ch004 ch04
+ln -s /root/system_data/resultData/group1/data0/ch005 ch05
+ln -s /root/system_data/resultData/group1/data0/ch006 ch06
+ln -s /root/system_data/resultData/group1/data0/ch007 ch07
+ln -s /root/system_data/resultData/group1/data0/ch008 ch08
+
+cd /root; mkdir START_INFO; cd START_INFO
+mkdir CH001; mkdir CH002; mkdir CH003; mkdir CH004; mkdir CH005; mkdir CH006
+
+cd /root/START_INFO/CH001; mkdir UPDATE
+cd /root/START_INFO/CH002; mkdir UPDATE
+cd /root/START_INFO/CH003; mkdir UPDATE
+cd /root/START_INFO/CH004; mkdir UPDATE
+cd /root/START_INFO/CH005; mkdir UPDATE
+cd /root/START_INFO/CH006; mkdir UPDATE
+
+echo "system directory create end"

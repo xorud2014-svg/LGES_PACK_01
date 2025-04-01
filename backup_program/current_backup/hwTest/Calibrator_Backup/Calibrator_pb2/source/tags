@@ -1,0 +1,190 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.2.2	//
+ACCEPT	../INC/com_socket.h	5;"	d
+ADDAVal	main.c	/^union ADDAVal {$/;"	u	file:
+AD_HADDR	main.c	29;"	d	file:
+AD_LADDR	main.c	30;"	d	file:
+AD_stdev	main.c	/^int AD_stdev(float Average,int count){$/;"	f
+AUX_HADDR	main.c	31;"	d	file:
+AUX_LADDR	main.c	32;"	d	file:
+AVSTDEV	main.c	/^} AVSTDEV;$/;"	t	file:
+BD_PER_MODULE	../INC/switch.h	16;"	d
+BccCheck	switch.c	/^int BccCheck(int count)$/;"	f
+BccCreate	switch.c	/^void BccCreate(int count)$/;"	f
+Bps	../INC/comm1.h	/^} Bps;$/;"	t
+BuildMask	com_socket.c	/^int BuildMask(void)$/;"	f
+CC	Makefile	/^CC	= gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS	= -g -Wall$/;"	m
+CH_PER_BD	../INC/switch.h	17;"	d
+CMD_ACK	../INC/switch.h	11;"	d
+CMD_ALL_OFF	../INC/switch.h	9;"	d
+CMD_MODE_IN	../INC/switch.h	15;"	d
+CMD_MODE_OUT	../INC/switch.h	14;"	d
+CMD_NACK	../INC/switch.h	12;"	d
+CMD_ONE_OFF	../INC/switch.h	8;"	d
+CMD_ONE_ON	../INC/switch.h	7;"	d
+CMD_RESET	../INC/switch.h	13;"	d
+CMD_TEST	../INC/switch.h	10;"	d
+COUNT	main.c	21;"	d	file:
+COUNT1	main.c	23;"	d	file:
+CURRENT	main.c	18;"	d	file:
+CellArray	switch.c	/^static int CellArray[BD_PER_MODULE][CH_PER_BD]; $/;"	v	file:
+CellMatching	switch.c	/^void CellMatching(void)$/;"	f
+ChBdNum	main.c	/^int ChBdNum, baseAddr;$/;"	v
+Channel	main.c	/^int state, scanType, chNum,Channel;$/;"	v
+CharToInt	main.c	/^int CharToInt(char cmp)$/;"	f
+CloseFD	com_socket.c	/^int CloseFD(int fd)$/;"	f
+CloseSD	com_socket.c	/^int CloseSD(void)$/;"	f
+CodeCheck	switch.c	/^int CodeCheck(int count)$/;"	f
+CommParam	../INC/comm1.h	/^} CommParam;$/;"	t
+Conversion	main.c	/^long Conversion(void)$/;"	f
+CreatADFile	main.c	/^void CreatADFile(int count,int type)$/;"	f
+CurrRefReset	main.c	/^void CurrRefReset()$/;"	f
+DENY	../INC/com_socket.h	6;"	d
+DIV_ADDR	main.c	33;"	d	file:
+DoAccept	com_socket.c	/^int DoAccept(void)$/;"	f
+DoRead	main.c	/^int DoRead(int fd)$/;"	f
+ETX	../INC/switch.h	5;"	d
+FD	com_socket.c	/^int FD[FD_MAX], SD, stdinoutOK, readMask[20];$/;"	v
+FD_MAX	../INC/com_socket.h	4;"	d
+Flow	../INC/comm1.h	/^} Flow;$/;"	t
+GetHostName	com_socket.c	/^char *GetHostName(void)$/;"	f
+GetServerSock	com_socket.c	/^int GetServerSock(int port)$/;"	f
+GetStdInOutOK	com_socket.c	/^int GetStdInOutOK(void)$/;"	f
+H_CLR	main.c	39;"	d	file:
+INCLUDE	Makefile	/^INCLUDE	= -I.$/;"	m
+IREF	main.c	/^} IREF;$/;"	t	file:
+InitFD	com_socket.c	/^void InitFD(void)$/;"	f
+Iref_0	main.c	/^    int Iref_0;$/;"	m	struct:iref_tag	file:
+Iref_N100	main.c	/^    int Iref_N100;$/;"	m	struct:iref_tag	file:
+Iref_P100	main.c	/^    int Iref_P100;$/;"	m	struct:iref_tag	file:
+MUX1_ADDR	main.c	37;"	d	file:
+MUX2_ADDR	main.c	38;"	d	file:
+OBJ	Makefile	/^OBJ =  com_io.o com_socket.o comm.o comm1.o switch.o main.o$/;"	m
+OFF	main.c	19;"	d	file:
+ON	main.c	20;"	d	file:
+PCcontrol	main.c	26;"	d	file:
+ProcessFD	com_socket.c	/^int ProcessFD(int fd, int (*fp)(int))$/;"	f
+ProcessMask	com_socket.c	/^int ProcessMask(int *nfds, fd_set *rdset, int (*fp)(int))$/;"	f
+REF_CRRNT	main.c	36;"	d	file:
+REF_HIGH	main.c	34;"	d	file:
+REF_IC_READ	main.c	22;"	d	file:
+REF_VLT	main.c	35;"	d	file:
+ReadCommand	main.c	/^int ReadCommand(int fd, int *cmd, int *val)$/;"	f
+RealData	main.c	/^int RealData(void)$/;"	f
+ReceiveDataPrint	switch.c	/^void ReceiveDataPrint(int count)$/;"	f
+RelayAllOff	main.c	/^void RelayAllOff(void)$/;"	f
+RelayAllOn	main.c	/^void RelayAllOn(void)$/;"	f
+RelayOnOff	main.c	/^void RelayOnOff(int num, int type)$/;"	f
+ResetTraySwitch	switch.c	/^void ResetTraySwitch(void)$/;"	f
+SBCcontrol	main.c	25;"	d	file:
+SD	com_socket.c	/^int FD[FD_MAX], SD, stdinoutOK, readMask[20];$/;"	v
+START_ADDR	main.c	28;"	d	file:
+STX	../INC/switch.h	4;"	d
+SWITCH_ADDR	../INC/switch.h	6;"	d
+ScanTypeSetting	switch.c	/^void ScanTypeSetting(int type)$/;"	f
+Send	comm.c	/^int Send(int fd, char *msg, int len)$/;"	f
+Send1	comm1.c	/^int Send1(int fd, char *msg, int len)$/;"	f
+SendDataPrint	switch.c	/^void SendDataPrint(int count)$/;"	f
+SendSerialData	switch.c	/^int SendSerialData(void)$/;"	f
+ServerEngine	com_socket.c	/^int ServerEngine(int port, int (*fp)(int))$/;"	f
+SetAuxDA	main.c	/^void SetAuxDA(int num, unsigned char val)$/;"	f
+SetClientSock	com_socket.c	/^int SetClientSock(int port, char *addr)$/;"	f
+SetFD	com_socket.c	/^int SetFD(void)$/;"	f
+SetMux	main.c	/^void SetMux(int num, int type)$/;"	f
+SetServerBindLoop	com_socket.c	/^int SetServerBindLoop(int flag)$/;"	f
+SetServerInfo	com_socket.c	/^struct server_status *SetServerInfo(int port)$/;"	f
+SetStdInOutOK	com_socket.c	/^void SetStdInOutOK(int ok)$/;"	f
+TIMEOUT_READ	com_io.c	14;"	d	file:
+TMT_B12	../INC/comm1.h	/^	TMT_B12,$/;"	e
+TMT_B192	../INC/comm1.h	/^	TMT_B192$/;"	e
+TMT_B24	../INC/comm1.h	/^	TMT_B24,$/;"	e
+TMT_B3	../INC/comm1.h	/^	TMT_B3,$/;"	e
+TMT_B48	../INC/comm1.h	/^	TMT_B48,$/;"	e
+TMT_B6	../INC/comm1.h	/^	TMT_B6,$/;"	e
+TMT_B96	../INC/comm1.h	/^	TMT_B96,$/;"	e
+TMT_FNONE	../INC/comm1.h	/^	TMT_FNONE$/;"	e
+TMT_FRTSCTS	../INC/comm1.h	/^	TMT_FRTSCTS,$/;"	e
+TMT_FXONXOFF	../INC/comm1.h	/^	TMT_FXONXOFF,$/;"	e
+TransData	switch.c	/^void TransData(int cmd, int ch, int val)$/;"	f
+TraySwitchOnOff	switch.c	/^void TraySwitchOnOff(int OnOff,int bd,int cnl)$/;"	f
+UnUse	main.c	24;"	d	file:
+UseSocket	com_socket.c	/^int	UseSocket(int port_num, char *ip_addr)$/;"	f
+VOLTAGE	main.c	17;"	d	file:
+VREF	main.c	/^} VREF;$/;"	t	file:
+VoltRefReset	main.c	/^void VoltRefReset()$/;"	f
+Vref_0V	main.c	/^    int Vref_0V;$/;"	m	struct:vref_tag	file:
+Vref_N5V	main.c	/^    int Vref_N5V;$/;"	m	struct:vref_tag	file:
+Vref_P5V	main.c	/^    int Vref_P5V;$/;"	m	struct:vref_tag	file:
+_COMM1_H_	../INC/comm1.h	2;"	d
+_COMM_H_	../INC/comm.h	2;"	d
+_SWITCH_H_	../INC/switch.h	2;"	d
+__COMM_IO_H__	../INC/com_io.h	2;"	d
+__COMM_SOCKET_H__	../INC/com_socket.h	2;"	d
+ave	main.c	/^    int ave;$/;"	m	struct:avstdev_tag	file:
+avstdev_tag	main.c	/^typedef struct avstdev_tag{$/;"	s	file:
+baseAddr	main.c	/^int ChBdNum, baseAddr;$/;"	v
+bps	../INC/comm1.h	/^	Bps		bps;$/;"	m	struct:
+calbox	main.c	/^int meter,calbox;$/;"	v
+caliAddr	main.c	/^int usePort, caliAddr;$/;"	v
+chNum	main.c	/^int state, scanType, chNum,Channel;$/;"	v
+closetty	comm.c	/^int closetty(int fd)$/;"	f
+closetty1	comm1.c	/^int closetty1(int fd)$/;"	f
+comm_param	main.c	/^CommParam comm_param = {"\/dev\/ttyS0", TMT_B96, TMT_FXONXOFF};  \/\/Calibration Box$/;"	v
+comm_param1	main.c	/^CommParam comm_param1 = {"\/dev\/ttyS1", TMT_B96, TMT_FXONXOFF};  \/\/Meter(34401A)$/;"	v
+cur_fd	../INC/com_socket.h	/^	int		cur_fd;		\/\/ current file discript$/;"	m	struct:server_status
+cur_user	../INC/com_socket.h	/^	int		cur_user;	\/\/ current user #$/;"	m	struct:server_status
+data	main.c	/^    int data;$/;"	m	struct:iref_tag	file:
+data	main.c	/^    int data;$/;"	m	struct:vref_tag	file:
+data	main.c	/^    unsigned char data[2];$/;"	m	union:ADDAVal	file:
+data1	main.c	/^	int data1;$/;"	m	struct:avstdev_tag	file:
+data2	main.c	/^	int data2;$/;"	m	struct:avstdev_tag	file:
+delay	comm.c	/^void delay(int sec)$/;"	f
+device	../INC/comm1.h	/^	char	device[11];$/;"	m	struct:
+flag_bindloop	com_socket.c	/^int flag_bindloop = 300; \/\/300 * 1sec = 5min$/;"	v
+flow	../INC/comm1.h	/^	Flow	flow;$/;"	m	struct:
+fp	main.c	/^FILE *fp;$/;"	v
+host	../INC/com_socket.h	/^	char	*host;		\/\/ hostname$/;"	m	struct:server_status
+iref_tag	main.c	/^typedef struct iref_tag {$/;"	s	file:
+main	main.c	/^int main(int argc, char *argv[])$/;"	f
+maskbytes	../INC/com_socket.h	/^	int		maskbytes;$/;"	m	struct:server_status
+meter	main.c	/^int meter,calbox;$/;"	v
+myVal	main.c	/^union ADDAVal myVal;$/;"	v
+oldtrm	comm.c	/^static struct termios oldtrm;$/;"	v	file:
+oldtrm1	comm1.c	/^static struct termios oldtrm1;$/;"	v	file:
+opentty	comm.c	/^int opentty(void)$/;"	f
+opentty1	comm1.c	/^int opentty1(void)$/;"	f
+port	../INC/com_socket.h	/^	int		port;		\/\/ port$/;"	m	struct:server_status
+readMask	com_socket.c	/^int FD[FD_MAX], SD, stdinoutOK, readMask[20];$/;"	v
+read_jmp	com_io.c	/^jmp_buf		read_jmp;$/;"	v
+readn	com_io.c	/^int readn(int fd, char *ptr, int nbytes)$/;"	f
+readnt	com_io.c	/^int readnt(int fd, char *ptr, int nbytes, int timeout)$/;"	f
+readset	com_socket.c	/^fd_set readset;$/;"	v
+rxData	switch.c	/^char rxData[256], txData[256];$/;"	v
+rxsettings	comm.c	/^int rxsettings(char *buf, int length)$/;"	f
+rxsettings1	comm1.c	/^int rxsettings1(char *buf,int length)$/;"	f
+scanType	main.c	/^int state, scanType, chNum,Channel;$/;"	v
+server_status	../INC/com_socket.h	/^struct	server_status$/;"	s
+signal4read	com_io.c	/^void signal4read(int signum)$/;"	f
+st_time	../INC/com_socket.h	/^	long	st_time;	\/\/ server start time$/;"	m	struct:server_status
+state	main.c	/^int state, scanType, chNum,Channel;$/;"	v
+stdev	main.c	/^    int stdev;$/;"	m	struct:avstdev_tag	file:
+stdinoutOK	com_socket.c	/^int FD[FD_MAX], SD, stdinoutOK, readMask[20];$/;"	v
+sv_info	com_socket.c	/^struct server_status sv_info;$/;"	v
+swapBit	main.c	/^int swapBit(int ch) {$/;"	f
+tmpValue	main.c	/^short int tmpValue[COUNT1];$/;"	v
+txData	switch.c	/^char rxData[256], txData[256];$/;"	v
+txsettings	comm.c	/^int txsettings(char *buf, int length)$/;"	f
+txsettings1	comm1.c	/^int txsettings1(char *buf,int length)$/;"	f
+usePort	main.c	/^int usePort, caliAddr;$/;"	v
+user	../INC/com_socket.h	/^	int		user;		\/\/ maximum user$/;"	m	struct:server_status
+val	main.c	/^    short int val;$/;"	m	union:ADDAVal	file:
+value	main.c	/^char value[256];$/;"	v
+vref_tag	main.c	/^typedef struct vref_tag {$/;"	s	file:
+write_ACK	com_socket.c	/^void write_ACK(int fd)$/;"	f
+write_NAK	com_socket.c	/^void write_NAK(int fd)$/;"	f
+writen	com_io.c	/^writen(int fd, char *ptr, int nbytes)$/;"	f

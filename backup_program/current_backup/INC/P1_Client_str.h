@@ -397,8 +397,9 @@ typedef struct s_p1_test_cond_step_tag {
 	long				faultCC_delta_v_reff_value;		//shhw_220919e
 
 	unsigned char		faultCanFreeze_use_flag;		//ktg_230728s
-	unsigned char		faultCanFreeze_time;
-	unsigned char		reserved9[2];
+	unsigned char		reserved9[3];			//ktg_250313
+	unsigned short int	faultCanFreeze_time;
+	unsigned char		reserved14[2];			//ktg_250313
 	unsigned long		faultCanFreeze_CellV;
 	unsigned long		faultCanFreeze_I;				//only positive	//ktg_230728e
 
@@ -855,7 +856,7 @@ typedef struct s_p1_can_transmit_common_data_tag {
 	unsigned char		bms_type;
 						//0:bms_none(default), 1:pack_relay, 2:sbl_bms, 3:hmc
 	unsigned char		sjw; //0:default
-	
+
 	long				controller_canID;
 
 	//kjg_180405_s long				reserved1[2];
@@ -1195,6 +1196,14 @@ typedef struct s_p1_rcv_cmd_gui_emg_set_tag { //khj_201227
 	unsigned char		emg_flag;
 	unsigned char		reserved[3];
 } S_P1_RCV_CMD_GUI_EMG_SET;
+
+typedef struct s_p1_rcv_cmd_gui_shutdown_tag { //ktg_250410	//jhj_250410
+	S_P1_CMD_HEADER		header;
+	/*
+	unsigned char		emg_flag;
+	unsigned char		reserved[3];
+	*/
+} S_P1_RCV_CMD_GUI_SHUTDOWN;
 
 typedef struct s_p1_rcv_cmd_chamber_flag_tag { //kjg_101221
 	S_P1_CMD_HEADER		header;

@@ -7,7 +7,8 @@
 //#include "HW_Addr_Formation_General1.h"
 
 //test condition define
-#define MAX_TEST_STEP						210
+//#define MAX_TEST_STEP						210
+#define MAX_TEST_STEP						250		//jhj_250310
 #define MAX_PATTERN_DATA					50001	//old
 //#define MAX_PATTERN_DATA					100001 //100D~
 #define MAX_CAN_FUNCTION					10
@@ -1195,6 +1196,7 @@
 #define M_SIG_EOL_PROCEDURE_CHECK_INDEX		83 //kjg_120709_e
 #define M_SIG_EOL_PROCEDURE_VBF_FILE_DOWNLOAD	84 //kjg_121004
 #define M_SIG_GUI_EMG_SET					85 //khj_201227
+#define M_SIG_GUI_SHUTDOWN					86 //ktg_250410		//jhj_250410
 
 //group signal
 #define G_SIG_CMD_RUN						0
@@ -1431,6 +1433,7 @@
 #define M_CD_FAULT_EXT_OT					95	//shutdown jhkw_160219
 #define M_CD_FAULT_LEAKAGE_CURRENT			96	//shutdown	ktg_211104
 #define M_CD_FAULT_DC_LINK_FUSE				97	//shutdown	phb_230710
+#define M_CD_FAULT_GUI_SHUTDOWN				98	//shutdown	ktg_250410		//jhj_250410
 
 #define G_CD_NONE							0
 #define G_CD_FAULT_UPPER_VOLTAGE			50	//pause

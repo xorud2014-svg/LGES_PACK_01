@@ -1533,6 +1533,13 @@ void msgParsing_COA_to_Module(int fromPs, int idx, S_MSG_VAL *RecvMsg)
 				myPs->signal[M_SIG_GUI_EMG_SET] = P0;
 			}
 			break;
+		case MSG_COA_MODULE_GUI_SHUTDOWN:		//ktg_250410	//jhj_250410
+			if(RecvMsg->val[1] == 1) {
+				myPs->signal[M_SIG_GUI_SHUTDOWN] = P1;
+			} else {
+				myPs->signal[M_SIG_GUI_SHUTDOWN] = P0;
+			}
+			break;
 		case MSG_COA_MODULE_CMD_TEST_COND_UPDATE: //kjg_170810
 			for(i=0; i < myPs->config.chInGroup[group]; i++) {
 				j = i / 8;

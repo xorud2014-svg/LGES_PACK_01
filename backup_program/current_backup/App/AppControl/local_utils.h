@@ -7,6 +7,7 @@ int		SystemLoader(int, char *[]);
 int		Initialize(int);
 
 int		Init_SystemData(void);
+void    Delete_SystemMemory(void); //shhw_250409
 int		Read_SystemMemory(char *);
 void	Init_SystemMemory_1(void);
 void	Init_SystemMemory_2(void);

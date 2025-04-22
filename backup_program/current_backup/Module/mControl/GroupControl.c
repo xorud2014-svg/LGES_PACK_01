@@ -138,8 +138,10 @@ void gRun_C(int group)
 
 	time1 = myPs->misc.timer_1sec;
 	time2 = myPs->misc.timer_1000ms;
-	diff = (time1 - myData->COA_Client[group].misc.net_time) * 1000;
-	diff += (time2 - myData->COA_Client[group].misc.net_time2);
+	//diff = (time1 - myData->COA_Client[group].misc.net_time) * 1000;
+	//diff += (time2 - myData->COA_Client[group].misc.net_time2);
+	diff = (time1 - myData->COA_Client[group].misc.pause_time) * 1000;		//jhj_250310 SK_network_timeout_merge
+	diff += (time2 - myData->COA_Client[group].misc.pause_time2);
 	//if((diff >= myData->COA_Client[group].config.netTimeout || diff < 0)
 	if((diff >= myData->COA_Client[group].config.netTimeout)	//csk_200506d
 		&& myGroup->signal[G_SIG_NET_CHECK] == P0) {

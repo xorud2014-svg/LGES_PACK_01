@@ -1,23 +1,23 @@
 master
-can_baudrate : 0
+can_baudrate : 2
 extended_id : 0
-controller_canID : 0
-mask1   : 0
+controller_canID : 7fffffff
+mask1   : 7ff
 mask2   : 0
-filter1 : 0
-filter2 : 0
+filter1 : 72b
+filter2 : 72f
 filter3 : 0
 filter4 : 0
 filter5 : 0
 filter6 : 0
 bms_type : 0
 sjw      : 0
-can_fd_flag : 0
-can_datarate : 0
-terminal_r : 0
-crc_type : 0
+can_fd_flag : 1
+can_datarate : 4
+terminal_r : 1
+crc_type : 1
 can_lin_flag : 0
-cell_check_use_flag : 0
+cell_check_use_flag : 2
 func_div	:	0 0 0 0 0 0 0 0 0 0
 compare_type	:	0 0 0 0 0 0 0 0 0 0
 data_type	:	0 0 0 0 0 0 0 0 0 0

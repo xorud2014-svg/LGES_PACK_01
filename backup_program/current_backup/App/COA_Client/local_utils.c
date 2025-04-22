@@ -6674,7 +6674,7 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 				P1_stepCond->faultCanFreeze_use_flag = (unsigned char)tmp;
 				idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_TIME;
 				tmp = myData->testCond[ch].local_object[stepNo][idx];
-				P1_stepCond->faultCanFreeze_time = (unsigned char)tmp;
+				P1_stepCond->faultCanFreeze_time = (unsigned short int)tmp;
 				idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_CELL_V;
 				tmp = myData->testCond[ch].local_object[stepNo][idx];
 				P1_stepCond->faultCanFreeze_CellV = (unsigned long)tmp;
@@ -6786,7 +6786,7 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			P1_stepCond->faultCanFreeze_use_flag = (unsigned char)tmp;
 			idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_TIME;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
-			P1_stepCond->faultCanFreeze_time = (unsigned char)tmp;
+			P1_stepCond->faultCanFreeze_time = (unsigned short int)tmp;
 			idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_CELL_V;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->faultCanFreeze_CellV = (unsigned long)tmp;

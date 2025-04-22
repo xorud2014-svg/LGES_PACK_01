@@ -565,6 +565,9 @@ int NetworkCommand_Parsing(void)
 		case P1_CMD_TO_SBC_GUI_EMG_SET: //khj_201227
 			rtn = rcv_cmd_gui_emg_set();
 			break;
+		case P1_CMD_TO_SBC_GUI_SHUTDOWN: //ktg_250410	//jhj_250410
+			rtn = rcv_cmd_gui_shutdown();
+			break;
 		default:
 			userlog(DEBUG_LOG, psName, "Can't Find Cmd[%x]\n", header.cmd_id);
 			rtn = -10;
@@ -832,6 +835,9 @@ int CmdHeader_Check(char *rcvHeader)
 			break;
 		case P1_CMD_TO_SBC_GUI_EMG_SET:		//khj_201227
 			length = sizeof(S_P1_RCV_CMD_GUI_EMG_SET);
+			break;
+		case P1_CMD_TO_SBC_GUI_SHUTDOWN:	 //ktg_250410	//jhj_250410
+			length = sizeof(S_P1_RCV_CMD_GUI_SHUTDOWN);
 			break;
 		default:
 			send_cmd_unknown(header.cmd_id, P1_CMD_ID_ERROR);
@@ -5623,6 +5629,32 @@ int	rcv_cmd_gui_emg_set(void)			//khj_201227s
 	return send_cmd_response((char *)&cmd.header, P1_CD_ACK);
 	
 }	//khj_201227e
+
+int	rcv_cmd_gui_shutdown(void)			//ktg_250410	//jhj_250410s
+{
+	int group, toPs;
+	S_MSG_CH_FLAG ch_flag;
+	S_MSG_VAL SendMsg;
+	S_P1_RCV_CMD_GUI_SHUTDOWN cmd;
+
+	memset((char *)&ch_flag, 0, sizeof(S_MSG_CH_FLAG));
+	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+
+	memcpy((char *)&cmd, (char *)&myPs->rcvCmd.cmd, sizeof(S_P1_RCV_CMD_GUI_SHUTDOWN));
+
+	userlog(DEBUG_LOG, psName, "recv_gui shutdown\n");
+	
+	group = myPs->config.groupNo;
+	toPs = COA1_TO_MODULE + group;
+	send_msg_ch_flag(toPs, (char *)&ch_flag);
+	SendMsg.msg = MSG_COA_MODULE_GUI_SHUTDOWN;
+	SendMsg.val[0] = group;
+	SendMsg.val[1] = 1; //0:?? 1: shutdown
+	send_msg(toPs, (char *)&SendMsg);
+	
+	return send_cmd_response((char *)&cmd.header, P1_CD_ACK);
+	
+}	//ktg_250410e	//jhj_250410e
 
 int send_cmd_response(char *rcvHeader, int code)
 {

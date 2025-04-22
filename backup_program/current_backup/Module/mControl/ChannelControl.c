@@ -4232,6 +4232,8 @@ void cPause(int ch)
 				myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 				myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 				myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+				myCh->misc2.freeze_Time = 0;
+				myCh->misc2.freeze_day = 0;
 				myCh->misc.saveTime_count = 0;	//ktg_210411
 				myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4275,6 +4277,8 @@ void cPause(int ch)
 				myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 				myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 				myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+				myCh->misc2.freeze_Time = 0;
+				myCh->misc2.freeze_day = 0;
 				myCh->misc.saveTime_count = 0;	//ktg_210411
 				myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4308,6 +4312,8 @@ void cPause(int ch)
 				myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 				myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 				myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+				myCh->misc2.freeze_Time = 0;
+				myCh->misc2.freeze_day = 0;
 				myCh->misc.saveTime_count = 0;	//ktg_210411
 				myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4649,6 +4655,8 @@ void cPause_sig_continue(int ch)
 		myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 		myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 		myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+		myCh->misc2.freeze_Time = 0;
+		myCh->misc2.freeze_day = 0;
 		myCh->misc.saveTime_count = 0;	//ktg_210411
 		myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4774,6 +4782,8 @@ void cPause_sig_cycle_continue(int ch)
 	myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 	myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 	myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+	myCh->misc2.freeze_Time = 0;
+	myCh->misc2.freeze_day = 0;
 	myCh->misc.saveTime_count = 0;	//ktg_210411
 	myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4835,6 +4845,8 @@ void cPause_sig_chamber_continue_1(int ch)
 	myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 	myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 	myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+	myCh->misc2.freeze_Time = 0;
+	myCh->misc2.freeze_day = 0;
 	myCh->misc.saveTime_count = 0;	//ktg_210411
 	myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4896,6 +4908,8 @@ void cPause_sig_chamber_continue_2(int ch)
 	myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 	myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 	myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+	myCh->misc2.freeze_Time = 0;
+	myCh->misc2.freeze_day = 0;
 	myCh->misc.saveTime_count = 0;	//ktg_210411
 	myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -4975,6 +4989,8 @@ void cPause_sig_next_step(int ch)
 	myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 	myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 	myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+	myCh->misc2.freeze_Time = 0;
+	myCh->misc2.freeze_day = 0;
 	myCh->misc.saveTime_count = 0;	//ktg_210411
 	myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -5662,6 +5678,8 @@ void cPause_sig_goto_step(int ch)
 	myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 	myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 	myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+	myCh->misc2.freeze_Time = 0;
+	myCh->misc2.freeze_day = 0;
 	myCh->misc.saveTime_count = 0;	//ktg_210411
 	myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -6797,6 +6815,8 @@ void cStepCharge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 
 			myCh->misc.meanSumCount = 0;
@@ -6895,18 +6915,24 @@ void cStepCharge(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
-			memset((char *)&myCh->misc.common_codeCount, 0,
+			/*memset((char *)&myCh->misc.common_codeCount, 0,
 				sizeof(MAX_COM_CODE));
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(MAX_LOC_CODE));*/
+			memset((char *)&myCh->misc.common_codeCount, 0,
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.local_codeCount, 0,
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -6961,6 +6987,8 @@ void cStepCharge(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 					myCh->misc.sensCountFlag = P2;
@@ -7122,10 +7150,14 @@ void cStepCharge(int ch)
 			if(myCh->signal[C_SIG_OUT_SWITCH] == P68) {
 				//kjg_120105
 				myCh->misc.sendDataCount = 0;
+				//memset((char *)&myCh->misc.common_codeCount, 0,
+				//	sizeof(MAX_COM_CODE));
+				//memset((char *)&myCh->misc.local_codeCount, 0,
+				//	sizeof(MAX_LOC_CODE));
 				memset((char *)&myCh->misc.common_codeCount, 0,
-					sizeof(MAX_COM_CODE));
+					sizeof(char) * MAX_COM_CODE);	//ktg_250415
 				memset((char *)&myCh->misc.local_codeCount, 0,
-					sizeof(MAX_LOC_CODE));
+					sizeof(char) * MAX_LOC_CODE);
 				//kjhw_170904s
 				//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 				//kjg_171223
@@ -7133,10 +7165,14 @@ void cStepCharge(int ch)
 					sizeof(unsigned short int) * MAX_AUX_DATA
 					* MAX_AUX_FUNCTION);
 				//kjhw_170904e
+				//memset((char *)&myCh->misc.aux_codeCount, 0,
+				//	sizeof(MAX_AUX_CODE));
+				//memset((char *)&myCh->misc.can_codeCount, 0,
+				//	sizeof(MAX_CAN_CODE));
 				memset((char *)&myCh->misc.aux_codeCount, 0,
-					sizeof(MAX_AUX_CODE));
+					sizeof(char) * MAX_AUX_CODE);	//ktg_250415
 				memset((char *)&myCh->misc.can_codeCount, 0,
-					sizeof(MAX_CAN_CODE));
+					sizeof(char) * MAX_CAN_CODE);
 
 				myCh->op.Isens = 0;
 				myCh->op.select = SAVE_FLAG_SAVING_TIME;
@@ -7162,6 +7198,8 @@ void cStepCharge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 
 			myCh->misc.fbCountV = 0;
@@ -7230,18 +7268,24 @@ void cStepCharge(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -7297,6 +7341,8 @@ void cStepCharge(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -7362,6 +7408,8 @@ void cStepCharge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -7510,6 +7558,8 @@ void cStepCharge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -7592,18 +7642,24 @@ void cStepCharge(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_SDI_70V_50A_5A_4KW:
@@ -7655,6 +7711,8 @@ void cStepCharge(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -7937,6 +7995,8 @@ void cStepDischarge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 
 			myCh->misc.saveDt = 0;
@@ -8040,18 +8100,24 @@ void cStepDischarge(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -8107,6 +8173,8 @@ void cStepDischarge(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -8279,10 +8347,14 @@ void cStepDischarge(int ch)
 		case P3: //lki_111111
 			if(myCh->signal[C_SIG_OUT_SWITCH] == P68) {	//kjg_120105
 				myCh->misc.sendDataCount = 0;
+				//memset((char *)&myCh->misc.common_codeCount, 0,
+				//	sizeof(MAX_COM_CODE));
+				//memset((char *)&myCh->misc.local_codeCount, 0,
+				//	sizeof(MAX_LOC_CODE));
 				memset((char *)&myCh->misc.common_codeCount, 0,
-					sizeof(MAX_COM_CODE));
+					sizeof(char) * MAX_COM_CODE);	//ktg_250415
 				memset((char *)&myCh->misc.local_codeCount, 0,
-					sizeof(MAX_LOC_CODE));
+					sizeof(char) * MAX_LOC_CODE);
 				//kjhw_170904s
 				//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 				//kjg_171223
@@ -8290,10 +8362,14 @@ void cStepDischarge(int ch)
 					sizeof(unsigned short int) * MAX_AUX_DATA
 					* MAX_AUX_FUNCTION);
 				//kjhw_170904e
+				//memset((char *)&myCh->misc.aux_codeCount, 0,
+				//	sizeof(MAX_AUX_CODE));
+				//memset((char *)&myCh->misc.can_codeCount, 0,
+				//	sizeof(MAX_CAN_CODE));
 				memset((char *)&myCh->misc.aux_codeCount, 0,
-					sizeof(MAX_AUX_CODE));
+					sizeof(char) * MAX_AUX_CODE);	//ktg_250415
 				memset((char *)&myCh->misc.can_codeCount, 0,
-					sizeof(MAX_CAN_CODE));
+					sizeof(char) * MAX_CAN_CODE);
 
 				myCh->op.Isens = 0;
 				myCh->op.select = SAVE_FLAG_SAVING_TIME;
@@ -8320,6 +8396,8 @@ void cStepDischarge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -8387,18 +8465,24 @@ void cStepDischarge(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -8454,6 +8538,8 @@ void cStepDischarge(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -8518,6 +8604,8 @@ void cStepDischarge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -8663,6 +8751,8 @@ void cStepDischarge(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -8749,18 +8839,24 @@ void cStepDischarge(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_SDI_70V_50A_5A_4KW:
@@ -8812,6 +8908,8 @@ void cStepDischarge(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9096,6 +9194,8 @@ void cStepRest(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9168,18 +9268,24 @@ void cStepRest(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 			tmp = 0;
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -9234,6 +9340,8 @@ void cStepRest(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9362,6 +9470,8 @@ void cStepRest(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9398,18 +9508,24 @@ void cStepRest(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			tmp = 0;
 			switch(myData->AppControl.config.systemModel) {
@@ -9465,6 +9581,8 @@ void cStepRest(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9605,6 +9723,8 @@ void cStepRest(int ch)
 				myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 				myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 				myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+				myCh->misc2.freeze_Time = 0;
+				myCh->misc2.freeze_day = 0;
 				myCh->misc.saveTime_count = 0;	//ktg_210411
 				myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9643,6 +9763,8 @@ void cStepRest(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -9699,18 +9821,24 @@ void cStepRest(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			tmp = 0;
 			switch(myData->AppControl.config.systemModel) {
@@ -9762,6 +9890,8 @@ void cStepRest(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -10537,6 +10667,8 @@ void cStepOcv(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -10592,18 +10724,24 @@ void cStepOcv(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -10659,6 +10797,8 @@ void cStepOcv(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -10756,6 +10896,8 @@ void cStepOcv(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -10776,18 +10918,24 @@ void cStepOcv(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
@@ -10843,6 +10991,8 @@ void cStepOcv(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -10983,6 +11133,8 @@ void cStepOcv(int ch)
 				myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 				myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 				myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+				myCh->misc2.freeze_Time = 0;
+				myCh->misc2.freeze_day = 0;
 				myCh->misc.saveTime_count = 0;	//ktg_210411
 				myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -11021,6 +11173,8 @@ void cStepOcv(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -11076,18 +11230,24 @@ void cStepOcv(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			switch(myData->AppControl.config.systemModel) {
 				case C_SDI_70V_50A_5A_4KW:
@@ -11139,6 +11299,8 @@ void cStepOcv(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -11390,6 +11552,8 @@ void cStepZ(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -11495,18 +11659,24 @@ void cStepZ(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			myCh->signal[C_SIG_PULSE_COUNT_FLAG] = P0;
 			myCh->misc.pulse_count = 0;
@@ -11591,6 +11761,8 @@ void cStepZ(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -11810,6 +11982,8 @@ void cStepZ(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -11873,18 +12047,24 @@ void cStepZ(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			myCh->signal[C_SIG_PULSE_COUNT_FLAG] = P0;
 			myCh->misc.pulse_count = 0;
@@ -11969,6 +12149,8 @@ void cStepZ(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -12034,6 +12216,8 @@ void cStepZ(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -12191,6 +12375,8 @@ void cStepZ(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -12279,18 +12465,24 @@ void cStepZ(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			myCh->signal[C_SIG_PULSE_COUNT_FLAG] = P0;
 			myCh->misc.pulse_count = 0;
@@ -12367,6 +12559,8 @@ void cStepZ(int ch)
 					myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 					myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+					myCh->misc2.freeze_Time = 0;
+					myCh->misc2.freeze_day = 0;
 					myCh->misc.saveTime_count = 0;	//ktg_210411
 					myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -12685,6 +12879,8 @@ void cStepPattern(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 
 			myCh->misc.saveDt = 0;
@@ -12770,18 +12966,24 @@ void cStepPattern(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -13314,6 +13516,8 @@ void cStepPattern(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -13359,18 +13563,24 @@ void cStepPattern(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -13448,6 +13658,8 @@ void cStepPattern(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -13726,6 +13938,8 @@ void cStepPattern(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -13794,18 +14008,24 @@ void cStepPattern(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -14090,6 +14310,8 @@ void cStepExternalCan(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -14170,18 +14392,24 @@ void cStepExternalCan(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -14337,6 +14565,8 @@ void cStepExternalCan(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -14382,18 +14612,24 @@ void cStepExternalCan(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -14481,6 +14717,8 @@ void cStepExternalCan(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -14641,6 +14879,8 @@ void cStepExternalCan(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -14705,18 +14945,24 @@ void cStepExternalCan(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -15021,6 +15267,8 @@ void cStepUserMap(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -15104,18 +15352,24 @@ void cStepUserMap(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -15531,6 +15785,8 @@ void cStepUserMap(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -15576,18 +15832,24 @@ void cStepUserMap(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -15662,6 +15924,8 @@ void cStepUserMap(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -15901,6 +16165,8 @@ void cStepUserMap(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -15969,18 +16235,24 @@ void cStepUserMap(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -16266,6 +16538,8 @@ void cStepExternalCan2(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -16346,18 +16620,24 @@ void cStepExternalCan2(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -16509,6 +16789,8 @@ void cStepExternalCan2(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -16554,18 +16836,24 @@ void cStepExternalCan2(int ch)
 			}
 
 			myCh->misc.sendDataCount = 3; //kjg_170810
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -16651,6 +16939,8 @@ void cStepExternalCan2(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -16810,6 +17100,8 @@ void cStepExternalCan2(int ch)
 			myCh->signal[C_SIG_ISOLATION_STATE_CHECK] = 0;	//ktg_210908	//ktg_220701
 			myCh->signal[C_SIG_CAN_TEST5_RUN] = P0;	//ktg_220724
 			myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;	//ktg_230728
+			myCh->misc2.freeze_Time = 0;
+			myCh->misc2.freeze_day = 0;
 			myCh->misc.saveTime_count = 0;	//ktg_210411
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
@@ -16874,18 +17166,24 @@ void cStepExternalCan2(int ch)
 			}
 
 			myCh->misc.sendDataCount = 0;
+			//memset((char *)&myCh->misc.common_codeCount, 0,
+			//	sizeof(MAX_COM_CODE));
+			//memset((char *)&myCh->misc.local_codeCount, 0,
+			//	sizeof(MAX_LOC_CODE));
 			memset((char *)&myCh->misc.common_codeCount, 0,
-				sizeof(MAX_COM_CODE));
+				sizeof(char) * MAX_COM_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.local_codeCount, 0,
-				sizeof(MAX_LOC_CODE));
+				sizeof(char) * MAX_LOC_CODE);
 			//kjhw_170904s
 			//memset((char *)&myCh->misc.local_codeCount_aux, 0,
 			//kjg_171223
 			memset((char *)&myData->local_codeCount_aux[ch][0][0], 0,
 				sizeof(unsigned short int) * MAX_AUX_DATA * MAX_AUX_FUNCTION);
 			//kjhw_170904e
-			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
-			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			//memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(MAX_AUX_CODE));
+			//memset((char *)&myCh->misc.can_codeCount, 0, sizeof(MAX_CAN_CODE));
+			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
+			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
 			if(myCh->misc.internal_skip == 1) {
 				myCh->op.code = C_CD_END_INTERNAL_SKIP;
@@ -25271,20 +25569,6 @@ void cFaultCond_Hard(int ch)
 		case C_LGC_600V_300A_200A_100A_360KW_10:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_11:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_12:	//phb_230426
-		case C_LGC_1000V_600A_300A_100A_1MW_1:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_2:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_3:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_4:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_5:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_6:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_7:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_8:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_9:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_10:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_11:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_12:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_13:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_14:	//ksh_250320
 		case C_UL_1500V_1000A_500A_100A_1MW:        //phb_230731
         case C_UL_1500V_1000A_500A_100A_1MW_2:      //phb_230731
 			check_flag3 = 2;
@@ -27877,21 +28161,36 @@ void cFaultCond_Can(int ch)
 		myCh->signal[C_SIG_CAN_SVDF_DETECT_PHASE] = P0;
 	}	//ktg_210706e
 
-	idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_USE_FLAG;	//ktg_230728s
+	idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_USE_FLAG;	//ktg_250226s
 	l_val = myTestCond->local_object[myCh->op.idxStepNo][idx];
 	if(l_val != 0) {
-		if((myCh->op.runTime % 10 == 0)) {
-			if(myCh->op.stepType == STEP_CHARGE
-				|| myCh->op.stepType == STEP_DISCHARGE
-				|| myCh->op.stepType == STEP_PATTERN) {
-				if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P0) {
-					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P1;
-				} else if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P1) {
-					myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P2;
+		if((myCh->op.runTime >=  100)) {
+			if((myCh->op.runTime % 10  == 0)) {
+				if(myCh->op.stepType == STEP_CHARGE
+					|| myCh->op.stepType == STEP_DISCHARGE
+					|| myCh->op.stepType == STEP_PATTERN) {
+					if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P0) {
+						myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P1;
+						idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_TIME;
+						l_val = myTestCond->local_object[myCh->op.idxStepNo][idx];
+						l_val = l_val;
+						myCh->misc2.freeze_Time = l_val + myCh->misc2.freeze_Time;
+						myCh->misc2.freeze_day = myCh->misc2.freeze_day;
+					} else if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P2) {
+						if(time_cal_compare(COMP_GREATER_THAN_OR_EQUAL_TO, myCh->op.runTime_day,
+							myCh->op.runTime, myCh->misc2.freeze_day, myCh->misc2.freeze_Time) > 0) {
+							idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_TIME;
+							l_val = myTestCond->local_object[myCh->op.idxStepNo][idx];
+							l_val = l_val;
+							myCh->misc2.freeze_Time = myCh->misc2.freeze_Time + l_val;
+							//time_cal_increment(myCh->misc2.freeze_day, myCh->misc2.freeze_Time,l_val);
+							myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P3;
+						}
+					}
 				}
 			}
 		}
-	}	//ktg_230728e
+	}	//ktg_250226e
 	
 	idx = IDX_LOC_OBJ_FAULT_CAN_HARDVENT_USE_FLAG;	//ktg_220331s
 	l_val = myTestCond->local_object[myCh->op.idxStepNo][idx];
@@ -28134,6 +28433,11 @@ void cFaultCond_Can(int ch)
 		}	//ktg_210706e
 	}
 
+	if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P1) {
+		myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P2;
+	} else if (myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P3) {
+		myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P2;
+	}
 	if(myCh->misc.can_drop_flag == 1) {	//ktg_210706s
 		myCh->misc.can_drop_flag = 0;
 		myCh->op.select = SAVE_FLAG_SAVING_POPUP;
@@ -28849,7 +29153,7 @@ int cFaultCond_Can_100ms_step(int ch, float f_val2, int can_idx)
 	short int func_div, func_div1, func_div2, func_div3, idxStepNo;
 	int idx, idx3, rtnCode;
 	unsigned int cellCount;
-	long l_val, l_val2, l_val3;
+	long l_val, l_val2, l_val3, l_val4;
 	
 	switch(myPs->config.division_CAN) {
 		case 1:
@@ -29004,8 +29308,10 @@ int cFaultCond_Can_100ms_step(int ch, float f_val2, int can_idx)
 				if(l_val != 0) {
 					if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P0) {
 						myData->CANCell[ch][can_idx].CanFreezecount = 0;
-					}
-					if(myData->cData[ch].op.cv_flag == 1) { //CV Area
+					} else if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P1) {
+						myData->CANCell[ch][can_idx].diffCell_100ms = l_val2 * 1000;
+						myData->CANCell[ch][can_idx].CanFreezecount = 0;
+					} else if(myData->cData[ch].op.cv_flag == 1) { //CV Area
 						myData->CANCell[ch][can_idx].CanFreezecount = 0;
 					} else {
 						idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_I;
@@ -29017,13 +29323,19 @@ int cFaultCond_Can_100ms_step(int ch, float f_val2, int can_idx)
 						if(l_val3 > l_val) {
 							idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_CELL_V;
 							l_val = myTestCond->local_object[idxStepNo][idx];
-							if (myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P2) {
-								if(l_val > myData->CANCell[ch][can_idx].diffCell_100ms) {
+							if (myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P3) {
+								l_val4 = l_val2 * 1000;
+							   	l_val4 = l_val4	- myData->CANCell[ch][can_idx].diffCell_100ms;
+								if(l_val4 < 0) {
+									l_val4 = l_val4 * (-1);
+								}
+								if(l_val >= l_val4) {
 									myData->CANCell[ch][can_idx].CanFreezecount++;
 									myCh->misc2.freeze_flag = 1;
 								} else {
 									myData->CANCell[ch][can_idx].CanFreezecount = 0;
 								}
+								myData->CANCell[ch][can_idx].diffCell_100ms = l_val2 * 1000;
 							} else {
 								myData->CANCell[ch][can_idx].CanFreezecount = 0;
 							}
@@ -29031,11 +29343,7 @@ int cFaultCond_Can_100ms_step(int ch, float f_val2, int can_idx)
 							myData->CANCell[ch][can_idx].CanFreezecount = 0;
 						}
 	
-						idx = IDX_LOC_OBJ_FAULT_CAN_FREEZE_TIME;
-						l_val = myTestCond->local_object[idxStepNo][idx];
-						l_val = l_val * 100;
-						l_val3 = myData->CANCell[ch][can_idx].CanFreezecount * 10;	//100ms
-						if(l_val3 >= l_val) {
+						if(myData->CANCell[ch][can_idx].CanFreezecount > 0) {
 							myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P0;
 							rtnCode = C_CD_CAN_FAULT_CAN_FREEZE;
 							myCh->op.code = rtnCode;
@@ -30034,20 +30342,6 @@ void cFaultCond_Hard_Pause(int ch)
 		case C_LGC_600V_300A_200A_100A_360KW_10:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_11:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_12:	//phb_230426
-		case C_LGC_1000V_600A_300A_100A_1MW_1:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_2:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_3:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_4:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_5:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_6:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_7:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_8:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_9:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_10:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_11:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_12:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_13:	//ksh_250320
-		case C_LGC_1000V_600A_300A_100A_1MW_14:	//ksh_250320
 			check_flag3 = 2;
 			ch_per_chamber = 2;
 			break;				//csk_190617e
@@ -34628,16 +34922,20 @@ void cSoftFeedback_A1(int ch)
 		}
 
 		if(myCh->op.stepType == STEP_CHARGE) {		//csk_190108s
-			if(myCh->misc.cmd_i[1] != val3a) {
+			//if(myCh->misc.cmd_i[1] != val3a) {
+			if(val2 != val3a) {		
 				myCh->misc.cmd_i[1] = val3a;
 				cmp_flag = 1;
 				gc_can_flag = 1;
+				myCh->misc.gcac_link_flag = 1;		//ktg_210511	//jhj_250408
 			} else cmp_flag = 0;
 		} else {
-			if(myCh->misc.cmd_i[1] != val4a) {
+			//if(myCh->misc.cmd_i[1] != val4a) {
+			if(val2 != val4a) {
 				myCh->misc.cmd_i[1] = val4a;
 				cmp_flag = 1;
 				ac_can_flag = 1;
+				myCh->misc.gcac_link_flag = 1;		//ktg_210511	//jhj_250408
 			} else cmp_flag = 0;
 		}
 
@@ -36166,6 +36464,8 @@ void cSoftFeedback_A2(int ch)
 						val2 += myCh->misc.fbI;
 						cCalCmdI(ch, val2, 0, myCh->op.rangeI);
 					}
+				} else {
+					cCalCmdI(ch, val2, 0, myCh->op.rangeI);	//ktg_240925	//jhj_250408
 				}
 			} else if(tmp2 > (i_cmp_p * 0.9)) { //CV Area
 				if((float)myCh->op.Isens > ((float)val2 * 0.8)) {
@@ -36225,6 +36525,8 @@ void cSoftFeedback_A2(int ch)
 						val2 += myCh->misc.fbI;
 						cCalCmdI(ch, val2, 0, myCh->op.rangeI);
 					}
+				} else {
+					cCalCmdI(ch, val2, 0, myCh->op.rangeI);	//ktg_240925	//jhj_250408
 				}
 			} else if(tmp2 < (i_cmp_n * 0.9)) { //CV Area
 				if((float)myCh->op.Isens < ((float)val2 * 0.8)) {

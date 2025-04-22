@@ -5,9 +5,9 @@ config_file_app="/root/system_data/config/parameter/AppControl_Config"
 
 cp "$config_file_app" "$config_file_app.bak"
 
-new_modelName="PSCSA-P1021-S02-R007-N001"
-new_versionNo="241007"
-new_update_date="241007"
+new_modelName="PSCSA-P1026-S02-R001-N002"
+new_versionNo="250421"
+new_update_date="250421"
 
 export new_modelName new_versionNo new_update_date
 
@@ -40,31 +40,34 @@ rm -rf "$config_file_app.bak"
 
 echo "AppControl_Config fix."
 
-config_file_m="/root/system_data/config/parameter/mControl_Config"
 
-cp "$config_file_m" "$config_file_m.bak"
+# Client_Config Protocal_Version UP
+config_file_client="/root/system_data/config/parameter/client/COA1/Client_Config"
 
-awk 'BEGIN {
+cp "$config_file_client" "$config_file_client.bak"
+
+new_ProtocalNo="4134"
+
+export new_ProtocalNo
+
+awk -v new_ProtocalNo="$new_ProtocalNo" 'BEGIN {
     FS = ":"
     OFS = ":"
 }
-$1 ~ /multi_temp_cali/ {
-    # Print the existing line as is
-    print;
-    # Add the new 'BreakDownCheck' line with a proper tab after ':'
-    printf "BreakDownCheck      :   1\n";
+$1 ~ /protocol_version/ {
+    print "protocol_version	:	" ENVIRON["new_ProtocalNo"];
     next
 }
 {
-    # Print other lines as is, without changing them
-    print
-}' "$config_file_m.bak" > "$config_file_m.tmp"
+	print
+}' "$config_file_client.bak" > "$config_file_client.tmp"
 
-mv "$config_file_m.tmp" "$config_file_m"
+mv "$config_file_client.tmp" "$config_file_client"
 
-rm -rf "$config_file_m.bak"
+rm -rf "$config_file_client.bak"
 
-echo "BreakDownCheck added to mControl_Config."
+echo "protocal version fix to Clinet_Config."
+
 
 cd /project/system_mcts
 
@@ -82,9 +85,20 @@ make all_coa
 
 ./clear
 
+cd /root/system_data/config/parameter
+
+echo "$new_modelName" > sbc_info
+
 echo "current_update done"
 
 rm -rf /root/update/ok.txt
 
+rm -rf /root/update/Auto_Update.tar.gz
+
+rm -rf /root/update/backup_program
+
+rm -rf /root/update/SBC_Update
+
 #Reboot system
 reboot
+

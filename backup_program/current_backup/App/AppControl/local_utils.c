@@ -679,6 +679,29 @@ int	Init_SystemData(void)
 
 	return 0;
 }
+//shhw_250409s
+void Delete_SystemMemory(void)
+{
+	char cmd[256], fileDir[256];
+
+	memset(fileDir, 0, sizeof(fileDir));
+	strcpy(fileDir, "/root/system_data/config/sharedMemory/");
+
+	//Delete systemMemory file
+	memset(cmd, 0, sizeof(cmd));
+	strcpy(cmd, "rm -rf ");
+	strcat(cmd, fileDir);
+	strcat(cmd, "systemMemory");
+	system(cmd);
+
+	//Make systemMemory file
+	memset(cmd, 0, sizeof(cmd));
+	strcpy(cmd, "touch  ");
+	strcat(cmd, fileDir);
+	strcat(cmd, "systemMemory");
+	system(cmd);
+}
+//shhw_250409e
 
 int Read_SystemMemory(char *fileName)
 {
@@ -711,6 +734,7 @@ int Read_SystemMemory(char *fileName)
 	if(rtn != sizeof(S_SYSTEM_DATA)) {
 		printf("error %s read\n", fileName);
 	}
+	Delete_SystemMemory(); //shhw_250409
 	close(fp);
 
 	return 0;

@@ -1,9 +1,9 @@
 groupId             :   1
 groupNo             :   1
-ipAddr              :   192.168.8.62
+ipAddr              :   192.168.100.72
 networkPort1        :   2001
 networkPort2        :   2002
-protocol_version    :   4133
+protocol_version    :   4134
 retryCount          :   6
 replyTimeout        :   30000
 netTimeout          :   90000

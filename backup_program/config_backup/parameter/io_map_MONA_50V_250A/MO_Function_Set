@@ -1,0 +1,80 @@
+No	Bit	Use	H/L	Ch	Group	Function				Description
+byte1(out)	610
+0	0	1	1	1	0		O_MAIN_MC				MAIN_MC
+1	1	1	1	1	0		O_SUB_MC				SUB_MC
+2	2	1	1	1	0		O_INVERTER_RUN			INVERTER_RUN
+3	3	1	1	1	0		O_INVERTER_RESET		INVERTER_RESET
+4	4	0	1	0	0		spare					spare
+5	5	0	1	0	0		spare					spare
+6	6	0	1	0	0		spare					spare
+7	7	0	1	0	0		spare					spare
+
+byte2(out)	611
+8	0	0	1	2	0		spare                   spare
+9	1	0	1	3	0		spare                   spare
+10	2	0	1	4	0		spare                   spare
+11	3	0	1	0	0		spare					spare
+12	4	1	1	0	0		O_TOWER_LAMP_RED		TOWER_LAMP_RED
+13	5	1	1	0	0		O_TOWER_LAMP_AMBER		TOWER_LAMP_AMBER
+14	6	1	1	0	0		O_TOWER_LAMP_GREEN		TOWER_LAMP_GREEN
+15	7	1	1	0	0		O_TOWER_LAMP_BUZZER		TOWER_LAMP_BUZZER
+
+byte3(out)	0
+16	0	0	1	2	0		O_MAIN_MC				MAIN_MC
+17	1	0	1	2	0		O_SUB_MC				SUB_MC
+18	2	0	1	2	0		O_INVERTER_RUN			INVERTER_RUN
+19	3	0	1	2	0		O_INVERTER_RESET		INVERTER_RESET
+20	4	0	1	2	0		spare					spare
+21	5	0	1	2	0		spare					spare
+22	6	0	1	2	0		spare					spare
+23	7	0	1	2	0		spare					spare
+
+byte4(out)	0
+24	0	0	1	0	0		spare					PARALLEL2
+25	1	0	1	0	0		spare					PARALLEL2
+26	2	0	1	0	0		spare					PARALLEL2
+27	3	0	1	0	0		spare					spare
+28	4	0	1	0	0		spare					spare
+29	5	0	1	0	0		spare					spare
+30	6	0	1	0	0		spare					spare
+31	7	0	1	0	0		spare					spare
+
+byte5(out)	0
+32	0	0	1	3	0		O_MAIN_MC				MAIN_MC
+33	1	0	1	3	0		O_SUB_MC				SUB_MC
+34	2	0	1	3	0		O_INVERTER_RUN			INVERTER_RUN
+35	3	0	1	3	0		O_INVERTER_RESET		INVERTER_RESET
+36	4	0	1	0	0		spare					spare
+37	5	0	1	0	0		spare					spare
+38	6	0	1	0	0		spare					spare
+39	7	0	1	0	0		spare					spare
+
+byte6(out)	0
+40	0	0	1	4	0		O_MAIN_MC				MAIN_MC
+41	1	0	1	4	0		O_SUB_MC				SUB_MC
+42	2	0	1	4	0		O_INVERTER_RUN			INVERTER_RUN
+43	3	0	1	4	0		O_INVERTER_RESET		INVERTER_RESET
+44	4	0	1	0	0		spare					spare
+45	5	0	1	0	0		spare					spare
+46	6	0	1	0	0		spare					spare
+47	7	0	1	0	0		spare					spare
+
+byte7(out)	0
+48	0	0	1	0	0		spare					spare
+49	1	0	1	0	0		spare					spare
+50	2	0	1	0	0		spare					spare
+51	3	0	1	0	0		spare					spare
+52	4	0	1	0	0		spare					spare
+53	5	0	1	0	0		spare					spare
+54	6	0	1	0	0		spare					spare
+55	7	0	1	0	0		spare					spare
+
+byte8(out)	0
+56	0	0	1	0	0		spare					spare
+57	1	0	1	0	0		spare					spare
+58	2	0	1	0	0		spare					spare
+59	3	0	1	0	0		spare					spare
+60	4	0	1	0	0		spare					spare
+61	5	0	1	0	0		spare					spare
+62	6	0	1	0	0		spare					spare
+63	7	0	1	0	0		spare					spare

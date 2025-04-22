@@ -34,7 +34,7 @@ P8		0		reserved
 Proc(No)	COA	COB	COC	COD	JIG	ETC	Description(ETC)
 P1			1	0	0	0	0	1	DataSave
 P2			0	0	0	0	0	0	CaliServer
-P3			0	0	0	0	0	0	TimeSchedule
+P3			0	0	0	0	0	1	TimeSchedule
 P4			0	0	0	0	0	0	Temp1Client
 P5			0	0	0	0	0	0	Temp2Client
 P6			0	0	0	0	0	0	reserved

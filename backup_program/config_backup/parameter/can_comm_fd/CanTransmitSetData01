@@ -1,17 +1,17 @@
 master
-can_baudrate : 0
+can_baudrate : 2
 extended_id : 0
 controller_canID : 0
 bms_type	:	0
 sjw        :	0
-can_fd_flag :	0
-can_datarate	:	0
-terminal_r	:	0
-crc_type	:	0
+can_fd_flag :	1
+can_datarate	:	4
+terminal_r	:	1
+crc_type	:	1
 can_lin_flag :	0
-func_div	:	0 0 0 0 0 0 0 0 0 0
-compare_type	:	0 0 0 0 0 0 0 0 0 0
-data_type	:	0 0 0 0 0 0 0 0 0 0
+func_div	:	1801 1802 1803 1804 1805 0 0 0 0 0
+compare_type	:	3 3 3 3 3 0 0 0 0 0
+data_type	:	2 2 2 2 2 0 0 0 0 0
 value	:	0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
 manual_can_bitconfig      : 0
 norminal_brp      : 0

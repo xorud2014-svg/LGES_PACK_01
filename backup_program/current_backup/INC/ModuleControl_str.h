@@ -356,6 +356,9 @@ typedef struct s_ch_misc2_tag {
 
 	short int			freeze_ChNo;	//ktg_230822
 	short int			freeze_time;	//ktg_230822
+
+	unsigned long		freeze_day;		//ktg_250226
+	unsigned long		freeze_Time;	//ktg_250226
 } S_CH_MISC2;
 
 typedef struct s_ch_cycle_tag {

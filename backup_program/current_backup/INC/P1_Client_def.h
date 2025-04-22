@@ -37,7 +37,8 @@
 //P1 test condition
 //#define MAX_P1_STEP							100 //for org
 //#define MAX_P1_STEP							210 //for formation
-#define MAX_P1_STEP							1000
+//#define MAX_P1_STEP							1000
+#define MAX_P1_STEP							250		//jhj_250310
 
 #define MAX_P1_SUB_STEP						10
 #define MAX_P1_COMP_POINT					3
@@ -162,6 +163,7 @@
 #define P1_CMD_TO_SBC_CAP_BANK_SET			0x00001095	//kjh_191014
 #define P1_CMD_TO_SBC_CALI_TEMP_REQUEST		0x00001097	//khj_210802
 #define P1_CMD_TO_SBC_CAN_TH_TABLE_SET		0x00001098	//ktg_220614
+#define P1_CMD_TO_SBC_GUI_SHUTDOWN			0x00001099	//ktg_250410	//jhj_250410
 
 #define P1_CMD_TO_PC_RESPONSE				0x00000001
 #define P1_CMD_TO_PC_COMM_CHECK				0x00000004
@@ -672,6 +674,7 @@
 #define P1_G_CD_FAULT_GROUP_OT				55
 #define P1_G_CD_FAULT_LEAKAGE_CURRENT		56	//ktg_211104
 #define P1_G_CD_FAULT_DC_LINK_FUSE	    	58	//phb_230710
+#define P1_G_CD_FAULT_GUI_SHUTDOWN	    	59	//ktg_250410	//jhj_250410
 
 #define P1_G_CD_FAULT_BD_OT					100
 #define P1_G_CD_FAULT_BD_ADC				101

@@ -1539,7 +1539,7 @@ void CAN_function_compare(int ch)	//ktg_2106
 				myData->CANCell[ch][cellpoint].currentCell = l_val;	//ktg_220214
 			}
 		}
-		if(myData->cData[ch].op.runTime % 10 == 0) {	//ktg_230728s
+		/*if(myData->cData[ch].op.runTime % 10 == 0) {	//ktg_230728s
 			if(myData->cData[ch].op.stepType == STEP_CHARGE 
 				|| myData->cData[ch].op.stepType == STEP_DISCHARGE
 				|| myData->cData[ch].op.stepType == STEP_PATTERN) {	//100msec
@@ -1567,7 +1567,7 @@ void CAN_function_compare(int ch)	//ktg_2106
 					}
 				}
 			}
-		}	//ktg_230728e
+		}*/	//ktg_230728e
 		if(myData->cData[ch].signal[C_SIG_CAN_SVDF_DETECT_PHASE] == P5
 			|| myData->cData[ch].signal[C_SIG_CAN_SVDF_DETECT_PHASE] == P0) {
 			myData->CANCell[ch][cellpoint].prepreCell = 0;
@@ -1580,12 +1580,12 @@ void CAN_function_compare(int ch)	//ktg_2106
 			myData->CANCell[ch][i].DropminCell = 0;
 			myData->CANCell[ch][i].DropCellcount = 0;
 		}	//ktg_211217e
-		if(myData->cData[ch].signal[C_SIG_CAN_FREEZE_PHASE] == P0) {	//ktg_230728s
+		/*if(myData->cData[ch].signal[C_SIG_CAN_FREEZE_PHASE] == P0) {	//ktg_230728s
 			myData->CANCell[ch][i].CanFreezecount = 0;
 			myData->CANCell[ch][i].currentCell_100ms = 0;
 			myData->cData[ch].misc2.freeze_time = 0;
 			myData->cData[ch].misc2.freeze_ChNo = 0;
-		}	//ktg_230728e
+		}*/	//ktg_230728e
 		cellpoint++;
 	}
 	myData->cData[ch].misc.diffCell

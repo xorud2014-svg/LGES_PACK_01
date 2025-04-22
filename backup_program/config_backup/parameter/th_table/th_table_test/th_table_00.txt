@@ -1,0 +1,13 @@
+Non_Model
+10kOhms_25degreeC
+R_tolerance_1percent
+3435K_25_85degreeC
+B_tolerance_1percent
+
+Bias_type	:	0
+Vref[mV]	:	5000
+R1[ohm]		:	8200
+R2[ohm]		:	0
+
+temp_degreeC	R_kOhm
+9999

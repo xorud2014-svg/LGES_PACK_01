@@ -91,6 +91,7 @@ int		rcv_cmd_alarm_reset(void);
 int		rcv_cmd_chamber_vent_stop(void); //kjhw_190820
 int		rcv_cmd_cap_bank_set(void); //kjh_191014
 int		rcv_cmd_gui_emg_set(void);	//khj_201227s
+int		rcv_cmd_gui_shutdown(void);	//ktg_250410	//jhj_250410
 
 int		send_cmd_response(char *, int);
 int		send_cmd_test_cond_conversion_end(int);

@@ -2070,6 +2070,8 @@ int convert_group_trouble_code_org_to_p1(int code)
 			rtn_code = P1_G_CD_FAULT_AC_POWER_LONG;			break;
 		case M_CD_FAULT_UPS_BATTERY:
 			rtn_code = P1_G_CD_FAULT_UPS_BATTERY;			break;
+		case M_CD_FAULT_GUI_SHUTDOWN:
+			rtn_code = P1_G_CD_FAULT_GUI_SHUTDOWN;			break;	//ktg_250410	//jhj_250410
 		case M_CD_FAULT_MAIN_EMG_SWITCH:
 			rtn_code = P1_G_CD_FAULT_MAIN_EMG_SWITCH;		break;
 		case M_CD_FAULT_SUB_EMG_SWITCH:

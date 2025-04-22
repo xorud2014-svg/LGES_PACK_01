@@ -1,0 +1,80 @@
+No	Bit	Use	H/L	Ch	Group	Function				Description
+byte1(out)	620
+0	0	1	1	1	0		O_CONVERTER_RUN			CONVERTER_RUN
+1	1	1	1	1	0		O_CONVERTER_RESET		CONVERTER_RESET
+2	2	1	1	1	0		O_CONVERTER_CHARGE		CONVERTER_CHARGE
+3	3	1	1	1	0		O_SELECT_VREF			CALI_MODE
+4	4	1	1	1	0		O_SELECT_VO_VS			SELECT_VO_VS
+5	5	1	1	1	0		O_RUN_RELAY				RUN_RELAY
+6	6	0	1	1	0		spare					spare
+7	7	1	1	1	0		O_PARALLEL				PARALLEL
+
+byte2(out)	621
+8	0	1	1	2	0		O_CONVERTER_RUN			CONVERTER_RUN
+9	1	1	1	2	0		O_CONVERTER_RESET		CONVERTER_RESET
+10	2	1	1	2	0		O_CONVERTER_CHARGE		CONVERTER_CHARGE
+11	3	1	1	2	0		O_SELECT_VREF			CALI_MODE
+12	4	1	1	2	0		O_SELECT_VO_VS			SELECT_VO_VS
+13	5	1	1	2	0		O_RUN_RELAY				RUN_RELAY
+14	6	0	1	1	0		spare					spare
+15	7	0	1	1	0		spare					spare
+
+byte3(out)	622
+16	0	1	1	3	0		O_CONVERTER_RUN			CONVERTER_RUN
+17	1	1	1	3	0		O_CONVERTER_RESET		CONVERTER_RESET
+18	2	1	1	3	0		O_CONVERTER_CHARGE		CONVERTER_CHARGE
+19	3	1	1	3	0		O_SELECT_VREF			CALI_MODE
+20	4	1	1	3	0		O_SELECT_VO_VS			SELECT_VO_VS
+21	5	1	1	3	0		O_RUN_RELAY				RUN_RELAY
+22	6	0	1	3	0		spare					spare
+23	7	1	1	3	0		O_PARALLEL				PARALLEL
+
+byte4(out)	623
+24	0	1	1	1	0		O_CONVERTER_RUN			CONVERTER_RUN
+25	1	1	1	1	0		O_CONVERTER_RESET		CONVERTER_RESET
+26	2	1	1	1	0		O_CONVERTER_CHARGE		CONVERTER_CHARGE
+27	3	1	1	1	0		O_SELECT_VREF			CALI_MODE
+28	4	1	1	1	0		O_SELECT_VO_VS			SELECT_VO_VS
+29	5	1	1	1	0		O_RUN_RELAY				RUN_RELAY
+30	6	0	1	1	0		spare					spare
+31	7	0	1	1	0		spare					spare
+
+byte5(out)	624
+32	0	1	1	1	0		O_I_RANGE3				I_RANGE3
+33	1	1	1	2	0		O_I_RANGE3              I_RANGE3
+34	2	1	1	3	0		O_I_RANGE3              I_RANGE3
+35	3	1	1	4	0		O_I_RANGE3              I_RANGE3
+36	4	0	1	0	0		spare					spare
+37	5	0	1	0	0		spare					spare
+38	6	0	1	0	0		spare					spare
+39	7	0	1	0	0		spare					spare
+
+byte6(out)	626
+40	0	1	1	1	0		O_I_RANGE2				I_RANGE2
+41	1	1	1	2	0		O_I_RANGE2              I_RANGE2
+42	2	1	1	3	0		O_I_RANGE2              I_RANGE2
+43	3	1	1	4	0		O_I_RANGE2              I_RANGE2
+44	4	1	1	2	0		O_PARALLEL              PARALLEL
+45	5	1	1	4	0		O_PARALLEL              PARALLEL
+46	6	0	1	0	0		spare					spare
+47	7	0	1	0	0		spare					spare
+
+byte7(out)	627
+48	0	1	1	1	0		O_PARALLEL_BD			PARALLEL_BD
+49	1	1	1	2	0		O_PARALLEL_BD           PARALLEL_BD
+50	2	1	1	3	0		O_PARALLEL_BD           PARALLEL_BD
+51	3	0	1	0	0		spare					spare
+52	4	0	1	0	0		spare					spare
+53	5	0	1	0	0		spare					spare
+54	6	0	1	0	0		spare					spare
+55	7	0	1	0	0		spare					spare
+
+byte8(out)	0
+56	0	0	1	0	0		spare					spare
+57	1	0	1	0	0		spare					spare
+58	2	0	1	0	0		spare					spare
+59	3	0	1	0	0		spare					spare
+60	4	0	1	0	0		spare					spare
+61	5	0	1	0	0		spare					spare
+62	6	0	1	0	0		spare					spare
+63	7	0	1	0	0		spare					spare

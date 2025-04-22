@@ -11,7 +11,7 @@ powerFailTimeout2		:	10000
 upsBatteryFailTimeout	:	2000
 logic_type				:	1
 upsBatteryFail_TypeFlag	:	3
-acPowerFail_TypeFlag	:	8
+acPowerFail_TypeFlag	:	6
 
 
 ============================Description============================

@@ -841,6 +841,7 @@ typedef struct s_cable_check_tag {
 } S_CABLE_CHECK;
 
 typedef struct s_module_misc_tag {
+	long				realTime_sec; //shh_250122 SWEGPROD-1488
 	//long long			rt_periodic;
 	long				rt_periodic;	//KHK 20191121
 

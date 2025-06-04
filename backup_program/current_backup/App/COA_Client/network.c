@@ -3841,16 +3841,16 @@ int rcv_cmd_ch_can_transmit_set(void)
 	if(cmd.commonData[0].manual_can_bitconfig == 1)	{
 		userlog(DEBUG_LOG, psName,
 		"kjg_d ch(%d) master norminal_brp:%d norminal_tseg1:%d norminal_tseg2:%d norminal_sjw:%d nominal_sample_point:%f
-		data_brp:%d data_tseg1:%d data_tseg2:%d data_tdcmod:%d data_tdco:%d data_tdcv:%d\n",
+		data_brp:%d data_tseg1:%d data_tseg2:%d data_sjw:%d data_sample_point:%f\n",
 		ch+1, cmd.commonData[0].nominal_brp, cmd.commonData[0].nominal_tseg1, cmd.commonData[0].nominal_tseg2, cmd.commonData[0].nominal_sjw, cmd.commonData[0].nominal_sample_point,
-		cmd.commonData[0].data_brp,	cmd.commonData[0].data_tseg1, cmd.commonData[0].data_tseg2, cmd.commonData[0].data_sjw);
+		cmd.commonData[0].data_brp,	cmd.commonData[0].data_tseg1, cmd.commonData[0].data_tseg2, cmd.commonData[0].data_sjw, cmd.commonData[0].data_sample_point);
 	}
 	if(cmd.commonData[1].manual_can_bitconfig == 1)	{
 		userlog(DEBUG_LOG, psName,
 		"kjg_d ch(%d) slave norminal_brp:%d norminal_tseg1:%d norminal_tseg2:%d norminal_sjw:%d nominal_sample_point:%f
-		data_brp:%d data_tseg1:%d data_tseg2:%d data_tdcmod:%d data_tdco:%d data_tdcv:%d\n",
+		data_brp:%d data_tseg1:%d data_tseg2:%d data_sjw:%d data_sample_point:%f\n",
 		ch+1, cmd.commonData[1].nominal_brp, cmd.commonData[1].nominal_tseg1, cmd.commonData[1].nominal_tseg2, cmd.commonData[1].nominal_sjw, cmd.commonData[1].nominal_sample_point,
-		cmd.commonData[1].data_brp,	cmd.commonData[1].data_tseg1, cmd.commonData[1].data_tseg2, cmd.commonData[1].data_sjw);
+		cmd.commonData[1].data_brp,	cmd.commonData[1].data_tseg1, cmd.commonData[1].data_tseg2, cmd.commonData[1].data_sjw, cmd.commonData[1].data_sample_point);
 	}
 	//ksh_241112_e
 

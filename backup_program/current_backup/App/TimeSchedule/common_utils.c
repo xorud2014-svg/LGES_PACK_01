@@ -251,6 +251,9 @@ int convert_subcode_division(int code)
 		case P1_C_CD_CAN_FAULT_SOFTVENTING_GAS:
 		case P1_C_CD_CAN_FAULT_HARDVENTING_GAS:	//ktg_220331e
 		case P1_C_CD_CAN_FAULT_CAN_FREEZE:	//ktg_230728
+		case P1_C_CD_FAULT_COMP_CAN_V:		//jhj_250514
+		case P1_C_CD_FAULT_COMP_CAN_V2:
+		case P1_C_CD_FAULT_COMP_CAN_V3:
 			rtn_div = 1;
 			break;
 		default :

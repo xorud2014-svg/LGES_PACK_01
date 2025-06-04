@@ -1231,6 +1231,9 @@
 #define F_SDI_5V_450A_200A_100A_10A_96CH_3 50013	//2sets(sbc:EmCore_a5364) + 1set
 #define F_SDI_5V_450A_200A_100A_10A_96CH_4 50014	//2sets(sbc:EmCore_a5364) + 1set
 
+//SBC RealTime
+#define SBC_TIME_FLAG					1			//O:Original, 1: NEW ///shh_250122 SWEGPROD-1488
+
 //work type
 #define WORK_TYPE_ONLINE				0
 #define WORK_TYPE_OFFLINE				1

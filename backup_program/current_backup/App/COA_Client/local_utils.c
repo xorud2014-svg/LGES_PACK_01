@@ -6852,12 +6852,29 @@ void StateChange_Pause(int num)
 void Update_RealTime(char *real_time)
 {
 	char cmd[32];
-
+	//shh_250122s SWEGPROD-1488
+	int toPs, group;	 //KimJangHun_241002
+	S_MSG_VAL SendMsg;	 //KimJangHun_241002 
+	//shh_250122e
+	
 	memset(cmd, 0, sizeof cmd);
 	strcpy(cmd, "date -s '");
 	strncat(cmd, real_time, 19);
 	strcat(cmd, "'");
 	system(cmd);
+
+	//shh_250122s SWEGPROD-1488
+	if(SBC_TIME_FLAG == 1) {
+		//KimJangHun_241002 //RT_TESTs
+		userlog(DEBUG_LOG, psName, "SBC NEW LOGIC TIME SYNC\n");
+		group = myPs->config.groupNo;
+		toPs = COA1_TO_MODULE + group;
+		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+		SendMsg.msg = MSG_COA_MODULE_PC_TIME_SYNC;
+		send_msg(toPs, (char *)&SendMsg);
+		//KimJangHun_241002 //RT_TESTe
+	}
+	//shh_250122e
 
 	userlog(DEBUG_LOG, psName, "Update real_time %s, %s\n", real_time, cmd);
 }

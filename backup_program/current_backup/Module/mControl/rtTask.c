@@ -116,7 +116,16 @@ void Exec_Slot_10ms_FD(int main_slot)
 	int i, max_can_ch;
 //csk_240301	long long hrt[10];
 
-	slot_tic_timer();//KHK 20191121
+	//shh_250122s SWEGPROD-1488
+	if(SBC_TIME_FLAG == 1) {
+		slot_tic_timer2();//KHK 20191121
+	}else {
+		slot_tic_timer();
+		//myPs->misc.slot_tic_timer ++;
+		//myPs->misc.slot_tic_timer += 1;
+	}
+	//slot_tic_timer();//KHK 20191121
+	//shh_250122e
 	max_can_ch = myPs->config.installedCAN;
 //csk_240301	hrt[0] = gethrtime();
 	if(main_slot >= 0 && main_slot <= 3) {
@@ -200,7 +209,12 @@ void Exec_Slot_10ms_FD(int main_slot)
 			GroupControl(MAX_GROUP_4);
 
 #ifdef __SBC_EM104_A5362__
-			Sync_RTC(); //kjg_w
+			//shh_250122s SWEGPROD-1488
+			if(SBC_TIME_FLAG == 1) {
+				Sync_RTC2(); //kjg_w
+			} else {
+				Sync_RTC();
+			} //shh_250122_e
 #endif
 
 			for(i=0; i < 4; i++) InOutControl(i);

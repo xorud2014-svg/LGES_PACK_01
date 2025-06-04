@@ -76,7 +76,13 @@ int Initialize(void)
 	}
 
 	Init_RT_COM();
-
+	//shh_250122s SWEGPROD-1488
+	if(SBC_TIME_FLAG == 1) {
+		getTime_RTC2(); 
+	} else {
+		getTime_RTC(); 
+	}
+	//shh_250122e
 	myData->AppControl.signal[APP_SIG_MODULE_CONTROL_PROCESS] = P1;
 
 	return 0;
@@ -636,6 +642,80 @@ void module_runningTime3(void)
 	}
 }
 
+//shh_250122_s SWEGPROD-1488
+void make_localtime(long timepr, struct tm *r)
+{
+	int j;
+	time_t i;
+	time_t timep;
+	extern struct timezone sys_tz;
+	const unsigned int __spm[12] = {
+		0,
+		(31),
+		(31+28),
+		(31+28+31),
+		(31+28+31+30),
+		(31+28+31+30+31),
+		(31+28+31+30+31+30),
+		(31+28+31+30+31+30+31),
+		(31+28+31+30+31+30+31+31),
+		(31+28+31+30+31+30+31+31+30),
+		(31+28+31+30+31+30+31+31+30+31),
+		(31+28+31+30+31+30+31+31+30+31+30),
+	};
+	const unsigned int __spm2[12] = {
+		0,
+		(31),
+		(31+29),
+		(31+29+31),
+		(31+29+31+30),
+		(31+29+31+30+31),
+		(31+29+31+30+31+30),
+		(31+29+31+30+31+30+31),
+		(31+29+31+30+31+30+31+31),
+		(31+29+31+30+31+30+31+31+30),
+		(31+29+31+30+31+30+31+31+30+31),
+		(31+29+31+30+31+30+31+31+30+31+30),
+	};
+	register time_t work;
+
+	timep = (timepr) - (sys_tz.tz_minuteswest * 60);
+	work = timep % (SPD);
+	r->tm_sec = work % 60;
+	work /= 60;
+	r->tm_min = work % 60;
+	r->tm_hour = work / 60;
+	work = timep / (SPD);
+	r->tm_wday = (4 + work) % 7;
+	for (i=1970; ; ++i) {
+		register time_t k = (!(i%4) && ((i%100) || !(i%400))) ? 366 : 365;
+		if (work > k) {
+			work -= k;
+			j = (int)k;
+		} else {
+			j = (int)k;
+			break;
+		}
+	}
+	r->tm_year = i - 1900;
+	if(j == 366) {
+		for (i=11; i && __spm2[i] > work; --i) ;
+		r->tm_mon = i;
+		r->tm_mday = work - __spm2[i] + 1;
+	} else {
+		for (i=11; i && __spm[i] > work; --i) ;
+		r->tm_mon = i;
+		r->tm_mday = work - __spm[i] + 1;
+	}
+	if((r->tm_mon+1) == 12 && r->tm_mday == 32) {
+		r->tm_year += 1;
+		r->tm_mon = 0;
+		r->tm_mday = 1;
+	}
+}
+//shh_250122_e
+
+
 //kjg_121106_s
 void localtime(const time_t *timepr, struct tm *r)
 {
@@ -707,6 +787,23 @@ void localtime(const time_t *timepr, struct tm *r)
 		r->tm_mday = 1;
 	}
 }
+//shh_250122s SWEGPROD-1488
+void getTime_RTC(void)
+{
+	struct timeval tv;
+	do_gettimeofday(&tv);
+	
+}
+void getTime_RTC2(void)
+{
+	struct timeval tv;
+	
+	do_gettimeofday(&tv);
+	
+	myPs->misc.realTime_sec = (long)tv.tv_sec;
+	
+}
+//shh_250122e
 
 void Sync_RTC(void)
 {
@@ -726,7 +823,8 @@ void Sync_RTC(void)
 //KHK 20191121 -------------------------------------------------------------
 	
 	//myPs->real_time[0] = 0; //kjg_w (long)(tv.tv_usec + 500) / 1000; //msec
-	myPs->real_time[0] = myPs->misc.slot_tic_timer;  //msec	//KHK 20191121
+	//myPs->real_time[0] = myPs->misc.slot_tic_timer;  //msec	//KHK 20191121
+	myPs->real_time[0] = (long)myPs->misc.slot_tic_timer;  //msec	//csk 200330
 	myPs->real_time[1] = (long)realTime.tm_sec; //sec
 	myPs->real_time[2] = (long)realTime.tm_min; //min
 	myPs->real_time[3] = (long)realTime.tm_hour; //hour
@@ -735,6 +833,30 @@ void Sync_RTC(void)
 	myPs->real_time[5] = (long)realTime.tm_mon + 1; //month
 	myPs->real_time[6] = (long)realTime.tm_year + 1900; //year
 } //kjg_121106_e
+
+
+void Sync_RTC2(void)
+{
+	struct tm realTime;
+
+	//if(myPs->misc.slot_tic_timer >= 1000){
+	//if(myPs->misc.slot_tic_timer > 999){
+	//	myPs->misc.realTime_sec++;
+	//	//myPs->misc.realTime_sec += 1;
+	//	myPs->misc.slot_tic_timer = 0;
+	//}
+	make_localtime(myPs->misc.realTime_sec, &realTime);
+	
+	myPs->real_time[0] = (long)myPs->misc.slot_tic_timer;  //msec	//csk 200330
+	myPs->real_time[1] = (long)realTime.tm_sec; //sec
+	myPs->real_time[2] = (long)realTime.tm_min; //min
+	myPs->real_time[3] = (long)realTime.tm_hour; //hour
+
+	myPs->real_time[4] = (long)realTime.tm_mday; //day
+	myPs->real_time[5] = (long)realTime.tm_mon + 1; //month
+	myPs->real_time[6] = (long)realTime.tm_year + 1900; //year
+} 
+//shh_250122e SWEGPROD-1488
 
 //KHK 20191121 -------------------------------------------------------------
 
@@ -745,6 +867,16 @@ void slot_tic_timer(void)
 		myPs->misc.slot_tic_timer = 0;
 	}
 }
+//shh_250122s SWEGPROD-1488 
+void slot_tic_timer2(void)
+{
+	myPs->misc.slot_tic_timer += (short int)(myPs->misc.rt_periodic / 1000000);
+	if(myPs->misc.slot_tic_timer >= 1000) {	//1 Sec
+		myPs->misc.slot_tic_timer = 0;
+		myPs->misc.realTime_sec++;
+	}
+}
+//shh_250122e
 
 //KHK 20191121 -------------------------------------------------------------
 

@@ -28459,6 +28459,7 @@ int cFaultCond_Can_common(int ch, float f_val2, int can_idx, int comp_flag)
 {
 	short int func_div, func_div1, func_div2, func_div3, idxStepNo;
 	short int delay_temp_can;	//jhkw_181119
+	short int maxCell_dataNo, minCell_dataNo;	//jhj_250514
 	int i, idx, rtnCode, toPs1, idx2, idx3;	//ktg_241008
 	int slave_idx, slave_ch; //kjhw_180705
 	float val, f_val, f_val3, f_val4;
@@ -28521,9 +28522,18 @@ int cFaultCond_Can_common(int ch, float f_val2, int can_idx, int comp_flag)
 		if(rtnCode > C_CD_NONE) {
 			idx2 = IDX_COM_OBJ_FAULT_COMP_AUX_VENT_FLAG;
 			val2 = myTestCond->local_object[idxStepNo][idx2];
+			
+			minCell_dataNo = myCh->misc.minCell_dataNo;		//jhj_250514	//add sub_code
+			maxCell_dataNo = myCh->misc.maxCell_dataNo;
+			diffCell = myCh->misc.diffCell;
+			minCell = myCh->misc.minCell;
+			
 			if(val2 > 0) Select_OutPoint(0, ch+1, O_CHAMBER_CH_WARNING, ON);
 			myCh->op.code = rtnCode;
 			myCh->misc.active_division = ACTIVE_DIV_PAUSE;
+			
+			make_sub_code(ch, rtnCode, maxCell_dataNo+1, minCell_dataNo+1, diffCell, minCell, 0, 0); //jhj_250514
+			
 			return rtnCode;
 		}
 	}

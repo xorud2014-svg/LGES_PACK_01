@@ -17,6 +17,9 @@ void	DIO_Signal_RemotePs_Pack_Dsp2_block2_TR1_FUSE(void); 	//Only use for 23PPSC
 void	DIO_Signal_RemotePs_Pack_Dsp2_block4(void);	//jhkw_170917
 void	DIO_Signal_RemotePs_Pack_Dsp2_block4_2(void);	//jhkw_180810
 void	DIO_Signal_RemotePs_Pack_Dsp2_block4_3(void);	//shh_2109012 //phb_230719
+void	DIO_Signal_RemotePs_Pack_Dsp2_block4_4(void);	//sec_240206
+void	DIO_Signal_RemotePs_Pack_Dsp2_block4_5(void);	//ksh_241206
+void	DIO_Signal_RemotePs_Pack_Dsp2_block4_6(void);	//ksh_250319
 void    DIO_Signal_RemotePs_Pack_Dsp3_block6(void); //jhkw_210319	//shhw_220905
 void	DIO_Signal_RemotePs_Pack_Dsp4_block4(void);		//ktg_211202
 

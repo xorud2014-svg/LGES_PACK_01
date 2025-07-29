@@ -27,7 +27,11 @@ void	module_runningTime2(int);		//csk_240301
 void	module_runningTime3(void);		//csk_240301
 
 void	Sync_RTC(void);
+void 	Sync_RTC2(void); //shh_250122 SWEGPROD-1488
+void 	getTime_RTC(void); //shh_250122 SWEGPROD-1488
+void 	getTime_RTC2(void); //shh_250122 SWEGPROD-1488
 void	slot_tic_timer(void);	//KHK 20191121
+void	slot_tic_timer2(void);	//shh_250122 SWEGPROD-1488
 
 void	sens_count_increment_group(void);
 void	sens_count_increment_bd(int);

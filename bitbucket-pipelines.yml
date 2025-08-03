@@ -1,0 +1,203 @@
+# Template docker-push
+
+# This template allows you to build and push your docker image to a Docker Hub account.
+# The workflow allows running tests, code linting and security scans on feature branches (as well as master).
+# The docker image will be validated and pushed to the docker registry after the code is merged to master.
+
+# Prerequisites: $DOCKERHUB_USERNAME, $DOCKERHUB_PASSWORD setup as deployment variables
+
+image: atlassian/default-image:3
+
+pipelines:
+  default:
+    - step:
+        name: Create Backup Archive
+        script:
+         # granting AppControl
+          - cd backup_program/current_backup/App/AppControl
+          - chmod 755 AutoStart
+          - chmod 755 backup_all
+          - chmod 755 backup_program
+          - chmod 755 backup_program_new
+          - chmod 755 bootOnStart
+          - chmod 755 clear
+          - chmod 755 dir_create
+          - chmod 755 forceStart
+          - chmod 755 Load_*
+          - chmod 755 mcts
+          - chmod 755 resetStart
+          - chmod 755 Unload_mControl
+          - cd ..
+          
+          # granting AppControl
+          - cd COA_Client
+          - chmod 755 COA_Client
+          - cd ..
+          
+          # granting DataSave
+          - cd DataSave
+          - chmod 755 DataSave
+          - cd ..
+          
+          # checking Update_Process exist
+          - |
+            if [ -d "Update_Process" ]; then
+              cd Update_Process
+              chmod 755 Update_Process
+              cd ..
+              cd AppControl
+              chmod 755 SBC_Update
+              chmod 755 SBC_RollBack
+              cd ..
+            else
+              echo "Update_Process skipped"
+            fi
+          
+          # checking Temp_Client exist
+          - |
+            if [ -d "Temp_Client" ]; then
+              cd Temp_Client
+              chmod 755 TempClient
+              cd ..
+            else
+              echo "Temp_Client skipped"
+            fi
+          - cd ../Module/mControl
+          - chmod 755 insrtl*
+          - chmod 755 rmrtl
+          - cd ../../../..
+          - mkdir -p backup_upload
+          - cd backup_upload
+          - mkdir -p backup_program
+          - cd ..
+
+          # config_backup.tar.gz
+          - tar -czvf backup_upload/backup_program/config_backup.tar.gz -C backup_program config_backup
+
+          # current_backup.tar.gz
+          - tar -czvf backup_upload/backup_program/current_backup.tar.gz -C backup_program current_backup
+          
+          - cd backup_upload
+          # backup_upload
+          - tar -czvf ../backup_program.tar.gz -C . backup_program/
+
+          # check result
+          - ls -al
+        artifacts:
+          - backup_program.tar.gz
+          
+#  branches:
+#    PRO_SDI:
+#      - step:
+#          name: Compile Source Code
+#          script:
+#            - echo "Start Compile"
+#            - cd backup_program/current_backup/App/AppControl
+#            - pwd
+#            - mkdir -p /project/system_mcts/current/App/AppControl
+#            - cp kjg_cflags.mk $KJG_CFLAG_PATH/kjg_cflags.mk
+#
+#            - export KJG_CFLAGS=$(awk '!/^#/ && /KJG_CFLAGS/ { print substr($0, index($0, "=") + 1) }' kjg_cflags.mk | xargs)
+#            - export CPPFLAGS="-I$(pwd)/../../../Module/mbuff"
+#            - echo "CPPFLAGS=$CPPFLAGS"
+#            - echo "KJG_CFLAGS=$KJG_CFLAGS"
+#
+#            - touch *
+#            - make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../COA_Client && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../DataSave && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../DumpMonitor && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../DebugMonitor && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../TimeSchedule && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../Temp_Client && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../../Module/mControl && make clean && make CFLAGS="$KJG_CFLAGS" CPPFLAGS="$CPPFLAGS"
+#            - cd ../../.. #move back to initial
+#          artifacts:
+#            - backup_program/**  # 전체 백업 디렉토리와 그 하위 파일들을 artifacts로 전달
+#
+#      - step:
+#          name: Zipped Backup into tar.gz
+#          script:
+#            # 압축: 상위 디렉토리에 생성
+#            - tar -czvf config_backup.tar.gz backup_program/config_backup
+#            - tar -czvf current_backup.tar.gz backup_program/current_backup
+#
+#            # 두 개 묶기
+#            - tar -czvf backup_program.tar.gz config_backup.tar.gz current_backup.tar.gz
+#
+#            # 중간 파일 삭제
+#            - rm -rf config_backup.tar.gz current_backup.tar.gz
+#
+#            # 압축 파일 확인
+#            - ls -al backup_program.tar.gz  # 확인하기 위한 로그 추가
+#          artifacts:
+#            - backup_program.tar.gz  # 이 단계에서 압축된 파일만 artifacts로 전달
+#
+#      - step:
+#          name: FTP Upload
+#          script:
+#            - echo "FTP 업로드 시작"
+#            - pipe: atlassian/ftp-deploy:0.7.0
+#              variables:
+#                USER: $FTP_USERNAME
+#                PASSWORD: $FTP_PASSWORD
+#                SERVER: $FTP_ADDRESS
+#                REMOTE_PATH: $FTP_BACKUP_PATH
+#                LOCAL_PATH: "backup_program.tar.gz"
+#    master:
+#      - step:
+#          name: Build and Test
+#          script:
+#            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+#            - docker build . --file Dockerfile --tag ${IMAGE_NAME}
+#            - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar.gz"
+#          services:
+#            - docker
+#          caches:
+#            - docker
+#          artifacts:
+#            - "*.tar.gz"
+#      - step:
+#          name: Deploy to Production
+#          deployment: Production
+#          script:
+#            - echo ${DOCKERHUB_PASSWORD} | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+#            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+#            - docker load --input "${IMAGE_NAME}.tar"
+#            - VERSION="prod-0.1.${BITBUCKET_BUILD_NUMBER}"
+#            - IMAGE=${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}
+#            - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
+#            - docker push "${IMAGE}:${VERSION}"
+#          services:
+#            - docker
+#    DEV_SDI:
+#      - step:
+#          name: Zipped Backup into tar.gz
+#          script:
+#            # 압축: 상위 디렉토리에 생성
+#            - tar -czvf config_backup.tar.gz backup_program/config_backup
+#            - tar -czvf current_backup.tar.gz backup_program/current_backup
+#
+#            # 두 개 묶기
+#            - tar -czvf backup_program.tar.gz config_backup.tar.gz current_backup.tar.gz
+#
+#            # 중간 파일 삭제
+#            - rm -rf config_backup.tar.gz current_backup.tar.gz
+#
+#            # 압축 파일 확인
+#            - ls -al backup_program.tar.gz  # 확인하기 위한 로그 추가
+#          artifacts:
+#            - backup_program.tar.gz  # 이 단계에서 압축된 파일만 artifacts로 전달
+#
+#      - step:
+#          name: FTP Upload
+#          script:
+#            - echo "Start FTP Upload"
+#            - ls -al backup_program.tar.gz
+#            - pipe: atlassian/ftp-deploy:0.7.0
+#              variables:
+#                USER: $FTP_USERNAME
+#                PASSWORD: $FTP_PASSWORD
+#                SERVER: $FTP_ADDRESS
+#                REMOTE_PATH: $FTP_BACKUP_PATH
+#                LOCAL_PATH: "backup_program.tar.gz"

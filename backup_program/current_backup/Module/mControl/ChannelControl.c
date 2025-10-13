@@ -34975,16 +34975,16 @@ void cSoftFeedback_A1(int ch)
 		}
 
 		if(myCh->op.stepType == STEP_CHARGE) {		//csk_190108s
-			//if(myCh->misc.cmd_i[1] != val3a) {
-			if(val2 != val3a) {		
+			if(myCh->misc.cmd_i[1] != val3a) {
+			//if(val2 != val3a) {		
 				myCh->misc.cmd_i[1] = val3a;
 				cmp_flag = 1;
 				gc_can_flag = 1;
 				myCh->misc.gcac_link_flag = 1;		//ktg_210511	//jhj_250408
 			} else cmp_flag = 0;
 		} else {
-			//if(myCh->misc.cmd_i[1] != val4a) {
-			if(val2 != val4a) {
+			if(myCh->misc.cmd_i[1] != val4a) {
+			//if(val2 != val4a) {
 				myCh->misc.cmd_i[1] = val4a;
 				cmp_flag = 1;
 				ac_can_flag = 1;

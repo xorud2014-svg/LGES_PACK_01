@@ -837,8 +837,10 @@ void Sync_RTC(void)
 
 void Sync_RTC2(void)
 {
+	struct timeval tv;
 	struct tm realTime;
 
+	do_gettimeofday(&tv);
 	//if(myPs->misc.slot_tic_timer >= 1000){
 	//if(myPs->misc.slot_tic_timer > 999){
 	//	myPs->misc.realTime_sec++;

@@ -3722,7 +3722,8 @@ void cOutSwitch_P71_General_N1(int ch, int slot)
 
 void cOutSwitch_P81_General1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	int v_div, i_div, rangeV, rangeI, group=0, idx, pattern_count, i;
 	int cmp_flag, module_ch, tmp;
@@ -5113,7 +5114,8 @@ void cOutSwitch_P81_General1(int ch, int slot)
 
 void cOutSwitch_P81_General2(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	int v_div, i_div, rangeV, rangeI, group=0;
 	int idx, pattern_count, i;
 	long val1, val1_max, val1_min, val1_0, val2, val2_max, val2_min, val2_0;
@@ -6273,7 +6275,8 @@ void cOutSwitch_P81_General2(int ch, int slot)
 
 void cOutSwitch_P81_General3(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	int v_div, i_div, rangeV, rangeI, group=0;
 	int idx, pattern_count, i;
 	long val1, val1_max, val1_min, val1_0, val2, val2_max, val2_min, val2_0;
@@ -7433,7 +7436,8 @@ void cOutSwitch_P81_General3(int ch, int slot)
 
 void cOutSwitch_P85_General_N1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	int v_div, i_div, rangeV, rangeI, group=0, idx, pattern_count, i, sysModel;
 	int module_ch, cmp_flag, tmp;
@@ -8747,7 +8751,8 @@ void cOutSwitch_P85_General_N1(int ch, int slot)
 
 void cOutSwitch_P91_General1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	int v_div, i_div, rangeV, rangeI, idx, i, sysModel;
 	long val1, val1_max, val1_min, val2, val2_max, val2_min;
 	long cmd_val, attr_count, val1_0, val2_0, v_cmd_offset_p, v_cmd_offset_n;
@@ -9936,7 +9941,8 @@ void cOutSwitch_P91_General1(int ch, int slot)
 
 void cOutSwitch_P95_General1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	int v_div, i_div, rangeV, rangeI, idx, i, sysModel, group=0;
 	long val1, val1_max, val1_min, val2, val2_max, val2_min;
 	long cmd_val, attr_count, val1_0, val2_0, v_cmd_offset_p, v_cmd_offset_n;
@@ -11062,7 +11068,8 @@ void cOutSwitch_P65_Pack1(int ch, int slot)
 
 void cOutSwitch_P71_Pack1(int ch, int slot)
 {
-	unsigned char idxStepNo;								//csk_190108
+	//unsigned char idxStepNo;								//csk_190108
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;	//csk_190108
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, i, group=0;
@@ -12362,7 +12369,8 @@ void cOutSwitch_P73_Pack1(int ch, int slot)
 {
 #ifdef __B_TYPE__
 	unsigned char pre_rangeI; //jhkw_190627
-	unsigned char idxStepNo;				//csk_190108
+	//unsigned char idxStepNo;				//csk_190108
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;	//csk_190108
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, i, group=0;
@@ -13448,7 +13456,8 @@ void cOutSwitch_P73_Pack1(int ch, int slot)
 
 void cOutSwitch_P75_Pack1(int ch, int slot)
 { //kjg_111009
-	unsigned char idxStepNo;				//csk_190108
+	//unsigned char idxStepNo;				//csk_190108
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;	//csk_190108
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, i, group=0;
@@ -14811,7 +14820,8 @@ void cOutSwitch_P75_Pack1(int ch, int slot)
 void cOutSwitch_P77_Pack1(int ch, int slot)
 { //kjhw_121211
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;				//csk_190108
+	//unsigned char idxStepNo;				//csk_190108
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;	//csk_190108
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, i, group=0;
@@ -15877,7 +15887,8 @@ void cOutSwitch_P77_Pack1(int ch, int slot)
 
 void cOutSwitch_P81_Pack1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
@@ -17260,7 +17271,8 @@ void cOutSwitch_P81_Pack1(int ch, int slot)
 void cOutSwitch_P83_Pack1(int ch, int slot)
 {
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	unsigned char pre_rangeI; //kjh_200507
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
@@ -18451,7 +18463,8 @@ void cOutSwitch_P83_Pack1(int ch, int slot)
 
 void cOutSwitch_P85_Pack1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
@@ -19140,7 +19153,8 @@ void cOutSwitch_P85_Pack1(int ch, int slot)
 void cOutSwitch_P87_Pack1(int ch, int slot)
 {
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	unsigned char pre_rangeI; //jhkw_190627
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
@@ -19889,7 +19903,8 @@ void cOutSwitch_P87_Pack1(int ch, int slot)
 
 void cOutSwitch_P91_Pack1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
 	int idx, i;
@@ -21000,7 +21015,8 @@ void cOutSwitch_P91_Pack1(int ch, int slot)
 void cOutSwitch_P93_Pack1(int ch, int slot)
 { //kjhw_121212
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
 	int idx, i;
@@ -21774,7 +21790,8 @@ void cOutSwitch_P93_Pack1(int ch, int slot)
 
 void cOutSwitch_P95_Pack1(int ch, int slot)
 {
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
 	int idx, i;
@@ -22309,7 +22326,8 @@ void cOutSwitch_P95_Pack1(int ch, int slot)
 void cOutSwitch_P97_Pack1(int ch, int slot)
 { //kjhw_121212
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
 	int idx, i;
@@ -22842,7 +22860,8 @@ void cOutSwitch_P97_Pack1(int ch, int slot)
 
 void cOutSwitch_P101_Pack1(int ch, int slot)
 { //kjhw_140828
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
@@ -24198,7 +24217,8 @@ void cOutSwitch_P101_Pack1(int ch, int slot)
 void cOutSwitch_P103_Pack1(int ch, int slot)
 { //kjhw_140828
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
@@ -25221,7 +25241,8 @@ void cOutSwitch_P103_Pack1(int ch, int slot)
 
 void cOutSwitch_P105_Pack1(int ch, int slot)
 { //kjhw_140828
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
@@ -25891,7 +25912,8 @@ void cOutSwitch_P105_Pack1(int ch, int slot)
 void cOutSwitch_P107_Pack1(int ch, int slot)
 { //kjhw_140828
 #ifdef __B_TYPE__
-	unsigned char idxStepNo;
+	//unsigned char idxStepNo;
+	int idxStepNo;	//jhj_250612	//MAX_STEP_420
 	short int func_div, func_div1, func_div2, func_div3;
 	short int out_delay_set;		//csk_190604
 	int v_div, i_div, rangeV, rangeI, group=0;
@@ -38958,20 +38980,28 @@ void calculate_DCR_2(int ch, int v_type)
 
 	sumT = 0.0; sumV = 0.0; sumT2 = 0.0; sumTV = 0.0;
 	if(v_type == 0) {
-		val1 = myData->cData[ch].misc.d_count - (int)myPs->config.dcr_count1;
+		//val1 = myData->cData[ch].misc.d_count - (int)myPs->config.dcr_count1;
+		val1 = myData->cData[ch].capa.d_count - (int)myPs->config.dcr_count1;	//jhj_250612	//MAX_STEP_420
 		if(val1 < 0) val1 = 0;
-		val2 = myData->cData[ch].misc.d_count;
+		//val2 = myData->cData[ch].misc.d_count;
+		val2 = myData->cData[ch].capa.d_count;	//jhj_250612	//MAX_STEP_420
 	} else {
 		val1 = (int)myPs->config.dcr_t2 / 10;
 		val2 = val1 + (int)myPs->config.dcr_count2;
 	}
 	for(i=val1; i < val2; i++) {
-		sumT += (double)myData->cData[ch].misc.d_t[i] / 100.0;
+		/*sumT += (double)myData->cData[ch].misc.d_t[i] / 100.0;
 		sumV += (double)myData->cData[ch].misc.d_v[i] / 1000.0;
 		sumT2 += ((double)myData->cData[ch].misc.d_t[i] / 100.0)
 			* ((double)myData->cData[ch].misc.d_t[i] / 100.0);
 		sumTV += ((double)myData->cData[ch].misc.d_t[i] / 100.0)
-			* ((double)myData->cData[ch].misc.d_v[i] / 1000.0);
+			* ((double)myData->cData[ch].misc.d_v[i] / 1000.0);*/
+		sumT += (double)myData->cData[ch].capa.d_t[i] / 100.0;	//jhj_250612	//MAX_STEP_420
+		sumV += (double)myData->cData[ch].capa.d_v[i] / 1000.0;
+		sumT2 += ((double)myData->cData[ch].capa.d_t[i] / 100.0)
+			* ((double)myData->cData[ch].capa.d_t[i] / 100.0);
+		sumTV += ((double)myData->cData[ch].capa.d_t[i] / 100.0)
+			* ((double)myData->cData[ch].capa.d_v[i] / 1000.0);
 	}
 
 	if(v_type == 0) {
@@ -38990,32 +39020,38 @@ void calculate_DCR_2(int ch, int v_type)
 		if(v_type == 0) {
 			i = (int)myPs->config.dcr_count1 - 1;
 			myData->cData[ch].ccv[1].avg_v
-				= (long)(tmp_a * myData->cData[ch].misc.d_t[i] + tmp_b);
+				//= (long)(tmp_a * myData->cData[ch].misc.d_t[i] + tmp_b);
+				= (long)(tmp_a * myData->cData[ch].capa.d_t[i] + tmp_b);	//jhj_250612	//MAX_STEP_420
 
 			sumT = 0.0;
 			for(i=val1; i < val2; i++) {
-				sumT += (double)myData->cData[ch].misc.d_i[i];
+				//sumT += (double)myData->cData[ch].misc.d_i[i];
+				sumT += (double)myData->cData[ch].capa.d_i[i];	//jhj_250612	//MAX_STEP_420
 			}
 			sumT /= (double)myPs->config.dcr_count1;
 			myData->cData[ch].ccv[1].avg_i = (long)sumT;
 		} else {
 			i = 0;
-			myData->cData[ch].misc.d_voltage
-				= (long)(tmp_a * myData->cData[ch].misc.d_t[i] + tmp_b);
+			//myData->cData[ch].misc.d_voltage
+			//	= (long)(tmp_a * myData->cData[ch].misc.d_t[i] + tmp_b);
+			myData->cData[ch].capa.d_voltage
+				= (long)(tmp_a * myData->cData[ch].capa.d_t[i] + tmp_b);	//jhj_250612	//MAX_STEP_420
 		}
 	} else {
 		if(v_type == 0) {
 			myData->cData[ch].ccv[1].avg_v = 0;
 			myData->cData[ch].ccv[1].avg_i = 0;
 		} else {
-			myData->cData[ch].misc.d_voltage = 0;
+			//myData->cData[ch].misc.d_voltage = 0;
+			myData->cData[ch].capa.d_voltage = 0;	//jhj_250612	//MAX_STEP_420
 		}
 	}
 
 	if(v_type == 0) return;
 
 	val1 = myData->cData[ch].ccv[1].avg_v;
-	val2 = myData->cData[ch].misc.d_voltage;
+	//val2 = myData->cData[ch].misc.d_voltage;
+	val2 = myData->cData[ch].capa.d_voltage;	//jhj_250612	//MAX_STEP_420
 	if(val1 >= 0 && val2 >= 0) {
 		val1 = val1 - val2;
 	} else if(val1 >= 0 && val2 < 0) {
@@ -39032,7 +39068,8 @@ void calculate_DCR_2(int ch, int v_type)
 	val1 = (int)myPs->config.dcr_t2 / 10;
 	val2 = val1 + (int)myPs->config.dcr_count2;
 	for(i=val1; i < val2; i++) {
-		sumT += (double)myData->cData[ch].misc.d_i[i];
+		//sumT += (double)myData->cData[ch].misc.d_i[i];
+		sumT += (double)myData->cData[ch].capa.d_i[i];	//jhj_250612	//MAX_STEP_420
 	}
 	val1 = (long)(sumT / (double)myPs->config.dcr_count2);
 	val2 = val1 - myData->cData[ch].ccv[1].avg_i;

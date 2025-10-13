@@ -103,7 +103,7 @@ typedef struct s_ch_misc_tag {
 	long				sensSumVp[MAX_FILTER_AD_COUNT];
 	long				sensSumVb[MAX_FILTER_AD_COUNT];
 
-	long				tmpVsens_avg; //kjg_111006_s
+	/*long				tmpVsens_avg; //kjg_111006_s	//jhj_250612	//MAX_STEP_420
 	long				tmpVsens_avg_sum[MAX_AVERAGE_COUNT];
 	long				tmpIsens_avg;
 	long				tmpIsens_avg_sum[MAX_AVERAGE_COUNT];
@@ -120,7 +120,7 @@ typedef struct s_ch_misc_tag {
 	long				d_v[1000];
 	long				d_i[1000];
 	long				d_t[1000];
-	long				d_voltage;
+	long				d_voltage;*/
 
 	short int			sendDataCount;
 	short int			reserved0; //kjg_171219
@@ -436,6 +436,26 @@ typedef struct s_ch_operation_data_tag {
 	unsigned long		checkDelayTime; //kjg_110813
 	S_SUB_CODE			subCode; //jhkw_220103
 } S_CH_OP_DATA;
+typedef struct s_ch_capacitance_tag {		//jhj_250612	//MAX_STEP_420
+	long				tmpVsens_avg; //kjg_111006_s
+	long				tmpVsens_avg_sum[MAX_AVERAGE_COUNT];
+	long				tmpIsens_avg;
+	long				tmpIsens_avg_sum[MAX_AVERAGE_COUNT];
+	unsigned char		tmp_avg_index;
+	unsigned char		tmp_avg_flag;
+	unsigned short int	dcr_delay_count; //kjg_111006_e
+
+	long				c_v1;
+	long				c_v2;
+	unsigned long		c_t1;
+	unsigned long		c_t2;
+	unsigned int		d_count;
+	int					d_flag;
+	long				d_v[1000];
+	long				d_i[1000];
+	long				d_t[1000];
+	long				d_voltage;
+} S_CH_CAPACITANCE;
 
 typedef struct s_ch_data_tag {
 	S_CH_OP_DATA		op;
@@ -446,6 +466,7 @@ typedef struct s_ch_data_tag {
 	S_CH_CYCLE			multiCycle[MAX_MULTI_CYCLE];
 	S_CH_CYCLE			accCycle[MAX_ACC_CYCLE];
 	S_CH_MISC			misc;
+	S_CH_CAPACITANCE	capa;	//jhj_250612	//MAX_STEP_420
 	S_CH_MISC2			misc2;
 
 	unsigned char		signal[MAX_SIGNAL];
@@ -743,6 +764,12 @@ typedef struct s_test_condition_tag {
 	S_TEST_COND_PATTERN_DATA	pattern[MAX_PATTERN_DATA];
 	S_TEST_COND_EXTERNAL_DATA	external_data[2];
 	S_TEST_COND_USERMAP_DATA	usermap; //kjhw_140828
+	
+	unsigned char		aux_group_cnt[MAX_CH_8][MAX_TEST_STEP][10];		//khj_210303 //jhj_250615 s
+	unsigned char		aux_group_flag[MAX_CH_8][MAX_TEST_STEP][10];
+	unsigned char		can_group_cnt[MAX_CH_8][MAX_TEST_STEP][10];
+	unsigned char		can_group_flag[MAX_CH_8][MAX_TEST_STEP][10];	//khj_210303 //jhj_250615 e
+	
 	unsigned char		fault_can_check_flag; //kjhw_141208
 	//unsigned char		reserved1[3]; //kjhw_141208
 	unsigned char		fault_balance_check_flag; //csk_190114d

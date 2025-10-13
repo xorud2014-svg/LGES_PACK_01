@@ -6091,11 +6091,13 @@ void send_monitoring_data(int i)
 		//= (unsigned char)convert_ch_code(CONVERT_ORG_TO_P1,	//ktg_210807
 		= (unsigned short int)convert_ch_code(CONVERT_ORG_TO_P1,
 		(long)myData->cData[ch].op.code);
-	cmd.chData.stepNo = myData->cData[ch].op.idxStepNo + 1;
+	//cmd.chData.stepNo = myData->cData[ch].op.idxStepNo + 1;
+	cmd.chData.stepNo = 0;										//jhj_250612    //MAX_STEP_420
+	cmd.chData.s_stepNo = myData->cData[ch].op.idxStepNo + 1;	//jhj_250612	//MAX_STEP_420
 	cmd.chData.grade = myData->cData[ch].op.grade;
-	cmd.chData.reserved4[0] = 0;	//ktg_210807s
+	/*cmd.chData.reserved4[0] = 0;	//ktg_210807s	//jhj_250612	//MAX_STEP_420
 	cmd.chData.reserved4[1] = 0;
-	cmd.chData.reserved4[2] = 0;	//ktg_210807e
+	cmd.chData.reserved4[2] = 0;*/	//ktg_210807e
 
 	cmd.chData.Vsens = myData->cData[ch].op.Vsens;
 

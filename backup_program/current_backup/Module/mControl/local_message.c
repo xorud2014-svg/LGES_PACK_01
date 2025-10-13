@@ -1558,6 +1558,9 @@ void msgParsing_COA_to_Module(int fromPs, int idx, S_MSG_VAL *RecvMsg)
 					= (long)RecvMsg->val[2];
 			}
 			break;
+		case MSG_COA_MODULE_PC_TIME_SYNC: //KimJangHun_241002 //shh_250122 SWEGPROD-1488
+			getTime_RTC2();
+			break;
 		default: break;
 	}
 }
@@ -2707,7 +2710,8 @@ void send_save_msg_2(int ch, int msg)
 		//= (unsigned char)convert_ch_code(CONVERT_ORG_TO_P1,	//ktg_210807
 		= (unsigned short int)convert_ch_code(CONVERT_ORG_TO_P1,
 		(long)myData->cData[ch].op.code);
-	myData->save_msg[msg].val[idx].chData.stepNo
+	myData->save_msg[msg].val[idx].chData.stepNo = 0;	//jhj_250612    //MAX_STEP_420
+	myData->save_msg[msg].val[idx].chData.s_stepNo		//jhj_250612	//MAX_STEP_420
 		= myData->cData[ch].op.idxStepNo + 1;
 
 	if(myData->cData[ch].op.stepType == STEP_END) {
@@ -2885,13 +2889,14 @@ void send_save_msg_2(int ch, int msg)
 			myData->save_msg[msg].val[idx].chData.sub_code[3].si_val[0] = 0;
 			break;
 	}
+	myData->save_msg[msg].val[idx].chData.reserved4 = 0;		//jhj_250612	//MAX_STEP_420
 	//jhkw_220103e
-	myData->save_msg[msg].val[idx].chData.reserved4[0]	//ktg_210807s
+	/*myData->save_msg[msg].val[idx].chData.reserved4[0]	//ktg_210807s
 		= 0;
 	myData->save_msg[msg].val[idx].chData.reserved4[1]
 		= 0;
 	myData->save_msg[msg].val[idx].chData.reserved4[2]
-		= 0;	//ktg_210807e
+		= 0;*/	//ktg_210807e
 
 	if(myData->cData[ch].op.select == SAVE_FLAG_SAVING_END
 		&& (myData->cData[ch].op.stepType == STEP_CHARGE
@@ -3096,42 +3101,67 @@ void send_pulse_msg_1(int ch, int msg, int count_flag)
 	} else if(myData->cData[ch].misc.pulse_count > pulse_t1
 		&& myData->cData[ch].misc.pulse_count < pulse_t2) {
 		if(msg == 0) {
-			i = myData->cData[ch].misc.d_count;
+			/*i = myData->cData[ch].misc.d_count;
 			myData->cData[ch].misc.d_count++;
 			myData->cData[ch].misc.d_t[i] = (long)i;
 			myData->cData[ch].misc.d_v[i] = myData->cData[ch].misc.tmpVsens;
 			myData->cData[ch].misc.d_i[i]
+				= myData->cData[ch].misc.total_tmpIsens;*/
+			i = myData->cData[ch].capa.d_count;		//jhj_250612	//MAX_STEP_420
+			myData->cData[ch].capa.d_count++;
+			myData->cData[ch].capa.d_t[i] = (long)i;
+			myData->cData[ch].capa.d_v[i] = myData->cData[ch].misc.tmpVsens;
+			myData->cData[ch].capa.d_i[i]
 				= myData->cData[ch].misc.total_tmpIsens;
 		}
 		return;
 	} else if(myData->cData[ch].misc.pulse_count == pulse_t2) {
 		if(msg == 0) {
-			i = myData->cData[ch].misc.d_count;
+			/*i = myData->cData[ch].misc.d_count;
 			myData->cData[ch].misc.d_count++;
 			myData->cData[ch].misc.d_t[i] = (long)i;
 			myData->cData[ch].misc.d_v[i] = myData->cData[ch].misc.tmpVsens;
 			myData->cData[ch].misc.d_i[i]
+				= myData->cData[ch].misc.total_tmpIsens;*/
+			i = myData->cData[ch].capa.d_count;		//jhj_250612	//MAX_STEP_420
+			myData->cData[ch].capa.d_count++;
+			myData->cData[ch].capa.d_t[i] = (long)i;
+			myData->cData[ch].capa.d_v[i] = myData->cData[ch].misc.tmpVsens;
+			myData->cData[ch].capa.d_i[i]
 				= myData->cData[ch].misc.total_tmpIsens;
 
 			calculate_DCR_2(ch, 0); //v1
-			myData->cData[ch].misc.d_count = 1;
+			//myData->cData[ch].misc.d_count = 1;
+			myData->cData[ch].capa.d_count = 1;		//jhj_250612	//MAX_STEP_420
 		}
 	} else if(myData->cData[ch].misc.pulse_count < pulse_t3) {
 		if(msg == 0) {
-			i = myData->cData[ch].misc.d_count;
+			/*i = myData->cData[ch].misc.d_count;
 			myData->cData[ch].misc.d_count++;
 			myData->cData[ch].misc.d_t[i] = (long)i;
 			myData->cData[ch].misc.d_v[i] = myData->cData[ch].misc.tmpVsens;
 			myData->cData[ch].misc.d_i[i]
+				= myData->cData[ch].misc.total_tmpIsens;*/
+			i = myData->cData[ch].capa.d_count;		//jhj_250612	//MAX_STEP_420
+			myData->cData[ch].capa.d_count++;
+			myData->cData[ch].capa.d_t[i] = (long)i;
+			myData->cData[ch].capa.d_v[i] = myData->cData[ch].misc.tmpVsens;
+			myData->cData[ch].capa.d_i[i]
 				= myData->cData[ch].misc.total_tmpIsens;
 		}
 	} else if(myData->cData[ch].misc.pulse_count == pulse_t3) {
 		if(msg == 0) {
-			i = myData->cData[ch].misc.d_count;
+			/*i = myData->cData[ch].misc.d_count;
 			myData->cData[ch].misc.d_count++;
 			myData->cData[ch].misc.d_t[i] = (long)i;
 			myData->cData[ch].misc.d_v[i] = myData->cData[ch].misc.tmpVsens;
 			myData->cData[ch].misc.d_i[i]
+				= myData->cData[ch].misc.total_tmpIsens;*/
+			i = myData->cData[ch].capa.d_count;		//jhj_250612	//MAX_STEP_420
+			myData->cData[ch].capa.d_count++;
+			myData->cData[ch].capa.d_t[i] = (long)i;
+			myData->cData[ch].capa.d_v[i] = myData->cData[ch].misc.tmpVsens;
+			myData->cData[ch].capa.d_i[i]
 				= myData->cData[ch].misc.total_tmpIsens;
 
 			calculate_DCR_2(ch, 1); //v2

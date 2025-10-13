@@ -124,8 +124,10 @@ void	cStopCond(int);
 void	cEndCond(int);
 void	cEndCond_Aux(int);
 int		cEndCond_Aux_step(int, int, long, int);
+int 	Aux_Group_Check(int, int, int, int);		//khj_210208	//jhj_250615	//AUX_CAN_AND
 void	cEndCond_Can(int);
 int		cEndCond_Can_step(int, float, int);
+int 	Can_Group_Check(int, int, int, int);		//khj_210208	//jhj_250615	//AUX_CAN_AND
 int		cEndCond_Can_default(int, float, int);
 
 void	cUserControl(int);

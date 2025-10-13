@@ -39,7 +39,8 @@ int		convert_group_trouble_code_org_to_p1(int);
 int		convert_group_trouble_code_org_to_p2(int);
 int		convert_group_trouble_code_org_to_p3(int);
 
-int		GradeCodeCheck(int, unsigned char, long);
+//int		GradeCodeCheck(int, unsigned char, long);
+int		GradeCodeCheck(int, int, long);					//jhj_250612	//MAX_STEP_420
 
 unsigned char	Read_InPoint(int, int, short int);
 void	Select_OutPoint(int, int, short int, unsigned char);

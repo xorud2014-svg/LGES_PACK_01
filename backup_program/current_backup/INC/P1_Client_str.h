@@ -144,8 +144,9 @@ typedef struct s_p1_test_step_header_tag {
 	unsigned char		reserved1; //kjg_090326 useSocFlag;
 	unsigned char		cycle_pause; //0:none, 1:pause(element_cycle count)
 									 //only use at loop step
-	unsigned char		patternIndex; //host program is reserved
-	unsigned char		reserved2;
+	/*unsigned char		patternIndex; //host program is reserved	//jhj_250612	//MAX_STEP_420
+	unsigned char		reserved2;*/
+	short int			s_stepNo;		//jhj_250612	//MAX_STEP_420
 } S_P1_TEST_STEP_HEADER;
 
 typedef struct s_p1_test_step_reference_tag {
@@ -200,14 +201,18 @@ typedef struct s_p1_test_step_reference_tag {
 	long				V_Lower_MultiCycleCount;
 							//step : V_Lower, loop : MultiCycleCount
 
-	unsigned char		AmpareHour_Branch_MultiCycleCountId;
+	//unsigned char		AmpareHour_Branch_MultiCycleCountId;
+	short int			AmpareHour_Branch_MultiCycleCountId;	//jhj_250612 s	//MAX_STEP_420
 							//step : AmpareHour_Branch
 							//cycle or loop : MultiCycleCountId
-	unsigned char		WattHour_Branch_MultiCycleCount_Branch;
+	//unsigned char		WattHour_Branch_MultiCycleCount_Branch;
+	short int			WattHour_Branch_MultiCycleCount_Branch;
 							//step : WattHour_Branch
 							//loop : MultiCycleCount_Branch
-	unsigned char		ValueRate_Branch; //step
-	unsigned char		AccCycleCount_Branch; //loop
+	//unsigned char		ValueRate_Branch; //step
+	//unsigned char		AccCycleCount_Branch; //loop
+	short int			ValueRate_Branch; //step
+	short int			AccCycleCount_Branch; //loop			//jhj_250612 e	//MAX_STEP_420
 
 	short int			can_func_div[MAX_P1_CAN_FUNCTION];
 	unsigned char		can_compare_type[MAX_P1_CAN_FUNCTION];
@@ -232,6 +237,9 @@ typedef struct s_p1_test_step_reference_tag {
 
 	long				AmpareHour_SumAmpareHour_Lower;
 	long				WattHour_SumWattHour_Lower;
+
+	unsigned char		can_group_no[MAX_P1_CAN_FUNCTION];		//khj_210208	//jhj_250615	//AUX_CAN_AND
+	unsigned char		aux_group_no[MAX_P1_CAN_FUNCTION];		//khj_210208	//jhj_250615	//AUX_CAN_AND
 } S_P1_TEST_STEP_REFERENCE;
 
 typedef struct s_p1_test_comp_cond_tag {
@@ -1301,7 +1309,8 @@ typedef struct s_p1_ch_data_tag {
 	unsigned char		stepNo;
 	unsigned char		grade;
 	unsigned char		cv_flag;		//shhw_220707
-	unsigned char		reserved4[2];	//shhw_220707
+	short int			s_stepNo;		//jhj_250612	//MAX_STEP_420
+	//unsigned char		reserved4[2];	//shhw_220707	//jhj_250612
 	//unsigned char		reserved4[3];	//ktg_210807
 
 	long				Vsens;

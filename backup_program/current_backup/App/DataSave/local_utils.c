@@ -835,7 +835,7 @@ int Save_ResultData_2(void)
 	}
 
 	fprintf(fp,
-		"%ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %ld, %ld\n",
+		"%ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %ld, %ld\n",
 		myData->save_msg[msg].val[idx].chData.resultIndex,
 		myData->save_msg[msg].val[idx].chData.totalRunTime_day,
 		myData->save_msg[msg].val[idx].chData.totalRunTime,
@@ -848,6 +848,7 @@ int Save_ResultData_2(void)
 		(int)myData->save_msg[msg].val[idx].chData.code,
 		(int)myData->save_msg[msg].val[idx].chData.grade,
 		(int)myData->save_msg[msg].val[idx].chData.stepNo,
+		(int)myData->save_msg[msg].val[idx].chData.s_stepNo,	//jhj_250612	//MAX_STEP_420
 		myData->save_msg[msg].val[idx].chData.Vsens,
 		myData->save_msg[msg].val[idx].chData.Isens,
 		myData->save_msg[msg].val[idx].chData.charge_AmpareHour,
@@ -1130,11 +1131,12 @@ int Save_ResultData_2(void)
 
 	if(myData->save_msg[msg].val[idx].chData.select == SAVE_FLAG_SAVING_ETC) {
 		userlog(DEBUG_LOG, psName,
-			"CH%d PAUSE resultIndex(%ld), runTime(%ld), stepType(%d), stepNo(%d), code(%d), Vsens(%ld), real_time(%ld day : %ld)\n",
+			"CH%d PAUSE resultIndex(%ld), runTime(%ld), stepType(%d), stepNo(%d), s_stepNo(%d), code(%d), Vsens(%ld), real_time(%ld day : %ld)\n",
 			ch+1, myData->save_msg[msg].val[idx].chData.resultIndex,
 			myData->save_msg[msg].val[idx].chData.runTime,
 			(int)myData->save_msg[msg].val[idx].chData.stepType,
 			(int)myData->save_msg[msg].val[idx].chData.stepNo,
+			(int)myData->save_msg[msg].val[idx].chData.s_stepNo,	//jhj_250612	//MAX_STEP_420
 			(int)myData->save_msg[msg].val[idx].chData.code,
 			myData->save_msg[msg].val[idx].chData.Vsens,
 			myData->save_msg[msg].val[idx].chData.realDate,
@@ -1167,7 +1169,7 @@ int Save_ResultData_2(void)
 		}
 
 		fprintf(fp,
-			"%ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %ld, %ld\n",
+			"%ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %d, %d, %d, %d, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %d, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %ld, %ld\n",
 			myData->save_msg[msg].val[idx].chData.resultIndex,
 			myData->save_msg[msg].val[idx].chData.totalRunTime_day,
 			myData->save_msg[msg].val[idx].chData.totalRunTime,
@@ -1180,6 +1182,7 @@ int Save_ResultData_2(void)
 			(int)myData->save_msg[msg].val[idx].chData.code,
 			(int)myData->save_msg[msg].val[idx].chData.grade,
 			(int)myData->save_msg[msg].val[idx].chData.stepNo,
+			(int)myData->save_msg[msg].val[idx].chData.s_stepNo,		//jhj_250612	//MAX_STEP_420
 			myData->save_msg[msg].val[idx].chData.Vsens,
 			myData->save_msg[msg].val[idx].chData.Isens,
 			myData->save_msg[msg].val[idx].chData.charge_AmpareHour,

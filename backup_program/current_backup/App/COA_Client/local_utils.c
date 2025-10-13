@@ -798,6 +798,8 @@ int Write_test_cond_step_file(S_P1_FILE_TEST_COND *P1_testCond, int ch, int div)
 			(int)P1_testCond->step[i].header.type);
 		fprintf(fp, "stepNo : %d\n",
 			(int)P1_testCond->step[i].header.stepNo);
+		fprintf(fp, "s_stepNo : %d\n",
+			(int)P1_testCond->step[i].header.s_stepNo);		//jhj_250612	//MAX_STEP_420
 		fprintf(fp, "mode : %d\n",
 			(int)P1_testCond->step[i].header.mode);
 		fprintf(fp, "testEnd : %d\n",
@@ -809,10 +811,10 @@ int Write_test_cond_step_file(S_P1_FILE_TEST_COND *P1_testCond, int ch, int div)
 			(int)P1_testCond->step[i].header.reserved1);
 		fprintf(fp, "cycle_pause : %d\n", 
 			(int)P1_testCond->step[i].header.cycle_pause);
-		fprintf(fp, "patternIndex : %d\n",
+		/*fprintf(fp, "patternIndex : %d\n",				//jhj_250612    //MAX_STEP_420
 			(int)P1_testCond->step[i].header.patternIndex);
 		fprintf(fp, "reserved2 : %d\n", 
-			(int)P1_testCond->step[i].header.reserved2);
+			(int)P1_testCond->step[i].header.reserved2);*/
 		fprintf(fp,"\n");
 
 		for(j=0; j < 1; j++) {
@@ -1396,11 +1398,13 @@ int convert_test_cond(int ch)
 		//header
 		idx = IDX_LOC_OBJ_CLIENT_STEP_NO;
 		myTestCond->local_object[step][idx]
-			= (long)myPs->testCond.step[step].header.stepNo;
+			//= (long)myPs->testCond.step[step].header.stepNo;
+			= (long)myPs->testCond.step[step].header.s_stepNo;		//jhj_250612	//MAX_STEP_420
 
 		idx = IDX_LOC_OBJ_STEP_NO;
 		myTestCond->local_object[step][idx]
-			= (long)myPs->testCond.step[step].header.stepNo;
+			//= (long)myPs->testCond.step[step].header.stepNo;
+			= (long)myPs->testCond.step[step].header.s_stepNo;		//jhj_250612	//MAX_STEP_420
 
 		idx = IDX_LOC_OBJ_TYPE;
 		type = convert_step_type(CONVERT_P1_TO_ORG,
@@ -2531,6 +2535,10 @@ void convert_test_cond_step_aux(S_P1_TEST_COND_STEP *P1_stepCond, int ch, int st
 	int idx, i, compare_type, code, branch;
 	int delay_time; //kjhw_171117
 	long func_div, data_type, data_value;
+	long group;		//khj_210208	//jhj_250615	//AUX_CAN_AND
+	
+	memset((char *)&myTestCond->aux_group_cnt[ch][step][0], 0,		//khj_210303	//jhj_250615	//AUX_CAN_AND
+		sizeof(unsigned char) * 10);
 
 	for(i=0; i < MAX_P1_AUX_FUNCTION; i++) {
 		func_div = (long)P1_stepCond->reference[0].aux_func_div[i];
@@ -2554,6 +2562,24 @@ void convert_test_cond_step_aux(S_P1_TEST_COND_STEP *P1_stepCond, int ch, int st
 		idx = IDX_LOC_OBJ_AUX_BRANCH_TMP_1 + i;
 		myTestCond->local_object[step][idx]
 			= (long)P1_stepCond->reference[0].aux_branch[i]; //kjg_170810_e
+
+		//khj_210208	//jhj_250615 s	//AUX_CAN_AND
+		group = (long)P1_stepCond->reference[0].aux_group_no[i];
+		idx = IDX_LOC_OBJ_AUX_GROUP_TMP_1 + i;
+		myTestCond->local_object[step][idx] = group;
+		
+		if(group == 1) {			//khj_210208
+			myTestCond->aux_group_cnt[ch][step][0]++;
+		} else if(group == 2) {
+			myTestCond->aux_group_cnt[ch][step][1]++;
+		} else if(group == 3) {
+			myTestCond->aux_group_cnt[ch][step][2]++;
+		} else if(group == 4) {
+			myTestCond->aux_group_cnt[ch][step][3]++;
+		} else if(group == 5) {
+			myTestCond->aux_group_cnt[ch][step][4]++;
+		}
+		//khj_210208	//jhj_250615 e	//AUX_CAN_AND
 
 		//if(func_div < AUX_BRANCH_FUNC_DIV_START
 		//	|| func_div > AUX_BRANCH_FUNC_DIV_END) continue;
@@ -2777,6 +2803,10 @@ void convert_test_cond_step_can(S_P1_TEST_COND_STEP *P1_stepCond, int ch, int st
 	int delay_time;		//khk_201120
 	long func_div, data_type, data_value;
 	float tmp_f = 0.0; //kjh_190709
+	long group; 		//khj_210208	//jhj_250615	//AUX_CAN_AND
+	
+	memset((char *)&myTestCond->can_group_cnt[ch][step][0], 0,		//khj_210303	//jhj_250615	//AUX_CAN_AND
+		sizeof(unsigned char) * 10);
 
 	for(i=0; i < MAX_P1_CAN_FUNCTION; i++) {
 		func_div = (long)P1_stepCond->reference[0].can_func_div[i];
@@ -2801,7 +2831,25 @@ void convert_test_cond_step_can(S_P1_TEST_COND_STEP *P1_stepCond, int ch, int st
 		idx = IDX_LOC_OBJ_CAN_BRANCH_TMP_1 + i;
 		myTestCond->local_object[step][idx]
 			= (long)P1_stepCond->reference[0].can_branch[i]; //kjg_170810_e
-
+			
+		//khj_210208	//jhj_250615 s	//AUX_CAN_AND
+		group = (long)P1_stepCond->reference[0].can_group_no[i];
+		idx = IDX_LOC_OBJ_CAN_GROUP_TMP_1 + i;
+		myTestCond->local_object[step][idx] = group;
+		
+		if(group == 1) {			//khj_210208
+			myTestCond->can_group_cnt[ch][step][0]++;
+		} else if(group == 2) {
+			myTestCond->can_group_cnt[ch][step][1]++;
+		} else if(group == 3) {
+			myTestCond->can_group_cnt[ch][step][2]++;
+		} else if(group == 4) {
+			myTestCond->can_group_cnt[ch][step][3]++;
+		} else if(group == 5) {
+			myTestCond->can_group_cnt[ch][step][4]++;
+		}
+		//khj_210208		//jhj_250615 e	//AUX_CAN_AND
+		
 		if((func_div >= CAN_RX_BRANCH_FUNC_DIV_START
 			&& func_div <= CAN_RX_BRANCH_FUNC_DIV_END)
 			|| (func_div >= CAN_RX_FUNC_DIV_START
@@ -5485,10 +5533,12 @@ int convert_test_cond_step_update(int ch)
 
 	//step header
 	idx = IDX_LOC_OBJ_CLIENT_STEP_NO;
-	myTestCond->local_object[stepNo][idx] = (long)P1_stepCond->header.stepNo;
+	//myTestCond->local_object[stepNo][idx] = (long)P1_stepCond->header.stepNo;
+	myTestCond->local_object[stepNo][idx] = (long)P1_stepCond->header.s_stepNo;		//jhj_250612	//MAX_STEP_420
 
 	idx = IDX_LOC_OBJ_STEP_NO;
-	myTestCond->local_object[stepNo][idx] = (long)P1_stepCond->header.stepNo;
+	//myTestCond->local_object[stepNo][idx] = (long)P1_stepCond->header.stepNo;
+	myTestCond->local_object[stepNo][idx] = (long)P1_stepCond->header.s_stepNo;		//jhj_250612	//MAX_STEP_420
 
 	idx = IDX_LOC_OBJ_TYPE;
 	type = convert_step_type(CONVERT_P1_TO_ORG, (long)P1_stepCond->header.type);
@@ -5972,7 +6022,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 
 	idx = IDX_LOC_OBJ_CLIENT_STEP_NO;
 	tmp = myData->testCond[ch].local_object[stepNo][idx];
-	P1_stepCond->header.stepNo = (unsigned char)tmp;
+	//P1_stepCond->header.stepNo = (unsigned char)tmp;
+	P1_stepCond->header.s_stepNo = tmp;		//jhj_250612	//MAX_STEP_420
 
 	switch(type) {
 		case STEP_IDLE:
@@ -5983,7 +6034,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			idx = IDX_LOC_OBJ_END_MULTI_CYCLE_COUNT_COMPARE;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].AmpareHour_Branch_MultiCycleCountId
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_SUM_AMPARE_HOUR;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6030,20 +6082,23 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			idx = IDX_LOC_OBJ_END_MULTI_CYCLE_COUNT_BRANCH;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].WattHour_Branch_MultiCycleCount_Branch
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_MULTI_CYCLE_COUNT_COMPARE;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].AmpareHour_Branch_MultiCycleCountId
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_ACC_CYCLE_COUNT;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].Time_Branch_AccCycleCount = tmp;
 
 			idx = IDX_LOC_OBJ_END_ACC_CYCLE_COUNT_BRANCH;
-			tmp = myData->testCond[ch].local_object[stepNo][idx];
-			P1_stepCond->reference[0].AccCycleCount_Branch = (unsigned char)tmp;
+			//tmp = myData->testCond[ch].local_object[stepNo][idx];
+			//P1_stepCond->reference[0].AccCycleCount_Branch = (unsigned char)tmp;
+			P1_stepCond->reference[0].AccCycleCount_Branch = (short int)tmp;	//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_ACC_CYCLE_COUNT_COMPARE;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6502,7 +6557,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			idx = IDX_LOC_OBJ_END_AMPARE_HOUR_BRANCH;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].AmpareHour_Branch_MultiCycleCountId
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_WATT_HOUR;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6511,7 +6567,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			idx = IDX_LOC_OBJ_END_WATT_HOUR_BRANCH;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].WattHour_Branch_MultiCycleCount_Branch
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_AMPARE_HOUR_RATE;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6521,7 +6578,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 
 				idx = IDX_LOC_OBJ_END_AMPARE_HOUR_RATE_BRANCH;
 				tmp = myData->testCond[ch].local_object[stepNo][idx];
-				P1_stepCond->reference[0].ValueRate_Branch = (unsigned char)tmp;
+				//P1_stepCond->reference[0].ValueRate_Branch = (unsigned char)tmp;
+				P1_stepCond->reference[0].ValueRate_Branch = (short int)tmp;	//jhj_250612	//MAX_STEP_420
 
 				idx = IDX_LOC_OBJ_END_AMPARE_HOUR_RATE_COMPARE;
 				tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6536,7 +6594,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 					idx = IDX_LOC_OBJ_END_WATT_HOUR_RATE_BRANCH;
 					tmp = myData->testCond[ch].local_object[stepNo][idx];
 					P1_stepCond->reference[0].ValueRate_Branch
-						= (unsigned char)tmp;
+						//= (unsigned char)tmp;
+						= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 					idx = IDX_LOC_OBJ_END_WATT_HOUR_RATE_COMPARE;
 					tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6716,7 +6775,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			idx = IDX_LOC_OBJ_END_AMPARE_HOUR_BRANCH;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].AmpareHour_Branch_MultiCycleCountId
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_WATT_HOUR;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6725,7 +6785,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 			idx = IDX_LOC_OBJ_END_WATT_HOUR_BRANCH;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
 			P1_stepCond->reference[0].WattHour_Branch_MultiCycleCount_Branch
-				= (unsigned char)tmp;
+				//= (unsigned char)tmp;
+				= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 			idx = IDX_LOC_OBJ_END_AMPARE_HOUR_RATE;
 			tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6735,7 +6796,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 
 				idx = IDX_LOC_OBJ_END_AMPARE_HOUR_RATE_BRANCH;
 				tmp = myData->testCond[ch].local_object[stepNo][idx];
-				P1_stepCond->reference[0].ValueRate_Branch = (unsigned char)tmp;
+				//P1_stepCond->reference[0].ValueRate_Branch = (unsigned char)tmp;
+				P1_stepCond->reference[0].ValueRate_Branch = (short int)tmp;	//jhj_250612	//MAX_STEP_420
 
 				idx = IDX_LOC_OBJ_END_AMPARE_HOUR_RATE_COMPARE;
 				tmp = myData->testCond[ch].local_object[stepNo][idx];
@@ -6750,7 +6812,8 @@ void convert_test_cond_module_coa_step(int ch, int stepNo)
 					idx = IDX_LOC_OBJ_END_WATT_HOUR_RATE_BRANCH;
 					tmp = myData->testCond[ch].local_object[stepNo][idx];
 					P1_stepCond->reference[0].ValueRate_Branch
-						= (unsigned char)tmp;
+						//= (unsigned char)tmp;
+						= (short int)tmp;		//jhj_250612	//MAX_STEP_420
 
 					idx = IDX_LOC_OBJ_END_WATT_HOUR_RATE_COMPARE;
 					tmp = myData->testCond[ch].local_object[stepNo][idx];

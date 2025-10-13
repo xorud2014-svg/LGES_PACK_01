@@ -882,7 +882,6 @@ void DIO_Signal(void)
 		case C_LGC_600V_300A_100A_720KW_2:	//shh_220204
 		case C_LGC_600V_300A_100A_720KW_3:	//shh_220204
 		case C_LGC_600V_300A_100A_720KW_4:	//shh_220204
-		case C_ULT_900V_500A_250A_50A_500KW:	//sec_230706	//jhj_250901
 		case C_HYUNDAI_1000V_250A_100A_500KW:	//shh_200513
 		case C_KOSTA_1000V_250A_100A_600KW:		//shh_201102
 		case C_HYUNDAI_1000V_500A_250A_500KW:	//jhk_180722
@@ -12967,7 +12966,6 @@ void M_In_FlagCheck(void)
 		case C_LGC_600V_300A_100A_720KW_2:	//shh_220204
 		case C_LGC_600V_300A_100A_720KW_3:	//shh_220204
 		case C_LGC_600V_300A_100A_720KW_4:	//shh_220204
-		case C_ULT_900V_500A_250A_50A_500KW:	//sec_230706	//jhj_250522
 		case C_HYUNDAI_1000V_250A_100A_500KW:	//shh_200513
 		case C_KOSTA_1000V_250A_100A_600KW:		//shh_201102
 		case C_HLGP_1000V_300A_100A_50A_600KW:	//jhk_180810
@@ -14746,13 +14744,6 @@ void PNE_AC_Power_Fail_Detect_8(void)
                 tmp = (unsigned char)inb(0x622) & 0x80; //0:normal, 1:fail
             }
             break;
-		case C_ULT_900V_500A_250A_50A_500KW:	//sec_230706		//jhj_250522
-			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail
-			if(tmp == 0x40) {
-			} else {
-				tmp = (unsigned char)inb(0x623) & 0x20; //0:normal, 0x20:fail
-			}
-			break;
 		case C_KCL_1000V_1000A_500A_100A_800KW:		//phb_240102 //ksh_250602 SWEGPROD-1536
 		case C_KCL_1000V_1000A_500A_100A_800KW_2:		//phb_240102 //ksh_250602 SWEGPROD-1536
 		case C_KCL_1000V_1000A_500A_100A_800KW_3:		//phb_240102 //ksh_250602 SWEGPROD-1536

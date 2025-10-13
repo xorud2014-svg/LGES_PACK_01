@@ -2429,7 +2429,8 @@ int convert_group_trouble_code_org_to_p3(int code)
 	return rtn_code;
 }
 
-int GradeCodeCheck(int ch, unsigned char idxStepNo, long val)
+//int GradeCodeCheck(int ch, unsigned char idxStepNo, long val)
+int GradeCodeCheck(int ch, int idxStepNo, long val)				//jhj_250612	//MAX_STEP_420
 {
 	unsigned char count;
 	int i, code;

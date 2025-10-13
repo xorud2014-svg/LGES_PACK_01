@@ -17,7 +17,7 @@ void Test_Print(void)
 	i = 0; if(i == 1) TimeSlot_Print();
 	i = 0; if(i == 1) TimeSlot_Print2(); //kjg_240213
 	i = 0; if(i == 1) DataStructureSize_Print();
-	i = 0; if(i == 1) Debug_Print();
+	i = 1; if(i == 1) Debug_Print();
 
 	i = 0; if(i == 1) AppControl_Print();
 	i = 0; if(i == 1) COA_Client_Print();
@@ -63,7 +63,7 @@ void Test_Print(void)
 	i = 0; if(i == 1) AuxTemp_Print();
 	i = 0; if(i == 1) Message_Print();
 	i = 0; if(i == 1) COM_Print();
-	i = 1; if(i == 1) CAN_Print();
+	i = 0; if(i == 1) CAN_Print();
 
 	i = 0; if(i == 1) Chamber_Print();
 	i = 0; if(i == 1) jhk_test();
@@ -755,7 +755,7 @@ void COA_Client_Print(void)
 		myData->COA_Client[group].step_cond_update
 			.testCond_step.header.type,
 		myData->COA_Client[group].step_cond_update
-			.testCond_step.header.stepNo,
+			.testCond_step.header.s_stepNo,			//jhj_250612		//MAX_STEP_420
 		myData->COA_Client[group].step_cond_update
 			.testCond_step.header.mode,
 		myData->COA_Client[group].step_cond_update
@@ -3903,6 +3903,23 @@ void TestCond_Print(void)
 		myData->testCond[channel].external_data[1].waveform_type,
 		myData->testCond[channel].external_data[1].control);
 */
+
+	printf("AUX_GROUP CNT %d\n", channel);
+	for(i=0; i < 5; i++) {
+		printf("%d, %d, %d, %d \n",
+			myData->testCond[channel].aux_group_cnt[channel][0][i],
+			myData->testCond[channel].aux_group_cnt[channel][1][i],
+			myData->testCond[channel].aux_group_cnt[channel][2][i],
+			myData->testCond[channel].aux_group_cnt[channel][3][i]);
+	}
+	printf("AUX_GROUP FLAG %d\n", channel);
+	for(i=0; i < 5; i++) {
+		printf("%d, %d, %d, %d \n",
+			myData->testCond[channel].aux_group_flag[channel][0][i],
+			myData->testCond[channel].aux_group_flag[channel][1][i],
+			myData->testCond[channel].aux_group_flag[channel][2][i],
+			myData->testCond[channel].aux_group_flag[channel][3][i]);
+	}
 	printf("\n");
 }
 
@@ -5432,6 +5449,8 @@ int COA_Client_TestCond_write_V100B(int div)
 			myData->COA_Client[div].testCond.step[i].header.type);
 		fprintf(fp, "stepNo : %d\n",
 			myData->COA_Client[div].testCond.step[i].header.stepNo);
+		fprintf(fp, "s_stepNo : %d\n",
+			myData->COA_Client[div].testCond.step[i].header.s_stepNo);		//jhj_250612	//MAX_STEP_420
 		fprintf(fp, "mode : %d\n",
 			myData->COA_Client[div].testCond.step[i].header.mode);
 		fprintf(fp, "testEnd : %d\n",
@@ -6221,6 +6240,8 @@ fprintf(fp,"\n");
 			myData->COA_Client[div].testCond.step[i].header.type);
 		fprintf(fp, "stepNo : %d\n",
 			myData->COA_Client[div].testCond.step[i].header.stepNo);
+		fprintf(fp, "s_stepNo : %d\n",
+			myData->COA_Client[div].testCond.step[i].header.s_stepNo);		//jhj_250612	//MAX_STEP_420
 		fprintf(fp, "mode : %d\n",
 			myData->COA_Client[div].testCond.step[i].header.mode);
 		fprintf(fp, "testEnd : %d\n",
@@ -6232,10 +6253,10 @@ fprintf(fp,"\n");
 			myData->COA_Client[div].testCond.step[i].header.reserved1);
 		fprintf(fp, "cycle_pause : %d\n",
 			myData->COA_Client[div].testCond.step[i].header.cycle_pause);
-		fprintf(fp, "patternIndex : %d\n",
+		/*fprintf(fp, "patternIndex : %d\n",
 			myData->COA_Client[div].testCond.step[i].header.patternIndex);
 		fprintf(fp, "reserved2 : %d\n",
-			myData->COA_Client[div].testCond.step[i].header.reserved2);
+			myData->COA_Client[div].testCond.step[i].header.reserved2);*/
 		fprintf(fp,"\n");
 
 		for(j=0; j < 1; j++) {
@@ -6323,7 +6344,7 @@ fprintf(fp,"\n");
 			fprintf(fp,"\n");
 
 			fprintf(fp, "Step_CAN\n");
-			fprintf(fp, "index, Division, Compare_Type, Data_Type, Branch, Value\n");
+			fprintf(fp, "index, Division, Compare_Type, Data_Type, Branch, Value, Group\n");
 			for(k=0; k < MAX_P1_CAN_FUNCTION; k++) {
 				fprintf(fp, "%02d, %d, %d, %d, %d, %f\n", k+1,
 					myData->COA_Client[div].testCond.step[i]
@@ -6335,14 +6356,16 @@ fprintf(fp,"\n");
 					myData->COA_Client[div].testCond.step[i]
 					.reference[j].can_branch[k],
 					myData->COA_Client[div].testCond.step[i]
-					.reference[j].can_value[k]);
+					.reference[j].can_value[k],
+					myData->COA_Client[div].testCond.step[i]
+					.reference[j].can_group_no[k]);
 			}
 			fprintf(fp,"\n");
 
 			fprintf(fp, "Step_Aux\n");
-			fprintf(fp, "index, Division, Compare_Type, Data_Type, Branch, Value, delay_time\n");
+			fprintf(fp, "index, Division, Compare_Type, Data_Type, Branch, Value, delay_time, Group\n");
 			for(k=0; k < MAX_P1_AUX_FUNCTION; k++) {
-				fprintf(fp, "%02d, %d, %d, %d, %d, %ld, %d\n", k+1,
+				fprintf(fp, "%02d, %d, %d, %d, %d, %ld, %d, %d\n", k+1,
 					myData->COA_Client[div].testCond.step[i]
 					.reference[j].aux_func_div[k],
 					myData->COA_Client[div].testCond.step[i]
@@ -6354,7 +6377,9 @@ fprintf(fp,"\n");
 					myData->COA_Client[div].testCond.step[i]
 					.reference[j].aux_value[k],
 					myData->COA_Client[div].testCond.step[i]
-					.reference[j].aux_delay_time[k]);
+					.reference[j].aux_delay_time[k],
+					myData->COA_Client[div].testCond.step[i]
+					.reference[j].aux_group_no[k]);
 			}
 			fprintf(fp,"\n");
 

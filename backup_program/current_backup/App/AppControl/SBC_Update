@@ -5,9 +5,9 @@ config_file_app="/root/system_data/config/parameter/AppControl_Config"
 
 cp "$config_file_app" "$config_file_app.bak"
 
-new_modelName="PSCSA-P1026-S02-R001-N002"
-new_versionNo="250421"
-new_update_date="250421"
+new_modelName="PSCSA-P1026-S02-R004-N001"
+new_versionNo="250725"
+new_update_date="250725"
 
 export new_modelName new_versionNo new_update_date
 
@@ -17,7 +17,7 @@ awk -v new_modelName="$new_modelName" 'BEGIN {
 }
 $1 ~ /modelName/ {
     # Replace model name with new_modelName, ensuring that the correct part is replaced
-    sub(/PSCSA-[^-]+-[^-]+-[^-]+-[^-]+/, new_modelName, $2); 
+    sub(/PSCSB-[^-]+-[^-]+-[^-]+-[^-]+/, new_modelName, $2); 
     print;
     next
 }
@@ -39,6 +39,62 @@ mv "$config_file_app.tmp" "$config_file_app"
 rm -rf "$config_file_app.bak"
 
 echo "AppControl_Config fix."
+
+config_file_m="/root/system_data/config/parameter/mControl_Config"
+
+cp "$config_file_m" "$config_file_m.bak"
+
+awk 'BEGIN {
+    FS = ":"
+    OFS = ":"
+}
+$1 ~ /multi_temp_cali/ {
+    # Print the existing line as is
+    print;
+    # Add the new 'BreakDownCheck' line with a proper tab after ':'
+    printf "BreakDownCheck      :   1\n";
+    next
+}
+{
+    # Print other lines as is, without changing them
+    print
+}' "$config_file_m.bak" > "$config_file_m.tmp"
+
+mv "$config_file_m.tmp" "$config_file_m"
+
+rm -rf "$config_file_m.bak"
+
+echo "BreakDownCheck added to mControl_Config."
+
+
+
+# CAN_TYPE FIX
+config_file_can="/root/system_data/config/parameter/can_comm/CanConfig"
+
+cp "$config_file_can" "$config_file_can.bak"
+
+new_CanType="1"
+
+export new_CanType
+
+awk -v new_CanType="$new_CanType" 'BEGIN {
+
+    FS = ":"
+    OFS = ":"
+}
+$1 ~ /commType/ {
+    print "commType		:	" ENVIRON["new_CanType"];
+    next
+}
+{
+	print
+}' "$config_file_can.bak" > "$config_file_can.tmp"
+
+mv "$config_file_can.tmp" "$config_file_can"
+
+rm -rf "$config_file_can.bak"
+
+echo "CanConfig fix."
 
 
 # Client_Config Protocal_Version UP

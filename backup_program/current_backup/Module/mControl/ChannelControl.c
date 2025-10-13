@@ -25541,6 +25541,8 @@ void cFaultCond_Hard(int ch)
 		case C_LGC_500V_250A_125A_50A_500KW_12: //ktg_191108
 		case C_LGC_500V_300A_100A_300KW:
 		case C_LGC_500V_400A_200A_400KW:
+		case C_LGC_500V_500A_250A_125A_500KW:	//jhj_250610
+		case C_LGC_500V_500A_250A_125A_500KW_2:	//jhj_250610
 		case C_LGC_500V_500A_300A_100A_500KW:   //phb_220913
         case C_LGC_500V_500A_300A_100A_500KW_2: //phb_220913
         case C_LGC_500V_500A_300A_100A_500KW_3: //phb_220913
@@ -25575,6 +25577,20 @@ void cFaultCond_Hard(int ch)
 		case C_LGC_600V_300A_200A_100A_360KW_10:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_11:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_12:	//phb_230426
+		case C_LGC_1000V_600A_300A_100A_1MW_1:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_2:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_3:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_4:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_5:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_6:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_7:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_8:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_9:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_10:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_11:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_12:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_13:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_14:	//ksh_250320
 		case C_UL_1500V_1000A_500A_100A_1MW:        //phb_230731
         case C_UL_1500V_1000A_500A_100A_1MW_2:      //phb_230731
 			check_flag3 = 2;
@@ -29345,7 +29361,7 @@ int cFaultCond_Can_100ms_step(int ch, float f_val2, int can_idx)
 								if(l_val4 < 0) {
 									l_val4 = l_val4 * (-1);
 								}
-								if(l_val >= l_val4) {
+								if(l_val > l_val4) {			//ktg_250708
 									myData->CANCell[ch][can_idx].CanFreezecount++;
 									myCh->misc2.freeze_flag = 1;
 								} else {
@@ -30314,6 +30330,7 @@ void cFaultCond_Hard_Pause(int ch)
 		case C_LGC_350V_300A_100A_420KW_2:	//shh_220128
 		case C_LGC_350V_300A_100A_420KW_3:	//shh_220128
 		case C_LGC_350V_300A_100A_420KW_4:	//shh_220128
+		case C_LGC_500V_250A_500KW:			 //sec_230106
 		case C_LGC_500V_250A_100A_125KW:
 		case C_LGC_500V_250A_100A_50A_500KW: //phb_220902
 		case C_LGC_500V_250A_100A_50A_250KW_2:	//ktg_200208
@@ -30364,6 +30381,20 @@ void cFaultCond_Hard_Pause(int ch)
 		case C_LGC_600V_300A_200A_100A_360KW_10:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_11:	//phb_230426
 		case C_LGC_600V_300A_200A_100A_360KW_12:	//phb_230426
+		case C_LGC_1000V_600A_300A_100A_1MW_1:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_2:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_3:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_4:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_5:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_6:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_7:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_8:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_9:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_10:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_11:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_12:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_13:	//ksh_250320
+		case C_LGC_1000V_600A_300A_100A_1MW_14:	//ksh_250320
 			check_flag3 = 2;
 			ch_per_chamber = 2;
 			break;				//csk_190617e
@@ -34944,16 +34975,16 @@ void cSoftFeedback_A1(int ch)
 		}
 
 		if(myCh->op.stepType == STEP_CHARGE) {		//csk_190108s
-			//if(myCh->misc.cmd_i[1] != val3a) {
-			if(val2 != val3a) {		
+			if(myCh->misc.cmd_i[1] != val3a) {
+			//if(val2 != val3a) {		
 				myCh->misc.cmd_i[1] = val3a;
 				cmp_flag = 1;
 				gc_can_flag = 1;
 				myCh->misc.gcac_link_flag = 1;		//ktg_210511	//jhj_250408
 			} else cmp_flag = 0;
 		} else {
-			//if(myCh->misc.cmd_i[1] != val4a) {
-			if(val2 != val4a) {
+			if(myCh->misc.cmd_i[1] != val4a) {
+			//if(val2 != val4a) {
 				myCh->misc.cmd_i[1] = val4a;
 				cmp_flag = 1;
 				ac_can_flag = 1;
@@ -35048,11 +35079,19 @@ void cSoftFeedback_A1(int ch)
 			check_t3a = 20 * (long)myPs->misc.increment_period; //20ms
 			break;
 		default:
-			check_t1 = 3; //30ms kjg_100520
-			check_t2 = 5; //50ms
-			check_t2a = 10 * (long)myPs->misc.increment_period; //10ms
-			check_t3 = 90 * (long)myPs->misc.increment_period; //90ms
-			check_t3a = 20 * (long)myPs->misc.increment_period; //20ms
+			if(myPs->config.scan_period == 10) {	//ksh_250709
+				check_t1 = 1; //50ms
+				check_t2 = 5; //50ms
+				check_t2a = 20 * (long)myPs->misc.increment_period; //20ms
+				check_t3 = 90 * (long)myPs->misc.increment_period; //90ms
+				check_t3a = 20 * (long)myPs->misc.increment_period; //20ms	
+			} else {
+				check_t1 = 3; //30ms kjg_100520
+				check_t2 = 5; //50ms
+				check_t2a = 10 * (long)myPs->misc.increment_period; //10ms
+				check_t3 = 90 * (long)myPs->misc.increment_period; //90ms
+				check_t3a = 20 * (long)myPs->misc.increment_period; //20ms
+			}
 			break;
 	}
 #ifdef __B_TYPE__

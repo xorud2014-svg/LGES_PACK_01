@@ -734,7 +734,9 @@ int Read_SystemMemory(char *fileName)
 	if(rtn != sizeof(S_SYSTEM_DATA)) {
 		printf("error %s read\n", fileName);
 	}
+
 	Delete_SystemMemory(); //shhw_250409
+	
 	close(fp);
 
 	return 0;
@@ -1425,9 +1427,9 @@ void Close_Process_2(char *process, char *index, int pointer, int signalNo)
 
 void Kill_Process(char *psName)
 {
-	char buf[32], psKill[32], cmd[256];
 	int rtn, i;
-    FILE *fp;
+	char buf[32], psKill[32], cmd[256];
+	FILE *fp;
 
 	memset(cmd, 0, sizeof cmd);
 	strcpy(cmd, "ps -ax | grep ./");
@@ -1602,8 +1604,8 @@ void Check_Process(void)
 				diff += (myData->mData.misc.timer_1000ms
 					- myData->COA_Client[i].misc.net_time2);
 				//if(diff >= myData->COA_Client[i].config.netTimeout
-				//	|| diff < 0) {		
-				if(diff >= myData->COA_Client[i].config.netTimeout) { //ksh_250203
+					//|| diff < 0) {
+				if(diff >= myData->COA_Client[i].config.netTimeout) {	//ksh_250203
 					userlog(DEBUG_LOG, psName, "app kill : %s\n", cmd);
 					Kill_Process(cmd);
 				}
@@ -2594,9 +2596,9 @@ int Read_AppControl_Config(int startType)
 
 int Read_mControl_Config(void)
 {
-	unsigned char ratioV, ratioI, ratioP; //kjh_211021
 	char temp[32], buf[32], fileName[256];
 	int tmp, i;
+	unsigned char ratioV, ratioI, ratioP; //kjh_211021
 	FILE *fp;
 
 	memset(fileName, 0, sizeof fileName);
@@ -2832,7 +2834,7 @@ int Read_mControl_Config(void)
 	}
 	memset(temp, 0, sizeof temp);
 	tmp = fscanf(fp, "%s", temp);
-	if(strcmp(temp, "maxP") != 0) {
+	if(strcmp(temp, "maxP") != 0) { //kjhw_130903
 		fclose(fp);
 		return -15;
 	}
@@ -7259,9 +7261,9 @@ int Read_CellArray_A(void)
 	fclose(fp);
 	return 0;
 }
-
+//jhkw_201117s
 int Read_Daq_Map(void)
-{	//jhkw_201117
+{
 	char temp[32], buf[32], fileName[256];
 	int tmp, i, j, no, start, end, type, monitor_ch, installed_daq;
     FILE *fp;
@@ -7402,6 +7404,7 @@ int Read_Daq_Map(void)
     fclose(fp);
 	return 0;
 }
+//jhkw_201117e
 
 int Create_BdCaliData_Org(int bd)
 {
@@ -8273,15 +8276,24 @@ int	Read_AuxSetData(void)
 int	Write_AuxSetData(void)
 {
 	char fileName[256];
-	int i, ch, count1, count2;
-	int count3, count4, count5; //kjh_160610
+	//int i, ch, count1, count2;
+	//int count3, count4, count5; //kjh_160610
+	int i = 0;
+	int ch = 0;
+	int count1 = 0;
+    int	count2 = 0;
+    int	count3 = 0;
+    int	count4 = 0;
+    int	count5 = 0;
+	int Temp_auxDataCount[MAX_CH_4][MAX_AUX_TYPE];
 	FILE *fp;
 
 	//memset((char *)&myData->auxDataCount, 0,
 	//	sizeof(int) * MAX_CH_512 * MAX_AUX_TYPE);	//kjg_180914
 	//memset((char *)&myData->auxDataCount, 0,
 	//	sizeof(int) * MAX_CH_256 * MAX_AUX_TYPE);
-	memset((char *)&myData->auxDataCount, 0,
+	//memset((char *)&myData->auxDataCount, 0,
+	memset((char *)&Temp_auxDataCount, 0,
 		sizeof(int) * MAX_CH_4 * MAX_AUX_TYPE);	//ktg_191126
 
 	memset(fileName, 0, sizeof fileName);
@@ -8349,13 +8361,23 @@ int	Write_AuxSetData(void)
 				}
 			}
 		}
-		myData->auxDataCount[ch][0] = count1;
-		myData->auxDataCount[ch][1] = count2;
-		myData->auxDataCount[ch][2] = count3; //kjh_160610
-		myData->auxDataCount[ch][3] = count4; //khj_191205
-		myData->auxDataCount[ch][4] = count5; //sec_220926
+		Temp_auxDataCount[ch][0]=count1;
+		Temp_auxDataCount[ch][1]=count2;
+		Temp_auxDataCount[ch][2]=count3;
+		Temp_auxDataCount[ch][3]=count4;
+		Temp_auxDataCount[ch][4]=count5;
+		//myData->auxDataCount[ch][0] = count1;
+		//myData->auxDataCount[ch][1] = count2;
+		//myData->auxDataCount[ch][2] = count3; //kjh_160610
+		//myData->auxDataCount[ch][3] = count4; //khj_191205
+		//myData->auxDataCount[ch][4] = count5; //sec_220926
 		userlog(DEBUG_LOG, psName, "ch%d: Temp(%d), AuxV(%d), AuxTH(%d), AuxHumidity(%d)\n, AuxGas(%d)\n", ch+1, count1, count2, count3, count4, count5);	//csk_200113	//sec_220926
 	}
+	memset((char *)&myData->auxDataCount, 0,
+		sizeof(int) * MAX_CH_4 * MAX_AUX_TYPE);	//ktg_191126
+	memcpy((char *)&myData->auxDataCount, (char *)&Temp_auxDataCount, 
+		sizeof(int) * MAX_CH_4 * MAX_AUX_TYPE); 
+	
 	return 0;
 }
 
@@ -8957,7 +8979,7 @@ int	Read_CanReceiveSetData(void)
 				tmp = fscanf(fp, "%s", buf);
 				myData->canReceiveSetData.commonData[ch][i].sjw
 					= (unsigned char)atoi(buf);
-													
+
 				memset(temp, 0, sizeof temp);
 				tmp = fscanf(fp, "%s", temp);
 				if(strcmp(temp, "reserved1") != 0) {
@@ -9034,7 +9056,7 @@ int	Read_CanReceiveSetData(void)
 				tmp = fscanf(fp, "%s", buf);
 				myData->canReceiveSetData.commonData[ch][i].sjw
 					= (unsigned char)atoi(buf);
-							
+
 				memset(temp, 0, sizeof temp);
 				tmp = fscanf(fp, "%s", temp);
 				if(strcmp(temp, "reserved1") != 0) {
@@ -10787,7 +10809,7 @@ int	Read_CanTransmitSetData(void)
 				tmp = fscanf(fp, "%s", buf);
 				myData->canTransmitSetData.commonData[ch][i].sjw
 					= (unsigned char)atoi(buf);
-				
+
 				memset(temp, 0, sizeof temp);
 				tmp = fscanf(fp, "%s", temp);
 				if(strcmp(temp, "reserved1") != 0) {
@@ -10854,7 +10876,7 @@ int	Read_CanTransmitSetData(void)
 				memset(buf, 0, sizeof buf);
 				tmp = fscanf(fp, "%s", buf);
 				myData->canTransmitSetData.commonData[ch][i].sjw
-					= (unsigned char)atoi(buf);				
+					= (unsigned char)atoi(buf);
 
 				memset(temp, 0, sizeof temp);
 				tmp = fscanf(fp, "%s", temp);
@@ -11119,7 +11141,7 @@ int	Read_CanTransmitSetData(void)
 				memset(buf, 0, sizeof buf);
 				tmp = fscanf(fp, "%s", buf);
 				myData->canTransmitSetData.commonData[ch][i].sjw
-					= (unsigned char)atoi(buf);				
+					= (unsigned char)atoi(buf);
 
 				memset(temp, 0, sizeof temp);
 				tmp = fscanf(fp, "%s", temp);
@@ -11896,7 +11918,7 @@ int	Write_CanTransmitSetData(void)
 				fprintf(fp, "bms_type	:	%d\n",
 					myData->canTransmitSetData.commonData[ch][i].bms_type);
 				fprintf(fp, "sjw        :	%d\n",
-					myData->canTransmitSetData.commonData[ch][i].sjw);				
+					myData->canTransmitSetData.commonData[ch][i].sjw);
 				fprintf(fp, "reserved1	:	0\n");
 					//kjg_180405 myData->canTransmitSetData.commonData[ch][i].reserved1[0]);
 				fprintf(fp, "reserved2	:	0\n");
@@ -13181,8 +13203,10 @@ int Read_Humidity_Table(void)
 	return 0;
 }
 
+
+//khj_191205s
 int Read_Humidity_Table_Type(int table, int type)
-{	//khj_191205
+{
 	char temp[32], buf[32], fileName[256];
 	int tmp, i;
 	float H_V;
@@ -13259,9 +13283,10 @@ int Read_Humidity_Table_Type(int table, int type)
 	fclose(fp);
 	return 0;	
 }
+//khj_191205e
 
-int Read_Measure_Cali_Temp(int mode)
-{	//khj_210802
+int Read_Measure_Cali_Temp(int mode)			//khj_210802
+{
 	char fileName[256], temp[32], buf[32];
 	int tmp, i, j;
 	int point_set, range_set;
@@ -13461,8 +13486,8 @@ int Read_Measure_Cali_Temp(int mode)
 			myData->measure_cali_temp[0][i].temp[4] = atoi(buf);
 	}
 
-	fclose(fp);
-	return 0;
+		fclose(fp);
+		return 0;
 }
 
 int Read_CanFlashFile(void)

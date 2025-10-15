@@ -48,7 +48,9 @@ typedef struct s_save_msg_ch_data_tag {
 	unsigned short int	code;	//ktg_210807
 	unsigned char		stepNo;
 	unsigned char		grade;
-	unsigned char		reserved4[3];	//ktg_210807
+	//unsigned char		reserved4[3];	//ktg_210807
+	unsigned char		reserved4;	//ktg_210807	//jhj_250612	//GUI : cv_flag
+	short int			s_stepNo;	//jhj_250612
 
 	long				Vsens;
 	long				Isens;

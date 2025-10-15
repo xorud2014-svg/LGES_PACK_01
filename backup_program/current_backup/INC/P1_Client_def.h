@@ -38,7 +38,7 @@
 //#define MAX_P1_STEP							100 //for org
 //#define MAX_P1_STEP							210 //for formation
 //#define MAX_P1_STEP							1000
-#define MAX_P1_STEP							250		//jhj_250310
+#define MAX_P1_STEP							420		//jhj_250310	//jhj_250612 250->420
 
 #define MAX_P1_SUB_STEP						10
 #define MAX_P1_COMP_POINT					3

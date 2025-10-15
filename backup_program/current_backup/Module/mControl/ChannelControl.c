@@ -3561,34 +3561,48 @@ void cRun(int ch)
 	}
 
 	//kjg_111006
-	i = (unsigned char)myCh->misc.tmp_avg_index;
-	myCh->misc.tmpVsens_avg_sum[i] = myCh->misc.tmpVsens;
-	myCh->misc.tmpIsens_avg_sum[i] = tmp_total_Isens;
+	//i = (unsigned char)myCh->misc.tmp_avg_index;
+	//myCh->misc.tmpVsens_avg_sum[i] = myCh->misc.tmpVsens;
+	//myCh->misc.tmpIsens_avg_sum[i] = tmp_total_Isens;
+	i = (unsigned char)myCh->capa.tmp_avg_index;	//jhj_250612	//MAX_STEP_420
+	myCh->capa.tmpVsens_avg_sum[i] = myCh->misc.tmpVsens;
+	myCh->capa.tmpIsens_avg_sum[i] = tmp_total_Isens;
 	i++;
 	if(i >= (int)myPs->config.tmp_avg_count) {
 		i = 0;
-		myCh->misc.tmp_avg_flag = P1;
+		//myCh->misc.tmp_avg_flag = P1;
+		myCh->capa.tmp_avg_flag = P1;	//jhj_250612	//MAX_STEP_450
 	}
-	myCh->misc.tmp_avg_index = (unsigned char)i;
-	avgV = myCh->misc.tmpVsens_avg_sum[0];
-	avgI = myCh->misc.tmpIsens_avg_sum[0];
-	if(myCh->misc.tmp_avg_flag == P0) {
+	//myCh->misc.tmp_avg_index = (unsigned char)i;
+	//avgV = myCh->misc.tmpVsens_avg_sum[0];
+	//avgI = myCh->misc.tmpIsens_avg_sum[0];
+	//if(myCh->misc.tmp_avg_flag == P0) {
+	myCh->capa.tmp_avg_index = (unsigned char)i;	//jhj_250612	//MAX_STEP_420
+	avgV = myCh->capa.tmpVsens_avg_sum[0];
+	avgI = myCh->capa.tmpIsens_avg_sum[0];
+	if(myCh->capa.tmp_avg_flag == P0) {
 		for(j=1; j < i; j++) {
-			avgV += myCh->misc.tmpVsens_avg_sum[j];
-			avgI += myCh->misc.tmpIsens_avg_sum[j];
+			//avgV += myCh->misc.tmpVsens_avg_sum[j];
+			//avgI += myCh->misc.tmpIsens_avg_sum[j];
+			avgV += myCh->capa.tmpVsens_avg_sum[j];	//jhj_250612	//MAX_STEP_420
+			avgI += myCh->capa.tmpIsens_avg_sum[j];
 		}
 		avgV /= (double)j;
 		avgI /= (double)j;
 	} else {
 		for(j=1; j < (int)myPs->config.tmp_avg_count; j++) {
-			avgV += myCh->misc.tmpVsens_avg_sum[j];
-			avgI += myCh->misc.tmpIsens_avg_sum[j];
+			//avgV += myCh->misc.tmpVsens_avg_sum[j];
+			//avgI += myCh->misc.tmpIsens_avg_sum[j];
+			avgV += myCh->capa.tmpVsens_avg_sum[j];	//jhj_250612	//MAX_STEP_420
+			avgI += myCh->capa.tmpIsens_avg_sum[j];
 		}
 		avgV /= (double)myPs->config.tmp_avg_count;
 		avgI /= (double)myPs->config.tmp_avg_count;
 	}
-	myCh->misc.tmpVsens_avg = (long)avgV;
-	myCh->misc.tmpIsens_avg = (long)avgI;
+	//myCh->misc.tmpVsens_avg = (long)avgV;
+	//myCh->misc.tmpIsens_avg = (long)avgI;
+	myCh->capa.tmpVsens_avg = (long)avgV;	//jhj_250612	//MAX_STEP_420
+	myCh->capa.tmpIsens_avg = (long)avgI;
 
 	switch(myCh->op.stepType) {
 		case STEP_CHARGE:			cStepCharge(ch);		break;
@@ -6852,12 +6866,18 @@ void cStepCharge(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -7214,12 +7234,18 @@ void cStepCharge(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 			myCh->misc.gcac_link_flag = 0;	//ktg_210511
 
 
@@ -7596,12 +7622,18 @@ void cStepCharge(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -8036,12 +8068,18 @@ void cStepDischarge(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -8413,12 +8451,18 @@ void cStepDischarge(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 #ifdef __B_TYPE__
 			rtn = output_voltage_limited(ch, (int)idxStepNo);	//jhkw_131023s
@@ -8793,12 +8837,18 @@ void cStepDischarge(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -9229,12 +9279,18 @@ void cStepRest(int ch)
 			myCh->misc.can_error_count = 0;
 			myCh->misc.delay_ch_output_state = 0; //kjg_110325
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -9480,12 +9536,18 @@ void cStepRest(int ch)
 			myCh->misc.can_error_count = 0;
 			myCh->misc.delay_ch_output_state = 0; //kjg_110325
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			idx = IDX_LOC_OBJ_CHAMBER_STEP_CHECK_FLAG; //kjhw_150821
 			if(myData->ChAttribute[ch].chamber_control == 1) {
@@ -9798,12 +9860,18 @@ void cStepRest(int ch)
 			myCh->misc.can_error_count = 0;
 			myCh->misc.delay_ch_output_state = 0; //kjg_110325
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -10208,12 +10276,18 @@ void cStepLongTimeRest(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
-			myCh->misc.c_v2 = 0;
-			myCh->misc.c_t1 = 0;
-			myCh->misc.c_t2 = 0;
-			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			//myCh->misc.c_v1 = 0;
+			//myCh->misc.c_v2 = 0;
+			//myCh->misc.c_t1 = 0;
+			//myCh->misc.c_t2 = 0;
+			//myCh->misc.d_count = 0;
+			//myCh->misc.d_flag = 0;
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -10701,12 +10775,18 @@ void cStepOcv(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -10905,12 +10985,18 @@ void cStepOcv(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			if(myData->canTransmitSetData.commonData[ch][0].bms_type == 2) {
 				rtn = bms_state_check(ch);
@@ -11207,12 +11293,18 @@ void cStepOcv(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -11596,12 +11688,18 @@ void cStepZ(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -11996,12 +12094,18 @@ void cStepZ(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 #ifdef __B_TYPE__
 			rtn = output_voltage_limited(ch, (int)idxStepNo); //jhkw_131023
@@ -12419,12 +12523,18 @@ void cStepZ(int ch)
 			myCh->misc.can_warnning_count = 0;
 			myCh->misc.can_error_count = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -12921,12 +13031,18 @@ void cStepPattern(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 			myCh->misc.pattern_count = 1;
 
 			myCh->misc.pattern_time_day = 0;
@@ -13534,12 +13650,18 @@ void cStepPattern(int ch)
 			myCh->misc.pid_error1[0] = 0.0;
 			myCh->misc.pid_error1[1] = 0.0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			//COA_VER_100C~
 			idx = IDX_LOC_OBJ_CHAMBER_STEP_CHECK_FLAG; //kjhw_150821
@@ -13981,12 +14103,18 @@ void cStepPattern(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 			myCh->misc.pattern_count = 1;
 
 			myCh->misc.pattern_time_day = 0;
@@ -14353,12 +14481,18 @@ void cStepExternalCan(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -14583,12 +14717,18 @@ void cStepExternalCan(int ch)
 			myCh->misc.pid_error1[0] = 0.0;
 			myCh->misc.pid_error1[1] = 0.0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			//COA_VER_100C~
 			idx = IDX_LOC_OBJ_CHAMBER_STEP_CHECK_FLAG; //kjhw_150821
@@ -14922,12 +15062,18 @@ void cStepExternalCan(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -15310,12 +15456,18 @@ void cStepUserMap(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 			myCh->misc.pattern_count = 1;
 
 			myCh->misc.pattern_time_day = 0;
@@ -15803,12 +15955,18 @@ void cStepUserMap(int ch)
 			myCh->misc.pid_error1[0] = 0.0;
 			myCh->misc.pid_error1[1] = 0.0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			//COA_VER_100C~
 			idx = IDX_LOC_OBJ_CHAMBER_STEP_CHECK_FLAG; //kjhw_150821
@@ -16208,12 +16366,18 @@ void cStepUserMap(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 			myCh->misc.pattern_count = 1;
 
 			myCh->misc.pattern_time_day = 0;
@@ -16581,12 +16745,18 @@ void cStepExternalCan2(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -16807,12 +16977,18 @@ void cStepExternalCan2(int ch)
 			myCh->misc.pid_error1[0] = 0.0;
 			myCh->misc.pid_error1[1] = 0.0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			//COA_VER_100B2~
 			idx = IDX_LOC_OBJ_CHAMBER_STEP_CHECK_FLAG; //kjhw_150821
@@ -17143,12 +17319,18 @@ void cStepExternalCan2(int ch)
 			myCh->misc.cmd_t[0] = 0;
 			myCh->misc.cmd_t[1] = 0;
 
-			myCh->misc.c_v1 = 0;
+			/*myCh->misc.c_v1 = 0;
 			myCh->misc.c_v2 = 0;
 			myCh->misc.c_t1 = 0;
 			myCh->misc.c_t2 = 0;
 			myCh->misc.d_count = 0;
-			myCh->misc.d_flag = 0;
+			myCh->misc.d_flag = 0;*/
+			myCh->capa.c_v1 = 0;	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v2 = 0;
+			myCh->capa.c_t1 = 0;
+			myCh->capa.c_t2 = 0;
+			myCh->capa.d_count = 0;
+			myCh->capa.d_flag = 0;
 
 			myCh->ccv[1] = myCh->ccv[0];
 			myCh->ccv[0].index = 0;
@@ -19174,7 +19356,8 @@ void cStepLoop_4(int ch)
 		myCh->op.idxStepNo = idxStepNo;
 	} else if(rtn == 3) { //goto
 		idx = IDX_LOC_OBJ_END_CYCLE_COUNT_BRANCH;
-		myCh->op.idxStepNo = (unsigned char)myTestCond->
+		//myCh->op.idxStepNo = (unsigned char)myTestCond->
+		myCh->op.idxStepNo = myTestCond->					//jhj_250612_test	//MAX_STEP_420
 			local_object[idxStepNo][idx] - 1;
 		myCh->elementCycle.cycle_count = 0;
 		idxStepNo = myCh->op.idxStepNo;
@@ -25541,8 +25724,6 @@ void cFaultCond_Hard(int ch)
 		case C_LGC_500V_250A_125A_50A_500KW_12: //ktg_191108
 		case C_LGC_500V_300A_100A_300KW:
 		case C_LGC_500V_400A_200A_400KW:
-		case C_LGC_500V_500A_250A_125A_500KW:	//jhj_250610
-		case C_LGC_500V_500A_250A_125A_500KW_2:	//jhj_250610
 		case C_LGC_500V_500A_300A_100A_500KW:   //phb_220913
         case C_LGC_500V_500A_300A_100A_500KW_2: //phb_220913
         case C_LGC_500V_500A_300A_100A_500KW_3: //phb_220913
@@ -27434,6 +27615,7 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 	unsigned char svdf_flag = 0;	//ktg_220220
 	int idx3, j;	//csk_190808
 	long val3;		//csk_190808
+	int group_div;	//khj_210208	//jhj_250615	//AUX_CAN_AND
 
 	auxType = myData->auxSetData[aux_idx].auxType; //jhkw_220103
 	if(myData->auxSetData[aux_idx].auxType == 0) { //temperature
@@ -27889,6 +28071,10 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 	for(i=0; i < MAX_AUX_FUNCTION; i++) {
 		idx = IDX_LOC_OBJ_AUX_FUNC_DIV_1 + i;
 		func_div = (int)myTestCond->local_object[idxStepNo][idx];
+
+		idx = IDX_LOC_OBJ_AUX_GROUP_TMP_1 + i;		//khj_210208	//jhj_250615	//AUX_CAN_AND
+		group_div = myTestCond->local_object[idxStepNo][idx];
+		
 		if(func_div == AUX_V_FUNC_DIV_NONE) continue;
 
 		if(func_div == AUX_FUNC_DIV_CONCENT1_FORCE_ON) { //kjhw_121024s
@@ -27932,6 +28118,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->op.code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -27944,6 +28132,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->op.code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -27956,6 +28146,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->op.code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -27968,6 +28160,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->op.code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -27983,6 +28177,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.maxAuxTemp;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -27993,6 +28189,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.minAuxTemp;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -28007,6 +28205,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.maxAuxV;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -28017,6 +28217,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.minAuxV;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -28028,6 +28230,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.diffAuxV;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -28042,6 +28246,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.maxAuxTH;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -28052,6 +28258,8 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 					val2 = myCh->misc.minAuxTH;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_FAULT_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->op.code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -28130,7 +28338,10 @@ int cFaultCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx, int real_
 			}
 		}
 	}
-
+	
+	memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+		sizeof(char) * 10);								//khj_210208	//jhj_250615	//AUX_CAN_AND
+		
 	return C_CD_NONE;
 }
 
@@ -28454,7 +28665,10 @@ void cFaultCond_Can(int ch)
 			if(cFaultCond_Can_100ms_step(ch, f_val2, i) > C_CD_NONE) return;
 		}	//ktg_210706e
 	}
-
+	
+	memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+		sizeof(char) * 10);								//khj_210208	//jhj_250615	//AUX_CAN_AND
+	
 	if(myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P1) {
 		myCh->signal[C_SIG_CAN_FREEZE_PHASE] = P2;
 	} else if (myCh->signal[C_SIG_CAN_FREEZE_PHASE] == P3) {
@@ -28936,6 +29150,7 @@ int cFaultCond_Can_step(int ch, float f_val2, int can_idx)
 	int i, idx, rtnCode;
 	int slave_idx, slave_ch; //kjhw_180705
 	float val, f_val3, f_val4;
+	int group_div;		//khj_210208	//jhj_250615	//AUX_CAN_AND
 
 	slave_idx = 0; //kjhw_180705
 	slave_ch = 0; //kjhw_180705
@@ -29057,6 +29272,10 @@ int cFaultCond_Can_step(int ch, float f_val2, int can_idx)
 	for(i=0; i < MAX_CAN_FUNCTION; i++) {
 		idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
 		func_div = (int)myTestCond->local_object[idxStepNo][idx];
+
+		idx = IDX_LOC_OBJ_CAN_GROUP_TMP_1 + i;		//khj_210208	//jhj_250615	//AUX_CAN_AND
+			group_div = myTestCond->local_object[idxStepNo][idx];
+		
 		if(func_div == CAN_RX_FUNC_DIV_NONE
 			|| func_div == CAN_RX_FUNC_DIV_GENERATION_POWER
 			|| (func_div >= CAN_RX_FUNC_DIV_OP_TYPE1
@@ -29114,6 +29333,8 @@ int cFaultCond_Can_step(int ch, float f_val2, int can_idx)
 		//	rtnCode = loc_cCodeCheck(ch, C_CD_CAN_FAULT_FUNC_DIV_1 + i,
 			rtnCode = loc_cCodeCheck_can(ch, C_CD_CAN_FAULT_FUNC_DIV_1 + i,	//khj_201211
 				(long)f_val3, 1, can_idx, i);
+			if(rtnCode > C_CD_NONE)						//khj_210303	//jhj_250615	//AUX_CAN_AND
+				rtnCode = Can_Group_Check(ch, idxStepNo, rtnCode, group_div);
 			if(rtnCode > C_CD_NONE) { //kjhw_121024s
 				if(func_div == CAN_RX_FUNC_DIV_CONCENT1_ON) {
 					Select_OutPoint(0, 0, O_OUT_CONCENT1, ON);
@@ -29177,6 +29398,9 @@ int cFaultCond_Can_step(int ch, float f_val2, int can_idx)
 			}
 		}
 	}
+	
+	//memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+	//	sizeof(char) * 10);								//khj_210208	//jhj_250615	//AUX_CAN_AND
 
 	return C_CD_NONE;
 }
@@ -32917,6 +33141,7 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 	int i, idx, rtnCode, func_div, j;
 	long factor; //, val3;
 	int aux_ch; //kjhw_151103
+	int group_div;	//khj_210208	//jhj_250615	//AUX_CAN_AND
 
 	if(myData->auxSetData[aux_idx].auxType == 0) { //temperature
 		factor = 1;
@@ -32929,6 +33154,10 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 	for(i=0; i < MAX_AUX_FUNCTION; i++) {			
 		idx = IDX_LOC_OBJ_AUX_FUNC_DIV_1 + i;
 		func_div = (int)myTestCond->local_object[idxStepNo][idx];
+
+		idx = IDX_LOC_OBJ_AUX_GROUP_TMP_1 + i;		//khj_210208	//jhj_250615	//AUX_CAN_AND
+		group_div = myTestCond->local_object[idxStepNo][idx];
+		
 		if(func_div == AUX_V_FUNC_DIV_NONE) continue;
 
 		if(func_div == AUX_FUNC_DIV_CONCENT1_FORCE_ON) { //kjhw_121024s
@@ -32973,6 +33202,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->misc.active_code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -32987,6 +33218,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->misc.active_code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33001,6 +33234,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->misc.active_code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33015,6 +33250,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 				rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 					val2, 1, aux_idx, i);
 					//val2, factor, aux_idx, i);
+				if(rtnCode > C_CD_NONE)
+					rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 				if(rtnCode > C_CD_NONE) {
 					myCh->misc.active_code = rtnCode;
 					make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33032,6 +33269,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.maxAuxTemp;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33044,6 +33283,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.minAuxTemp;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33060,6 +33301,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.maxAuxV;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33072,6 +33315,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.minAuxV;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33085,6 +33330,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.diffAuxV;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33101,6 +33348,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.maxAuxTH;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33113,6 +33362,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 					val2 = myCh->misc.minAuxTH;
 					rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 						val2, factor, aux_idx, i);
+					if(rtnCode > C_CD_NONE)
+						rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 					if(rtnCode > C_CD_NONE) {
 						myCh->misc.active_code = rtnCode;
 						make_sub_code(ch, rtnCode, i+1, func_div, 0, 0, 0, 0); //jhkw_220103
@@ -33167,6 +33418,8 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 			//	factor);
 			rtnCode = loc_cCodeCheck_aux(ch, C_CD_AUX_END_FUNC_DIV_1 + i,
 				val2, factor, aux_idx, i); //kjhw_170904
+			if(rtnCode > C_CD_NONE)
+				rtnCode = Aux_Group_Check(ch, idxStepNo, rtnCode, group_div);//khj_210208	//jhj_250615
 			//kjhw_121024s
 			if(rtnCode > C_CD_NONE) {
 				if(func_div == AUX_FUNC_DIV_CONCENT1_ON) {
@@ -33231,9 +33484,67 @@ int cEndCond_Aux_step(int ch, int idxStepNo, long val2, int aux_idx)
 			}
 		}
 	}
-
+	
+	/*memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+		sizeof(char) * 10);*/								//khj_210208	//jhj_250615	//AUX_CAN_AND
+		
 	return C_CD_NONE;
 }
+
+//khj_210208	//jhj_250615 s		//AUX_CAN_AND
+int Aux_Group_Check(int ch, int idxStepNo, int rtnCode, int group_div)
+{
+	int rtn;
+		
+	if(group_div < 1) {
+		return rtnCode;
+	} else {
+		if(group_div == 1) {
+			myTestCond->aux_group_flag[ch][idxStepNo][0]++;
+			if(myTestCond->aux_group_flag[ch][idxStepNo][0]
+				== myTestCond->aux_group_cnt[ch][idxStepNo][0]) {
+				memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				rtn = rtnCode;
+				return rtn;
+			}
+		} else if(group_div == 2) {
+			myTestCond->aux_group_flag[ch][idxStepNo][1]++;
+			if(myTestCond->aux_group_flag[ch][idxStepNo][1]
+				== myTestCond->aux_group_cnt[ch][idxStepNo][1]) {
+				memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		} else if(group_div == 3) {
+			myTestCond->aux_group_flag[ch][idxStepNo][2]++;
+			if(myTestCond->aux_group_flag[ch][idxStepNo][2]
+				== myTestCond->aux_group_cnt[ch][idxStepNo][2]) {
+				memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		} else if(group_div == 4) {
+			myTestCond->aux_group_flag[ch][idxStepNo][3]++;
+			if(myTestCond->aux_group_flag[ch][idxStepNo][3]
+				== myTestCond->aux_group_cnt[ch][idxStepNo][3]) {
+				memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		} else if(group_div == 5) {
+			myTestCond->aux_group_flag[ch][idxStepNo][4]++;
+			if(myTestCond->aux_group_flag[ch][idxStepNo][4]
+				== myTestCond->aux_group_cnt[ch][idxStepNo][4]) {
+				memset((char *)&myTestCond->aux_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		}
+		return C_CD_NONE;
+	}
+}
+//khj_210208	//jhj_250615 e		//AUX_CAN_AND
 
 void cEndCond_Can(int ch)
 {
@@ -33305,6 +33616,8 @@ void cEndCond_Can(int ch)
 		}	//kjhw_141217e
 	}
 	
+	memset((char *)&myTestCond->can_group_flag[ch][myCh->op.idxStepNo][0], 0,
+		sizeof(char) * 10);								//khj_210208	//jhj_250615	//AUX_CAN_AND
 	//csk_200214
 	myCh->misc.can_fault_check_phase++;
 	if(myCh->misc.can_fault_check_phase >= P3)
@@ -33316,6 +33629,7 @@ int cEndCond_Can_step(int ch, float f_val2, int can_idx)
 	short int idxStepNo;
 	int i, idx, rtnCode, func_div, func_div1, func_div2, func_div3, can_ch;
 	float f_val3;
+	int group_div;		//khj_210303	//jhj_250615	//AUX_CAN_AND
 
 	idxStepNo = myCh->op.idxStepNo;
 
@@ -33326,6 +33640,10 @@ int cEndCond_Can_step(int ch, float f_val2, int can_idx)
 	for(i=0; i < MAX_CAN_FUNCTION; i++) {
 		idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
 		func_div = (int)myTestCond->local_object[idxStepNo][idx];
+
+		idx = IDX_LOC_OBJ_CAN_GROUP_TMP_1 + i;		//khj_210208	//jhj_250615	//AUX_CAN_AND
+				group_div = myTestCond->local_object[idxStepNo][idx];
+		
 		if(func_div == CAN_RX_FUNC_DIV_NONE
 			|| func_div == CAN_RX_FUNC_DIV_GENERATION_POWER) continue;
 
@@ -33533,6 +33851,8 @@ int cEndCond_Can_step(int ch, float f_val2, int can_idx)
 			//	(long)f_val3, 1);
 			rtnCode = loc_cCodeCheck_can(ch, C_CD_CAN_END_FUNC_DIV_1 + i,
 				(long)f_val3, 1, can_idx, i);				//khj_201120
+			if(rtnCode > C_CD_NONE)						//khj_210303	//jhj_250615	//AUX_CAN_AND
+				rtnCode = Can_Group_Check(ch, idxStepNo, rtnCode, group_div);
 			if(rtnCode > C_CD_NONE) { //kjhw_121024s
 				if(func_div == CAN_RX_FUNC_DIV_CONCENT1_ON) {
 					Select_OutPoint(0, 0, O_OUT_CONCENT1, ON);
@@ -33600,6 +33920,70 @@ int cEndCond_Can_step(int ch, float f_val2, int can_idx)
 
 	return C_CD_NONE;
 }
+
+//khj_210303	//jhj_250615 s	//AUX_CAN_AND
+int Can_Group_Check(int ch, int idxStepNo, int rtnCode, int group_div)
+{
+	int rtn;
+		
+	if(group_div < 1) {
+		return rtnCode;
+	} else {
+		if(group_div == 1) {
+			myTestCond->can_group_flag[ch][idxStepNo][0]++;
+			if(myTestCond->can_group_flag[ch][idxStepNo][0]
+				== myTestCond->can_group_cnt[ch][idxStepNo][0]) {
+			//	memset((char *)&myTestCond->can_group_cnt[ch][idxStepNo][0], 0,
+			//		sizeof(unsigned char) * 10);
+				memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				rtn = rtnCode;
+				return rtn;
+			}
+		} else if(group_div == 2) {
+			myTestCond->can_group_flag[ch][idxStepNo][1]++;
+			if(myTestCond->can_group_flag[ch][idxStepNo][1]
+				== myTestCond->can_group_cnt[ch][idxStepNo][1]) {
+			//	memset((char *)&myTestCond->can_group_cnt[ch][idxStepNo][0], 0,
+			//		sizeof(unsigned char) * 10);
+				memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		} else if(group_div == 3) {
+			myTestCond->can_group_flag[ch][idxStepNo][2]++;
+			if(myTestCond->can_group_flag[ch][idxStepNo][2]
+				== myTestCond->can_group_cnt[ch][idxStepNo][2]) {
+			//	memset((char *)&myTestCond->can_group_cnt[ch][idxStepNo][0], 0,
+			//		sizeof(unsigned char) * 10);
+				memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		} else if(group_div == 4) {
+			myTestCond->can_group_flag[ch][idxStepNo][3]++;
+			if(myTestCond->can_group_flag[ch][idxStepNo][3]
+				== myTestCond->can_group_cnt[ch][idxStepNo][3]) {
+			//	memset((char *)&myTestCond->can_group_cnt[ch][idxStepNo][0], 0,
+			//		sizeof(unsigned char) * 10);
+				memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		} else if(group_div == 5) {
+			myTestCond->can_group_flag[ch][idxStepNo][4]++;
+			if(myTestCond->can_group_flag[ch][idxStepNo][4]
+				== myTestCond->can_group_cnt[ch][idxStepNo][4]) {
+			//	memset((char *)&myTestCond->can_group_cnt[ch][idxStepNo][0], 0,
+			//		sizeof(unsigned char) * 10);
+				memset((char *)&myTestCond->can_group_flag[ch][idxStepNo][0], 0,
+					sizeof(unsigned char) * 10);
+				return rtnCode;
+			}
+		}
+		return C_CD_NONE;
+	}
+}//khj_210303	//jhj_250615 e	//AUX_CAN_AND
 
 int cEndCond_Can_default(int ch, float f_val2, int can_idx)
 {
@@ -34132,7 +34516,8 @@ int cUserControl_can_goto(int ch, int rx_idx)
 	val = (long)myData->CanData[ch][rx_idx].f_val[0] - 1;
 	if((val < 1) || (val > myTestCond->common_object[IDX_COM_OBJ_TOTAL_STEP])
 		|| ((val - 1) == (long)myCh->op.idxStepNo)) return 1;
-	myCh->misc.user_branch_stepNo = (unsigned char)val; //kjg_w max 300 step
+	//myCh->misc.user_branch_stepNo = (unsigned char)val; //kjg_w max 300 step
+	myCh->misc.user_branch_stepNo = (short int)val; //jhj_250612	//MAX_STEP_420
 
 	myCh->signal[C_SIG_CMD_GOTO_STEP] = P1;
 	for(i=0; i < MAX_SLAVE_CH; i++) {
@@ -37814,7 +38199,8 @@ void cCalculate_Capacitance(int ch, int idxStepNo)
 			Vsens = myCh->op.Vsens;
 			break;
 		default:
-			Vsens = myCh->misc.tmpVsens_avg;
+			//Vsens = myCh->misc.tmpVsens_avg;
+			Vsens = myCh->capa.tmpVsens_avg;	//jhj_250612	//MAX_STEP_420
 			break;
 	}
 
@@ -37839,7 +38225,7 @@ void cCalculate_Capacitance(int ch, int idxStepNo)
 	}
 
 	if(comp_type == 0) {
-		if(myCh->misc.c_t1 == 0 && Vsens >= val1) {
+		/*if(myCh->misc.c_t1 == 0 && Vsens >= val1) {
 			myCh->misc.c_v1 = Vsens;
 			myCh->misc.c_t1 = myCh->op.runTime;
 		}
@@ -37850,13 +38236,24 @@ void cCalculate_Capacitance(int ch, int idxStepNo)
 				//kjh_211021 val1 = (myCh->misc.c_t2 - myCh->misc.c_t1) * 10;
 				val1 = (myCh->misc.c_t2 - myCh->misc.c_t1)
 					* myPs->config.scan_period;	//kjh_211021
-				val2 = Vsens - myCh->misc.c_v1;
+				val2 = Vsens - myCh->misc.c_v1;*/
+		if(myCh->capa.c_t1 == 0 && Vsens >= val1) {	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v1 = Vsens;
+			myCh->capa.c_t1 = myCh->op.runTime;
+		}
+		
+		if(myCh->capa.c_v2 == 0) {
+			if(Vsens < val2) {
+				myCh->capa.c_t2 = myCh->op.runTime;
+				val1 = (myCh->capa.c_t2 - myCh->capa.c_t1)
+					* myPs->config.scan_period;	//kjh_211021
+				val2 = Vsens - myCh->capa.c_v1;
 				if(val2 > 0) {
 					tmp = (double)val1 * (double)myCh->misc.total_Isens;
 					myCh->op.capacitance = tmp / (double)val2;
 				}
 			} else {
-				myCh->misc.c_v2 = Vsens;
+				/*myCh->misc.c_v2 = Vsens;
 				myCh->misc.c_t2 = myCh->op.runTime;
 				//kjh_211021 val1 = (myCh->misc.c_t2 - myCh->misc.c_t1) * 10;
 				val1 = (myCh->misc.c_t2 - myCh->misc.c_t1)
@@ -37864,12 +38261,20 @@ void cCalculate_Capacitance(int ch, int idxStepNo)
 				val2 = myCh->misc.c_v2 - myCh->misc.c_v1;
 				if(val2 > 0) {
 					tmp = (double)val1 * (double)myCh->misc.total_Isens;
+					myCh->op.capacitance = tmp / (double)val2;*/
+				myCh->capa.c_v2 = Vsens;	//jhj_250612	//MAX_STEP_420
+				myCh->capa.c_t2 = myCh->op.runTime;
+				val1 = (myCh->capa.c_t2 - myCh->capa.c_t1)
+					* myPs->config.scan_period;	//kjh_211021
+				val2 = myCh->capa.c_v2 - myCh->capa.c_v1;
+				if(val2 > 0) {
+					tmp = (double)val1 * (double)myCh->misc.total_Isens;
 					myCh->op.capacitance = tmp / (double)val2;
 				}
 			}
 		}
 	} else {
-		if(myCh->misc.c_t1 == 0 && Vsens <= val1) {
+		/*if(myCh->misc.c_t1 == 0 && Vsens <= val1) {
 			myCh->misc.c_v1 = Vsens;
 			myCh->misc.c_t1 = myCh->op.runTime;
 		}
@@ -37892,6 +38297,33 @@ void cCalculate_Capacitance(int ch, int idxStepNo)
 				val1 = (myCh->misc.c_t2 - myCh->misc.c_t1)
 					* myPs->config.scan_period;	//kjh_211021
 				val2 = myCh->misc.c_v1 - myCh->misc.c_v2;
+				if(val2 > 0) {
+					tmp = (double)val1 * (double)myCh->misc.total_Isens;
+					myCh->op.capacitance = tmp / (double)val2 * (-1.0);
+				}
+			}
+		}*/
+		if(myCh->capa.c_t1 == 0 && Vsens <= val1) {	//jhj_250612	//MAX_STEP_420
+			myCh->capa.c_v1 = Vsens;
+			myCh->capa.c_t1 = myCh->op.runTime;
+		}
+
+		if(myCh->capa.c_v2 == 0) {
+			if(Vsens > val2) {
+				myCh->capa.c_t2 = myCh->op.runTime;
+				val1 = (myCh->capa.c_t2 - myCh->capa.c_t1)
+					* myPs->config.scan_period;	//kjh_211021
+				val2 = myCh->capa.c_v1 - Vsens;
+				if(val2 > 0) {
+					tmp = (double)val1 * (double)myCh->misc.total_Isens;
+					myCh->op.capacitance = tmp / (double)val2 * (-1.0);
+				}
+			} else if(Vsens <= val2) {
+				myCh->capa.c_v2 = Vsens;
+				myCh->capa.c_t2 = myCh->op.runTime;
+				val1 = (myCh->capa.c_t2 - myCh->capa.c_t1)
+					* myPs->config.scan_period;	//kjh_211021
+				val2 = myCh->capa.c_v1 - myCh->capa.c_v2;
 				if(val2 > 0) {
 					tmp = (double)val1 * (double)myCh->misc.total_Isens;
 					myCh->op.capacitance = tmp / (double)val2 * (-1.0);

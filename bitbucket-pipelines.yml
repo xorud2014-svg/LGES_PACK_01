@@ -27,6 +27,7 @@ pipelines:
           - chmod 755 mcts
           - chmod 755 resetStart
           - chmod 755 Unload_mControl
+          - chmod 755 test
           - cd ..
           
           # granting AppControl
@@ -38,6 +39,15 @@ pipelines:
           - cd DataSave
           - chmod 755 DataSave
           - cd ..
+
+          #granting rt_can
+          - cd ..
+          - cd Module/rt_can
+          - chmod 755 insrtl
+          - chmod 755 rmrtl
+          - cd ..
+          - cd ..
+          - cd App
           
           # checking Update_Process exist
           - |

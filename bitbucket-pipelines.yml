@@ -95,7 +95,7 @@ pipelines:
           - ls -al
         artifacts:
           - backup_program.tar.gz
-          
+#test_ktg          
 #  branches:
 #    PRO_SDI:
 #      - step:

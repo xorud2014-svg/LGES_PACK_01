@@ -136,6 +136,9 @@ void Output_Ch_Switch_Pack(int slot, int ch)
 		case P73: //relay on, semi switch on (fast) Vref x 2
 			cOutSwitch_P73_Pack1(ch, slot); //kjhw_120430
 			break;
+		case P74: //relay on, semi switch on (fast) Vref x 2
+  			cOutSwitch_P74_Pack1(ch, slot); //20181219 KHK
+ 			break;
 		case P75: //relay on, semi switch on (fast) for cStepZ
 			cOutSwitch_P75_Pack1(ch, slot);
 			break;
@@ -13453,7 +13456,71 @@ void cOutSwitch_P73_Pack1(int ch, int slot)
 	}
 #endif
 }
+void cOutSwitch_P74_Pack1(int ch, int slot)
+{
+	int v_div, i_div, rangeV, rangeI, i;
+	int j, master_ch, idxStepNo, idx, attr_count;
+	long val1, val2;
+	long val1_max, val1_min; //kjhw_120424
+	double v_ratio; //jhkw_181106
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
 
+	user_mode = cFind_User_Define_Mode(ch);
+	if(user_mode.org_mode == MODE_USER){
+		if(user_mode.mode == MODE_CP) return;
+	}
+	myCh->op.stepMode = (unsigned char)user_mode.mode;
+
+	v_div = (int)myCh->misc.cmd_v_div;
+	i_div = (int)myCh->misc.cmd_i_div;
+	rangeV = myCh->op.rangeV;
+	rangeI = myCh->op.rangeI;
+	v_ratio = myPs->config.maxV[0] / myPs->config.maxV[rangeV]; //jhkw_181106
+	if(myCh->misc.cmd_i[0] >= 0) {
+		val1 = myCh->misc.cmd_v[0];
+	} else {
+		val1 = myCh->misc.cmd_v[1];
+	}
+	val1_max = myPs->config.maxV[rangeV]; //kjhw_120424
+	val1_min = myPs->config.minV[rangeV]; //kjhw_120424
+
+	val2 = myCh->misc.cmd_i[0];
+	idxStepNo = myCh->op.idxStepNo;
+	master_ch = find_master_ch(ch);
+	idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+	attr_count = myData->testCond[master_ch].common_object[idx];
+	if(myData->ChAttribute[ch].chNo_master != 0) {
+		if(myData->testCond[master_ch].local_object[idxStepNo]
+			[IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P1){
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				val2 = cFind_SOC_Tracking_Current(ch);
+				val2 = val2 / attr_count;
+				myData->cData[master_ch].misc.cmd_i[0] = val2;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[0] = val2;
+				}
+			}
+		//jhkw_221205s
+		} else if(myData->testCond[master_ch].local_object[idxStepNo]
+			[IDX_LOC_OBJ_SEQUENCE_CHARGE_FLAG] == P1) {
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				val2 = cFind_Sequence_Charge_Current(ch);
+				val2 = val2 / attr_count;
+				myData->cData[master_ch].misc.cmd_i[0] = val2;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[0] = val2;
+				}
+		//jhkw_221205e
+			}
+		}
+	}
+}
 void cOutSwitch_P75_Pack1(int ch, int slot)
 { //kjg_111009
 	//unsigned char idxStepNo;				//csk_190108

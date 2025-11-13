@@ -3564,5 +3564,790 @@ KJGGG:
 	return 0;
 }
 
+//20181219 KHK------------------------------------------------------
+int Read_SOC_Tracking_File(char *psName1, int ch, int pattern_index, unsigned char type)
+{
+	char cmd[256], *in_delimiter = ",\t\n\r", *token;
+	char temp[256], buf[256];
+	unsigned char crate_mode, old_file, interpolation, row, col; //jhkw_191108
+	int tmp, i, j, k;
+	unsigned long crate_val, crate; //jhkw_191108
+	long div;
+	float diff_current, diff, A;
+	FILE *fp;
+
+	old_file = 0;
+	i = IDX_LOC_OBJ_PATTERN_UPDATED; //kjg_170810
+	div = myData->testCond[ch].local_object[pattern_index][i];
+
+	memset(cmd, 0, sizeof cmd);
+	if(div == 0) { //first
+		sprintf(cmd, "/root/START_INFO/CH%03d/SOC_tracking_data_%05d_%d.csv",
+			ch+1, pattern_index+1, type+1);
+	} else {
+		sprintf(cmd,
+			"/root/START_INFO/CH%03d/UPDATE/SOC_tracking_data_%05d_%d.csv",
+			ch+1, pattern_index+1, type+1);
+	}
+	if((fp = fopen(cmd, "r")) == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Open Error}\n", cmd);
+		return -1;
+	}
+
+	j = k = 0;
+
+FIRST:
+	crate_mode = crate_val = crate = row = col = interpolation = 0; //jhkw_191108
+	i = 0;
+	while(i == 0) {
+		j++;
+		if(j >= 100) {
+			i = -1;
+			break;
+		}
+		memset(temp, 0, sizeof temp);
+		tmp = fscanf(fp, "%s", temp);
+
+		if(temp[0] == 'S' && temp[1] == 'T' && temp[2] == 'X' && temp[3] == '_'){
+			i = 1;
+			if(temp[4] == 'C' || temp[4] == 'c') {
+				old_file = 1;
+			}
+			if(old_file == 1) {
+				if(k >= 1) {
+					if(temp[14] == 'C' && temp[15] == 'R' && temp[16] == 'A'
+						&& temp[17] == 'T' && temp[18] == 'E'){
+						crate_mode = 1;
+					}
+				}
+			} else {
+				if(temp[14] == '1'){
+					interpolation = 1;
+				} else if(temp[14] == '2'){
+					crate_mode = 1;
+				} else if(temp[14] == '3'){
+					crate_mode = 1;
+					interpolation = 1;
+				} else {
+				}
+			}
+			break;
+		}
+	}
+
+	if(i <= 0) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){STX Error}\n", cmd);
+    	fclose(fp);
+		return -2;
+	}
+
+	memset((char *)&myData->testCond[ch].SOC_tracking[type], 0,
+		sizeof(S_TEST_COND_SOC_TRACKING_DATA));
+
+	memset(temp, 0, sizeof temp);
+	tmp = fscanf(fp, "%s", temp);
+	token = strtok(temp, in_delimiter);
+	if(token == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Index Error}\n", cmd);
+    	fclose(fp);
+		return -3;
+	}
+	memset(buf, 0, sizeof buf);
+	strcpy(buf, token);
+	token = strtok(NULL, in_delimiter);
+	if(old_file == 1) {
+		userlog(DEBUG_LOG, psName1, "old_file conversion\n");
+		if((strncmp(buf, "SOC", 3) == 0)) {
+			row = col = 1;
+			//Index //SOC/Temp
+		} else {
+			k++;
+			if(k == 1) {
+				goto FIRST;
+			} else if(k == 2) {
+				userlog(DEBUG_LOG, psName1, "%s file(load){Index Error Check 2}\n", cmd);
+	    		fclose(fp);
+				return -4;
+			}
+		}
+	} else {
+		userlog(DEBUG_LOG, psName1, "new_file conversion\n");
+		if((strncmp(buf, "R1", 2) == 0) || (strncmp(buf, "r1", 2) == 0)) {
+			row = 1;
+		} else if((strncmp(buf, "R2", 2) == 0) || (strncmp(buf, "r2", 2) == 0)) {
+			row = 2;
+		} else if((strncmp(buf, "R3", 2) == 0) || (strncmp(buf, "r3", 2) == 0)) {
+			row = 3;
+		} else if((strncmp(buf, "R4", 2) == 0) || (strncmp(buf, "r4", 2) == 0)) {
+			row = 4;
+		} else {
+			k++;
+			if(k == 1) {
+				goto FIRST;
+			} else if(k == 2) {
+				userlog(DEBUG_LOG, psName1, "%s file(load){Index Error Check 2}\n", cmd);
+				fclose(fp);
+				return -4;
+			}
+		}
+		memset(buf, 0, sizeof buf);
+		strcpy(buf, token);
+		token = strtok(NULL, in_delimiter);
+		if((strncmp(buf, "C1", 2) == 0) || (strncmp(buf, "c1", 2) == 0)) {
+			col = 1;
+		} else if((strncmp(buf, "C2", 2) == 0) || (strncmp(buf, "c2", 2) == 0)) {
+			col = 2;
+		} else {
+			k++;
+			if(k == 1) {
+				goto FIRST;
+			} else if(k == 2) {
+				userlog(DEBUG_LOG, psName1, "%s file(load){Index Error Check 3}\n", cmd);
+				fclose(fp);
+				return -5;
+			}
+		}
+		memset(temp, 0, sizeof temp);
+		tmp = fscanf(fp, "%s", temp);
+		token = strtok(temp, in_delimiter);
+		if(token == NULL) {
+			userlog(DEBUG_LOG, psName1, "%s file(load){DATA ERROR}\n", cmd);
+			fclose(fp);
+			return -6;
+		}
+
+		memset(buf, 0, sizeof buf);
+		strcpy(buf, token);
+		token = strtok(NULL, in_delimiter);
+	}
+
+	userlog(DEBUG_LOG, psName1, "c-rate flag = %d\n", crate_mode); //jhkw_191108
+	crate = Calculate_Crate_Value(crate_mode, ch);
+	userlog(DEBUG_LOG, psName1, "c-rate = %ld\n", (long)crate); //jhkw_191108
+	myData->testCond[ch].SOC_tracking[type].maxI = 0;
+	myData->testCond[ch].SOC_tracking[type].minI
+		= myData->mData.config.maxI[0] * 4;
+	for(i=0; i < (MAX_SOC_TRACKING_DATA - 5) + 1; i++) { //SOC //15
+		if(i > 0){
+			memset(temp, 0, sizeof temp);
+			tmp = fscanf(fp, "%s", temp);
+			token = strtok(temp, in_delimiter);
+		}
+		for(j=0; j < MAX_SOC_TRACKING_DATA + 1; j++) { // Temp //20
+			if(i == 0 && j == 0){
+			 	continue;
+			}
+			memset(buf, 0, sizeof buf);
+			if(token == NULL){
+			}else{
+				strcpy(buf, token);
+			}
+			if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+			}else{
+				if(i == 0){
+					if(j > 0){
+						if(token != NULL){ //KHKW
+							myData->testCond[ch].SOC_tracking[type].temp[j-1]
+								= (long)(atof(buf)*1000.0);
+							myData->testCond[ch].SOC_tracking[type].temp_num++;
+						}
+					}
+				}
+				if(j == 0){
+					if(i > 0){
+						if(token != NULL){ //KHKW
+							myData->testCond[ch].SOC_tracking[type].SOC[i-1]
+								= (long)(atof(buf)*10.0);
+							myData->testCond[ch].SOC_tracking[type].soc_num++;
+						}
+					}
+				}
+				if(i > 0 && j > 0){
+					crate_val = (long)(atof(buf)*crate);
+					myData->testCond[ch].SOC_tracking[type].limit_current[i-1][j-1]
+						= crate_val;
+					if(myData->testCond[ch].SOC_tracking[type].maxI
+						< myData->testCond[ch].SOC_tracking[type].limit_current[i-1][j-1]){
+						myData->testCond[ch].SOC_tracking[type].maxI
+							= myData->testCond[ch].SOC_tracking[type].limit_current[i-1][j-1];
+					}
+					if(myData->testCond[ch].SOC_tracking[type].minI
+						> myData->testCond[ch].SOC_tracking[type].limit_current[i-1][j-1]){
+						if(myData->testCond[ch].SOC_tracking[type].limit_current[i-1][j-1] != 0){
+							myData->testCond[ch].SOC_tracking[type].minI
+								= myData->testCond[ch].SOC_tracking[type].limit_current[i-1][j-1];
+						}
+					}
+
+				}
+				token = strtok(NULL, in_delimiter);
+			}
+		}
+	}
+	for(i=0; i < (MAX_SOC_TRACKING_DATA - 5); i++) { //SOC
+		for(j=0; j < MAX_SOC_TRACKING_DATA-1; j++) { // Temp
+			if((i <  myData->testCond[ch].SOC_tracking[type].soc_num) //SOC
+					&&(j < myData->testCond[ch].SOC_tracking[type].temp_num-1)){ //Temp
+				diff = myData->testCond[ch].SOC_tracking[type].temp[j+1]
+					   - myData->testCond[ch].SOC_tracking[type].temp[j];
+				if(diff != 0){
+					diff_current = myData->testCond[ch].SOC_tracking[type].limit_current[i][j+1]
+						- myData->testCond[ch].SOC_tracking[type].limit_current[i][j];
+					if(diff_current != 0){
+						A = (float)(diff_current/ diff);
+						myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+							= A;
+						myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]
+							= myData->testCond[ch].SOC_tracking[type].limit_current[i][j+1]
+							- A * (float)myData->testCond[ch].SOC_tracking[type].temp[j+1];
+					}else{
+						myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j] = 0.0;
+						myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]
+							= myData->testCond[ch].SOC_tracking[type].limit_current[i][j+1];
+					}
+				}else{
+					myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j] = 0.0;
+					myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]
+						= myData->testCond[ch].SOC_tracking[type].limit_current[i][j+1];
+				}
+			}
+		}
+	}
+
+    fclose(fp);
+	if(div == 0) { //first
+		userlog(DEBUG_LOG, psName1,
+			"SOC tracking file read completed ch:%d index:%d type:%d\n",
+			ch+1, pattern_index+1, type);
+	} else { //1 update
+		userlog(DEBUG_LOG, psName1, "SOC tracking file read completed(update) ch:%d index:%d type:%d\n",
+			ch+1, pattern_index+1, type);
+	}
+	myData->testCond[ch].SOC_tracking[type].row = row;
+	myData->testCond[ch].SOC_tracking[type].col = col;
+	myData->testCond[ch].SOC_tracking[type].interpolation = interpolation;
+	userlog(DEBUG_LOG, psName1, "row = %d, col = %d, interpolation = %d, c-rate flag = %d\n",
+		row, col, interpolation, crate_mode); //jhkw_191108
+	return 0;
+}
+//jhkw_201102e
+//--------------------------------------------------------------------
+
+//20181219 KHK------------------------------------------------------
+int Read_User_Define_Mode_Charging_Count_File(char *psName1, int ch)
+{
+	char cmd[256], *in_delimiter = ",\t\n\r", *token;
+	char temp[256], buf[256];
+	int tmp, i, j, k, mode;
+	FILE *fp;
+
+	memset(cmd, 0, sizeof cmd);
+	sprintf(cmd, "/root/START_INFO/CH%03d/ChargingCount_data.csv",ch+1);
+	// /root/START_INFO/CH00#/ChargingCount_data.csv
+
+	if((fp = fopen(cmd, "r")) == NULL) {
+//		userlog(DEBUG_LOG, psName1, "%s file(load){Open Error}\n", cmd);
+		return -1;
+	}
+
+	j = k = 0;
+	i = 0;
+	while(i == 0) {
+		j++;
+		if(j >= 100) {
+			i = -1;
+			break;
+		}
+		memset(temp, 0, sizeof temp);
+		tmp = fscanf(fp, "%s", temp);
+
+	//	userlog2(DEBUG_LOG, psName1, " %02x:%02x:%02x:%02x",
+	//		(unsigned char)temp[0], (unsigned char)temp[1],
+	//		(unsigned char)temp[2], (unsigned char)temp[3]);
+
+//		if(strncmp(buf, "STX_CHGCOUNT", 12) == 0) {
+		if(temp[0] == 'S' && temp[1] == 'T' && temp[2] == 'X'
+			&&temp[3] == '_' && temp[7] == 'C'){
+			i = 1;
+			break;
+		}
+	}
+	//userlog2(DEBUG_LOG, psName1, ":end\n");
+
+	if(i <= 0) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){STX Error}\n", cmd);
+    	fclose(fp);
+		return -2;
+	}
+
+	memset((char *)&myData->testCond[ch].user_define_mode.charging_count_set, 0,
+		sizeof(S_TEST_COND_CHARGING_COUNT_SET_DATA));
+
+	memset(temp, 0, sizeof temp);
+	tmp = fscanf(fp, "%s", temp);
+	token = strtok(temp, in_delimiter);
+	if(token == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Index Error}\n", cmd);
+    	fclose(fp);
+		return -3;
+	}
+
+	for(i=0; i < 16; i++) {
+		if(i > 0){
+			memset(temp, 0, sizeof temp);
+			tmp = fscanf(fp, "%s", temp);
+			token = strtok(temp, in_delimiter);
+		}
+		//Charging Count
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				myData->testCond[ch].user_define_mode.charging_count_set.counter[i] = atol(buf);
+				if(atol(buf)
+					> myData->testCond[ch].user_define_mode.charging_count_set.maxCounter){
+					myData->testCond[ch].user_define_mode.charging_count_set.maxCounter = atol(buf);
+				}
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+		//Charging Mode
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				mode = atoi(buf);
+				myData->testCond[ch].user_define_mode.charging_count_set.mode[i]
+					= mode;
+//					= convert_step_mode(CONVERT_P1_TO_ORG, (long)mode);
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+		//SOC Tracking Use Flag
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				myData->testCond[ch].user_define_mode.charging_count_set.soc_tracking_use[i] = atoi(buf);
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+		//Power
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				if(myData->testCond[ch].user_define_mode.charging_count_set.mode[i] == P1_MODE_CC){
+					myData->testCond[ch].user_define_mode.charging_count_set.refP[i]
+						= (long)(atof(buf) * myData->mData.patt_ratioI); //shh_230107
+						//= (long)(atof(buf)*1000000);
+				}else{
+					myData->testCond[ch].user_define_mode.charging_count_set.refP[i]
+						= (long)(atof(buf) * myData->mData.patt_ratioP); //shh_230107
+						//= (long)(atof(buf)*1000);
+				}
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+	}
+
+    fclose(fp);
+	userlog(DEBUG_LOG, psName1,
+		"ChargingCount_data file read completed ch:%d \n",ch+1);
+	return 0;
+}
+//--------------------------------------------------------------------
+
+
+//20181219 KHK------------------------------------------------------
+int Read_User_Define_Mode_Charging_RPT_SOC_File(char *psName1, int ch)
+{
+	char cmd[256], *in_delimiter = ",\t\n\r", *token;
+	char temp[256], buf[256];
+	int tmp, i, j, k;
+	FILE *fp;
+
+	memset(cmd, 0, sizeof cmd);
+	sprintf(cmd, "/root/START_INFO/CH%03d/ChargingRPTSOC_data.csv",ch+1);
+	// /root/START_INFO/CH00#/ChargingRPTSOC_data.csv
+
+	if((fp = fopen(cmd, "r")) == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Open Error}\n", cmd);
+		return -1;
+	}
+
+	j = k = 0;
+	i = 0;
+	while(i == 0) {
+		j++;
+		if(j >= 100) {
+			i = -1;
+			break;
+		}
+		memset(temp, 0, sizeof temp);
+		tmp = fscanf(fp, "%s", temp);
+
+	//	userlog2(DEBUG_LOG, psName1, " %02x:%02x:%02x:%02x",
+	//		(unsigned char)temp[0], (unsigned char)temp[1],
+	//		(unsigned char)temp[2], (unsigned char)temp[3]);
+
+		if(temp[0] == 'S' && temp[1] == 'T' && temp[2] == 'X'
+			&&temp[3] == '_' && temp[7] == 'R'){
+			i = 1;
+			break;
+		}
+	}
+	//userlog2(DEBUG_LOG, psName1, ":end\n");
+
+	if(i <= 0) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){STX Error}\n", cmd);
+    	fclose(fp);
+		return -2;
+	}
+
+	memset((char *)&myData->testCond[ch].user_define_mode.charging_rpt_soc_set, 0,
+		sizeof(S_TEST_COND_CHARGING_RPT_SOC_SET_DATA));
+
+	memset(temp, 0, sizeof temp);
+	tmp = fscanf(fp, "%s", temp);
+	token = strtok(temp, in_delimiter);
+	if(token == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Index Error}\n", cmd);
+    	fclose(fp);
+		return -3;
+	}
+
+	for(i=0; i < 16; i++) {
+		if(i > 0){
+			memset(temp, 0, sizeof temp);
+			tmp = fscanf(fp, "%s", temp);
+			token = strtok(temp, in_delimiter);
+		}
+		//Charging Count
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				myData->testCond[ch].user_define_mode.charging_rpt_soc_set.counter[i] = atol(buf);
+				if(atol(buf)
+					> myData->testCond[ch].user_define_mode.charging_rpt_soc_set.maxCounter){
+					myData->testCond[ch].user_define_mode.charging_rpt_soc_set.maxCounter = atol(buf);
+				}
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+		//Charging End SOC
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				myData->testCond[ch].user_define_mode.charging_rpt_soc_set.endSOC[i] = (long)(atof(buf)*10);
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+		//RPT SOC Set Use Flag
+		if(token == NULL){
+		}else{
+			memset(buf, 0, sizeof buf);
+			strcpy(buf, token);
+		}
+		if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+		}else{
+			if(token != NULL){
+				myData->testCond[ch].user_define_mode.charging_rpt_soc_set.from_endsoc_to_rptsoc_set[i] = (unsigned char)atoi(buf);
+			}
+		}
+		token = strtok(NULL, in_delimiter);
+	}
+
+    fclose(fp);
+	userlog(DEBUG_LOG, psName1,
+		"ChargingRPTSOC_data file read completed ch:%d \n",ch+1);
+	return 0;
+}
+//--------------------------------------------------------------------
+//jhkw_221205s
+int Read_Sequence_Charge_File(char *psName1, int ch, int pattern_index)
+{
+	char cmd[256], *in_delimiter = ",\t\n\r", *token;
+	char temp[256], buf[256];
+	unsigned char row, col, row2, row_num, row2_num, col_num;
+	int tmp, i, j, k;
+	long div, ratio;
+	long ratio_row, ratio_row2, ratio_col;	//shhw_230525
+	FILE *fp;
+
+	row = col = row2 = row_num = row2_num = col_num = 0;
+	ratio = (long)myData->mData.patt_ratioI; //MICRO or MILLI UNIT//shhw_240104
+	//ratio = 1000000;
+	ratio_row2 = 1000000; 	//AuxV unit is only MICRO_UNIT //shhw_240104
+	ratio_col = 1000; 		//shhw_240104
+	i = IDX_LOC_OBJ_PATTERN_UPDATED; //kjg_170810
+	div = myData->testCond[ch].local_object[pattern_index][i];
+
+	memset(cmd, 0, sizeof cmd);
+	if(div == 0) { //first
+		sprintf(cmd, "/root/START_INFO/CH%03d/SequenceCharge_%05d.csv",
+			ch+1, pattern_index+1);
+	} else {
+		sprintf(cmd,
+			"/root/START_INFO/CH%03d/UPDATE/SequenceCharge_%05d.csv",
+			ch+1, pattern_index+1);
+	}
+	if((fp = fopen(cmd, "r")) == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Open Error}\n", cmd);
+		return -1;
+	}
+
+	j = k = 0;
+
+FIRST:
+	i = 0;
+	while(i == 0) {
+		j++;
+		if(j >= 100) {
+			i = -1;
+			break;
+		}
+		memset(temp, 0, sizeof temp);
+		tmp = fscanf(fp, "%s", temp);
+
+		if(temp[0] == 'S' && temp[1] == 'T' && temp[2] == 'X' && temp[3] == '_'){
+			i = 1;
+			break;
+		}
+	}
+
+	if(i <= 0) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){STX Error}\n", cmd);
+    	fclose(fp);
+		return -2;
+	}
+
+	memset((char *)&myData->testCond[ch].SQ_Charge, 0,
+		sizeof(S_TEST_COND_SEQUENCE_CHARGE_DATA));
+
+	memset(temp, 0, sizeof temp);
+	tmp = fscanf(fp, "%s", temp);
+	token = strtok(temp, in_delimiter);
+	if(token == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){Index Error}\n", cmd);
+    	fclose(fp);
+		return -3;
+	}
+	memset(buf, 0, sizeof buf);
+	strcpy(buf, token);
+	token = strtok(NULL, in_delimiter);
+	if((strncmp(buf, "R1", 2) == 0) || (strncmp(buf, "r1", 2) == 0)) {
+		row = 1;
+	} else if((strncmp(buf, "R2", 2) == 0) || (strncmp(buf, "r2", 2) == 0)) {
+		row = 2;
+	} else if((strncmp(buf, "R3", 2) == 0) || (strncmp(buf, "r3", 2) == 0)) {
+		row = 3;
+	} else if((strncmp(buf, "R4", 2) == 0) || (strncmp(buf, "r4", 2) == 0)) {
+		row = 4;
+	} else if((strncmp(buf, "R5", 2) == 0) || (strncmp(buf, "r5", 2) == 0)) {	//shhw_230119s
+		row = 5;
+	} else if((strncmp(buf, "R6", 2) == 0) || (strncmp(buf, "r6", 2) == 0)) {
+		row = 6;
+	} else if((strncmp(buf, "R7", 2) == 0) || (strncmp(buf, "r7", 2) == 0)) {	//shhw_230119e
+		row = 7;
+	} else {
+		k++;
+		if(k == 1) {
+			goto FIRST;
+		} else if(k == 2) {
+			userlog(DEBUG_LOG, psName1, "%s file(load){Index Error Check row}\n", cmd);
+    		fclose(fp);
+			return -4;
+		}
+	}
+	//shhw_230525s
+	ratio_row = 10; //SOC
+	if(row == 3) ratio_row = (long)myData->mData.patt_ratioI;//MICRO or MILLI UNIT//shhw_240104
+	//if(row == 3) ratio_row = 1000000; //Capacity(Ah)
+	//shhw_230525e
+	memset(buf, 0, sizeof buf);
+	strcpy(buf, token);
+	token = strtok(NULL, in_delimiter);
+	if((strncmp(buf, "C1", 2) == 0) || (strncmp(buf, "c1", 2) == 0)) {
+		col = 1;
+	} else if((strncmp(buf, "C2", 2) == 0) || (strncmp(buf, "c2", 2) == 0)) {
+		col = 2;
+	} else if((strncmp(buf, "C3", 2) == 0) || (strncmp(buf, "c3", 2) == 0)) {	//shhw_230119s
+		col = 3;
+	} else if((strncmp(buf, "C4", 2) == 0) || (strncmp(buf, "c4", 2) == 0)) {
+		col = 4;
+	} else if((strncmp(buf, "C5", 2) == 0) || (strncmp(buf, "c5", 2) == 0)) {
+		col = 5;
+	} else if((strncmp(buf, "C6", 2) == 0) || (strncmp(buf, "c6", 2) == 0)) {
+		col = 6;
+	} else if((strncmp(buf, "C7", 2) == 0) || (strncmp(buf, "c7", 2) == 0)) {	//shhw_230119e
+		col = 7;
+	} else {
+		k++;
+		if(k == 1) {
+			goto FIRST;
+		} else if(k == 2) {
+			userlog(DEBUG_LOG, psName1, "%s file(load){Index Error Check col}\n", cmd);
+			fclose(fp);
+			return -5;
+		}
+	}
+	//ratio_col = 1000; //shhw_240104
+	memset(buf, 0, sizeof buf);
+	strcpy(buf, token);
+	token = strtok(NULL, in_delimiter);
+	if((strncmp(buf, "V1", 2) == 0) || (strncmp(buf, "v1", 2) == 0)) {
+		row2 = 1;
+	} else if((strncmp(buf, "V2", 2) == 0) || (strncmp(buf, "v2", 2) == 0)) {
+		row2 = 2;
+	} else if((strncmp(buf, "V3", 2) == 0) || (strncmp(buf, "v3", 2) == 0)) {	//shhw_230119s
+		row2 = 3;
+	} else if((strncmp(buf, "V4", 2) == 0) || (strncmp(buf, "v4", 2) == 0)) {
+		row2 = 4;
+	} else if((strncmp(buf, "V5", 2) == 0) || (strncmp(buf, "v5", 2) == 0)) {
+		row2 = 5;
+	} else if((strncmp(buf, "V6", 2) == 0) || (strncmp(buf, "v6", 2) == 0)) {
+		row2 = 6;
+	} else if((strncmp(buf, "V7", 2) == 0) || (strncmp(buf, "v7", 2) == 0)) {	//shhw_230119e
+		row2 = 7;
+	} else {
+		k++;
+		if(k == 1) {
+			goto FIRST;
+		} else if(k == 2) {
+			userlog(DEBUG_LOG, psName1, "%s file(load){Index Error Check row2}\n", cmd);
+			fclose(fp);
+			return -5;
+		}
+	}
+	memset(temp, 0, sizeof temp);
+	tmp = fscanf(fp, "%s", temp);
+	token = strtok(temp, in_delimiter);
+	if(token == NULL) {
+		userlog(DEBUG_LOG, psName1, "%s file(load){DATA ERROR}\n", cmd);
+		fclose(fp);
+		return -6;
+	}
+
+	memset(buf, 0, sizeof buf);
+	strcpy(buf, token);
+	token = strtok(NULL, in_delimiter);
+
+	myData->testCond[ch].SQ_Charge.maxI = 0;
+	myData->testCond[ch].SQ_Charge.minI
+		= myData->mData.config.maxI[0] * 4;
+	for(i=0; i < MAX_SQ_ROW_DATA + 1; i++) { //SOC //15
+		if(i > 0){
+			memset(temp, 0, sizeof temp);
+			tmp = fscanf(fp, "%s", temp);
+			token = strtok(temp, in_delimiter);
+		}
+		for(j=0; j < (MAX_SQ_COL_DATA * 2) + 1; j++) { // Temp //10
+			if(i == 0 && j == 0){
+			 	continue;
+			}
+			memset(buf, 0, sizeof buf);
+			if(token == NULL){
+			}else{
+				strcpy(buf, token);
+			}
+			if((strncmp(buf, "EOF", 3) == 0) || (strncmp(buf, "eof", 3) == 0)) {
+			}else{
+				if(i == 0){
+					if((j > 0) && (j % 2 == 1)){
+						if(token != NULL){ //KHKW
+							myData->testCond[ch].SQ_Charge.COL[col_num]
+								= (long)(atof(buf)*ratio_col);	//shhw_230525
+								//= (long)(atof(buf)*1000.0);
+							col_num++;
+						}
+					}
+				}
+				if(j == 0){
+					if(i > 0){
+						if(token != NULL){ //KHKW
+							myData->testCond[ch].SQ_Charge.ROW[row_num]
+								= (long)(atof(buf)*ratio_row);	//shhw_230525
+								//= (long)(atof(buf)*10.0);
+							row_num++;
+						}
+					}
+				}
+				if(i > 0 && j > 0){
+					if(j % 2 == 1) {
+						myData->testCond[ch].SQ_Charge.limit_current[i-1][j/2]
+							= (long)(atof(buf) * ratio);
+						if(myData->testCond[ch].SQ_Charge.maxI
+							< myData->testCond[ch].SQ_Charge.limit_current[i-1][j/2]){
+							myData->testCond[ch].SQ_Charge.maxI
+								= myData->testCond[ch].SQ_Charge.limit_current[i-1][j/2];
+						}
+						if(myData->testCond[ch].SQ_Charge.minI
+							> myData->testCond[ch].SQ_Charge.limit_current[i-1][j/2]){
+							if(myData->testCond[ch].SQ_Charge.limit_current[i-1][j/2] != 0){
+								myData->testCond[ch].SQ_Charge.minI
+									= myData->testCond[ch].SQ_Charge.limit_current[i-1][j/2];
+							}
+						}
+					} else if(j % 2 == 0){
+						myData->testCond[ch].SQ_Charge.div_voltage[i-1][(j/2)-1]
+							= (long)(atof(buf) * ratio_row2);	//shhw_240104
+							//= (long)(atof(buf) * ratio);
+						row2_num = j/2;
+					}
+				}
+				token = strtok(NULL, in_delimiter);
+			}
+		}
+	}
+
+    fclose(fp);
+	if(div == 0) { //first
+		userlog(DEBUG_LOG, psName1,
+			"Sequence charge file read completed ch:%d index:%d\n",
+			ch+1, pattern_index+1);
+	} else { //1 update
+		userlog(DEBUG_LOG, psName1, "Sequence charge file read completed(update) ch:%d index:%d\n",
+			ch+1, pattern_index+1);
+	}
+	myData->testCond[ch].SQ_Charge.row = row;
+	myData->testCond[ch].SQ_Charge.col = col;
+	myData->testCond[ch].SQ_Charge.row2 = row2;
+	myData->testCond[ch].SQ_Charge.row_num = row_num;
+	myData->testCond[ch].SQ_Charge.col_num = col_num;
+	myData->testCond[ch].SQ_Charge.row2_num = row2_num;
+	userlog(DEBUG_LOG, psName1, "row = %d, col = %d, row2 = %d\n", row, col, row2);
+	userlog(DEBUG_LOG, psName1, "row_num = %d, col_num = %d, row2_num = %d\n"
+		, row_num, col_num, row2_num);
+	return 0;
+}
+//jhkw_221205e
+
 #endif
 

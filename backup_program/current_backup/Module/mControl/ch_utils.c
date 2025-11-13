@@ -39274,3 +39274,459 @@ int cCheck_Reference_Condition(int ch)
 	if(step != myCh->op.idxStepNo) return (-1);
 	else return rtn;
 }
+
+//20181219 KHK------------------------------------------------------
+long	cFind_SOC_Tracking_Limit_Current(int ch, long refI)
+{
+	//SOC Tracking for Pattern Step
+
+	unsigned char type, interpolation, row, col;
+	int i, j, tmp, tmp1, idxStepNo, check_i;
+	int idx, func_div, attr_count, master_ch;
+	long	SOC, temp, val, val1, val2, diff, diff_current, soc1, soc2;
+	float A, B;
+	double limit_current; //jhkw_190425
+	long ratioV, ratioI;	//jhkw_231127
+	double ratioP;	//jhkw_231127
+
+    idxStepNo = myCh->op.idxStepNo;
+	idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+	attr_count = myTestCond->common_object[idx];
+	type = SOC = temp = 0;
+
+	ratioV = myData->mData.ratioV;	//jhkw_231127s
+	ratioI = myData->mData.ratioI;
+	ratioP = myData->mData.ratioP;	//jhkw_231127e
+	if(refI > 0) {
+		if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P0){
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				refI = refI / attr_count;
+			}
+			return refI;
+		} else {
+			type = 0;	//charge
+		}
+	} else {
+		if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG] == P0){
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				refI = refI / attr_count;
+			}
+			return refI;
+		} else {
+			type = 1;	//discharge
+			refI = refI * (-1);
+		}
+	}
+
+	//jhkw_190425s
+	limit_current = 0;
+	if(myCh->op.stepMode == MODE_CP) {
+		//Conversion Power(W) -> Current(I)
+		limit_current = refI;
+		limit_current /= (double)myCh->misc.tmpVsens;
+		limit_current *= myData->mData.cp_to_cc;	//jhkw_231127
+		refI = limit_current * attr_count;
+	}
+	//jhkw_190425e
+
+	interpolation = myData->testCond[ch].SOC_tracking[type].interpolation;
+	row = myData->testCond[ch].SOC_tracking[type].row;
+	col = myData->testCond[ch].SOC_tracking[type].col;
+    idxStepNo = myCh->op.idxStepNo;
+	if(row == 1) {
+		SOC = (long)myCh->op.SOC;
+	} else if(row == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_ROW) {
+				SOC = myCh->misc.can_data_l[0] / 100;
+			}
+		}
+	} else if(row == 3) {
+		SOC = myCh->misc.maxAuxV / 100;
+	} else if(row == 4) {
+		SOC = myCh->misc.sum_AmpareHour / 100;
+	} else {
+		SOC = 0;
+	}
+
+	if(col == 1) {
+		for(i=0; i < MAX_AUX_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_AUX_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == AUX_V_FUNC_DIV_NONE) continue;
+			if(func_div == AUX_FUNC_DIV_MAX_AUXT) {
+				temp = myCh->misc.maxAuxT;
+			}else if(func_div == AUX_FUNC_DIV_MIN_AUXT) {
+				temp = myCh->misc.minAuxT;
+			}else if(func_div == AUX_FUNC_DIV_DIFF_AUXT) {
+				temp = myCh->misc.diffAuxT;
+			}else if(func_div == AUX_FUNC_DIV_AVG_AUXT) {
+				temp = myCh->misc.avgAuxT;
+			}
+		}
+	} else if(col == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_COL) {
+				temp = myCh->misc.can_data_l[1];
+			}
+		}
+	} else {
+		temp = 0;
+	}
+
+	tmp = myData->testCond[ch].SOC_tracking[type].soc_num;
+	if(tmp > (MAX_SOC_TRACKING_DATA -5)) tmp = MAX_SOC_TRACKING_DATA - 5; //15
+	if(tmp <= 0) tmp = 1;
+
+	for(i=0; i < tmp; i++) { // SOC
+		if(SOC < myData->testCond[ch].SOC_tracking[type].SOC[i]) break;
+	}
+	i = i -1;
+	if(i < 0){
+	   	i = 0;
+	}
+	check_i = i;
+	if(check_i >= myData->testCond[ch].SOC_tracking[type].soc_num-1){
+		check_i = myData->testCond[ch].SOC_tracking[type].soc_num-2;
+		if(check_i < 0)
+			check_i = 0;
+	}
+
+	tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+	if(tmp > MAX_SOC_TRACKING_DATA) tmp = MAX_SOC_TRACKING_DATA; //20
+	if(tmp <= 0) tmp = 1;
+
+	for(j=0; j < tmp; j++) { // Temp
+		if(temp < myData->testCond[ch].SOC_tracking[type].temp[j]) break;
+	}
+	j = j - 1;
+	if(j < 0){
+		j = 0;
+	}
+
+	//shhw_240816s
+	if(interpolation == 1)
+	{
+		//Calculation for the Interpolation value
+		tmp1 = myData->testCond[ch].SOC_tracking[type].soc_num;
+		tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+		if(temp > myData->testCond[ch].SOC_tracking[type].temp[tmp-1]){
+			temp = myData->testCond[ch].SOC_tracking[type].temp[tmp-1];
+			j = tmp-2;
+			if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+				i = 0;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+				i = tmp1 -1;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else{
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+			}
+		}else if(temp < myData->testCond[ch].SOC_tracking[type].temp[0]){
+			temp = myData->testCond[ch].SOC_tracking[type].temp[0];
+			j = 0;
+			if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+				i = 0;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2  = val1;
+			}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+				i = tmp1 -1;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2  = val1;
+			}else{
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+			}
+		}else{
+			if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+				i = 0;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+				i = tmp1 -1;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else{
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+			}
+		}
+
+		soc1 = myData->testCond[ch].SOC_tracking[type].SOC[check_i];
+		soc2 = myData->testCond[ch].SOC_tracking[type].SOC[check_i+1];
+		diff = soc2 - soc1;
+		if(diff != 0){
+			diff_current = val2 - val1;
+			if(diff_current != 0){
+				A = diff_current/ diff;
+				B = val1 - A * soc1;
+			}else{
+				A = 0.0;
+				B = val1;
+			}
+		}else{
+			A = 0.0;
+			B = val1;
+		}
+		val = (float)SOC * A + B;
+		if(refI > val) refI = val;
+	} else {
+		//Step Mode(non interpolation Mode)
+		val = myData->testCond[ch].SOC_tracking[type].limit_current[i][j];
+		if(refI > val) refI = val;
+	}
+	//shhw_240816e
+
+	if(type == 1) {
+		if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_LIMIT_CURRENT_LOWER] != 0){
+			if(labs(refI)
+				> labs(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_LIMIT_CURRENT_LOWER])){
+				refI = myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_LIMIT_CURRENT_LOWER];
+				//if(refI > 0) refI = refI * (-1);
+			}
+		}
+		if(refI > 0) refI = refI * (-1);
+	}
+	limit_current = 0;
+	if(myCh->op.stepMode == MODE_CP) {
+	//Conversion Current(I) -> Power(W)
+	//jhkw_190425s
+	//	limit_current = (double)(myCh->misc.tmpVsens / ratioV)
+	//		* (double)(refI / ratioI) / ratioP;
+	//	refI = limit_current / attr_count;
+		myCh->misc.socRefI = refI; //shht_240629(241022)
+		limit_current = (double)(myCh->misc.tmpVsens / ratioV);
+		limit_current *= (double)((double)refI / (double)ratioI);
+	    limit_current /= ratioP;
+		refI = limit_current / attr_count;
+	//jhkw_190425e
+	} else {
+		refI = refI / attr_count;
+	}
+	master_ch = find_master_ch(ch);
+	if(myData->ChAttribute[ch].chNo_master == 0) {
+		if(myCh->op.stepMode == MODE_CP) {
+			refI = myData->cData[master_ch].misc.cmd_p[1];
+		}
+	}
+	return refI;
+}
+//------------------------------------------------------------
+//20181219 KHK----------------------------------------------
+long	cFind_SOC_Tracking_Current(int ch)
+{
+	//Charge SOC
+	unsigned char type, interpolation, row, col;
+	int i, j, tmp, tmp1, idx, func_div, idxStepNo, check_i;
+	long temp=0, SOC, val=0, val1, val2, diff, diff_current, soc1, soc2;
+	float A, B;
+
+	type = SOC = 0;
+	interpolation = myData->testCond[ch].SOC_tracking[type].interpolation;
+	row = myData->testCond[ch].SOC_tracking[type].row;
+	col = myData->testCond[ch].SOC_tracking[type].col;
+    idxStepNo = myCh->op.idxStepNo;
+	if(row == 1) {
+		SOC = (long)myCh->op.SOC;
+	} else if(row == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_ROW) {
+				SOC = myCh->misc.can_data_l[0] / 100;
+			}
+		}
+	} else if(row == 3) {
+		SOC = myCh->misc.maxAuxV / 100;
+	} else if(row == 4) {
+		SOC = myCh->misc.sum_AmpareHour / 100;
+	} else {
+		SOC = 0;
+	}
+
+	if(col == 1) {
+		for(i=0; i < MAX_AUX_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_AUX_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == AUX_V_FUNC_DIV_NONE) continue;
+			if(func_div == AUX_FUNC_DIV_MAX_AUXT) {
+				temp = myCh->misc.maxAuxT;
+			}else if(func_div == AUX_FUNC_DIV_MIN_AUXT) {
+				temp = myCh->misc.minAuxT;
+			}else if(func_div == AUX_FUNC_DIV_DIFF_AUXT) {
+				temp = myCh->misc.diffAuxT;
+			}else if(func_div == AUX_FUNC_DIV_AVG_AUXT) {
+				temp = myCh->misc.avgAuxT;
+			}
+		}
+	} else if(col == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_COL) {
+				temp = myCh->misc.can_data_l[1];
+			}
+		}
+	} else {
+		temp = 0;
+	}
+//	temp = 15000.0;//KHK Test
+//	SOC = 100;//KHK Test
+
+	tmp = myData->testCond[ch].SOC_tracking[type].soc_num;
+	if(tmp > (MAX_SOC_TRACKING_DATA -5)) tmp = MAX_SOC_TRACKING_DATA - 5; //15
+	if(tmp <= 0) tmp = 1;
+
+	for(i=0; i < tmp; i++) { // SOC
+		if(SOC < myData->testCond[ch].SOC_tracking[type].SOC[i]) break;
+	}
+	i = i -1;
+	if(i < 0){
+	   	i = 0;
+	}
+	check_i = i;
+	if(check_i >= myData->testCond[ch].SOC_tracking[type].soc_num-1){
+		check_i = myData->testCond[ch].SOC_tracking[type].soc_num-2;
+		if(check_i < 0)
+			check_i = 0;
+	}
+
+	tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+	if(tmp > MAX_SOC_TRACKING_DATA) tmp = MAX_SOC_TRACKING_DATA; //20
+	if(tmp <= 0) tmp = 1;
+
+	for(j=0; j < tmp; j++) { // Temp
+		if(temp < myData->testCond[ch].SOC_tracking[type].temp[j]) break;
+	}
+	j = j - 1;
+	if(j < 0){
+		j = 0;
+	}
+
+	//shhw_240816s
+	if(interpolation == 0) {
+		//for SOC Step Mode
+		val = myData->testCond[ch].SOC_tracking[type].limit_current[i][j];
+	 	return val;
+	}
+	//shhw_240816e
+	tmp1 = myData->testCond[ch].SOC_tracking[type].soc_num;
+	tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+	if(temp > myData->testCond[ch].SOC_tracking[type].temp[tmp-1]){
+		temp = myData->testCond[ch].SOC_tracking[type].temp[tmp-1];
+		j = tmp-2;
+		if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+			i = 0;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+			i = tmp1 -1;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else{
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+		}
+	}else if(temp < myData->testCond[ch].SOC_tracking[type].temp[0]){
+		temp = myData->testCond[ch].SOC_tracking[type].temp[0];
+		j = 0;
+		if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+			i = 0;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2  = val1;
+		}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+			i = tmp1 -1;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2  = val1;
+		}else{
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+		}
+	}else{
+		if(j == 19) j = 18;	//shhw_221209
+
+		if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+			i = 0;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+			i = tmp1 -1;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else{
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+
+		}
+	}
+
+	soc1 = myData->testCond[ch].SOC_tracking[type].SOC[check_i];
+	soc2 = myData->testCond[ch].SOC_tracking[type].SOC[check_i+1];
+	diff = soc2 - soc1;
+	if(diff != 0){
+		diff_current = val2 - val1;
+		if(diff_current != 0){
+			A = diff_current/ diff;
+			B = val1 - A * soc1;
+		}else{
+			A = 0.0;
+			B = val1;
+		}
+	}else{
+		A = 0.0;
+		B = val1;
+	}
+	val = (float)SOC * A + B;
+	return (long)val;
+}
+//jhkw_201102e
+//------------------------------------------------------------

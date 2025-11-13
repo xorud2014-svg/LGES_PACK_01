@@ -1780,3 +1780,138 @@ void CAN_function_compare(int ch)	//ktg_2106
 		}
 	}
 }
+
+//jhkw_221205s
+long cFind_Sequence_Charge_Current(int ch)
+{
+	unsigned char row, col, row2, sequence_count;
+	int i = 0, k = 0, j, tmp,idxStepNo; //shhw_230525
+	//int i, j, tmp, idx, func_div, idxStepNo;
+	long temp = 0, SOC = 0, val = 0, row2_val = 0;
+
+	row = myData->testCond[ch].SQ_Charge.row;
+	col = myData->testCond[ch].SQ_Charge.col;
+	row2 = myData->testCond[ch].SQ_Charge.row2;
+    idxStepNo = myData->cData[ch].op.idxStepNo;
+	sequence_count = myData->cData[ch].misc.sequence_count;
+
+
+	//shhw_230525s
+
+	//CUT OFF Start
+	//row2 1: Unuse, 2:maxAuV, 3: minAuxV, 4: canData(AuxV)
+	switch(row2) {
+		case 1:
+			row2_val = 0;
+			break;
+		case 2:
+			row2_val = myData->cData[ch].misc.maxAuxV;
+			break;
+		case 3:
+			row2_val = myData->cData[ch].misc.minAuxV;
+			break;
+		case 4:
+			row2_val = myData->cData[ch].misc.can_data_l[0]; //CAN_RX_FUNC_DIV_C_TABLE_ROW
+			//row2_val = myData->cData[ch].misc.can_data_l[0] * 1000;
+			break;
+		default:
+			row2_val = 0;
+			break;
+	}
+	//CUT OFF End
+
+	//SOC, Capacity(Ah) Start
+	//row 1: Unuse, 2: SOC, 3: Ah, from 4, it doesn't use yet
+	switch(row) {
+		case 1:
+			SOC = 0;
+			break;
+		case 2:
+			SOC = (long)myData->cData[ch].op.SOC;
+			break;
+		case 3:
+			SOC = myData->cData[ch].misc.total_AmpareHour;
+			break;
+		case 4:
+			SOC = myData->cData[ch].misc.maxAuxV;
+			break;
+		case 5:
+			SOC = myData->cData[ch].misc.sum_AmpareHour;
+			break;
+		default:
+			SOC = 0;
+			break;
+	}
+	//SOC, Capacity(Ah) End
+
+	//Sequence Col Start
+	//col 1: maxAuxT, 2: minAuxT, 3: canData(T)
+	switch(col) {
+		case 1:
+			temp = myData->cData[ch].misc.maxAuxT;
+			break;
+		case 2:
+			temp = myData->cData[ch].misc.minAuxT;
+			break;
+		case 3:
+			temp = myData->cData[ch].misc.can_data_l[1];	//CAN_RX_FUNC_DIV_C_TABLE_COL
+			break;
+		default:
+			temp = 0;
+			break;
+	}
+	//Sequence Col End
+
+	//shhw_230525e
+
+	//	temp = 15000.0;//KHK Test
+	//	SOC = 100;//KHK Test
+	tmp = myData->testCond[ch].SQ_Charge.col_num;
+	if(tmp > MAX_SQ_COL_DATA) tmp = MAX_SQ_COL_DATA; //MAX_SQ_COL_DATA : 20
+	if(tmp <= 0) tmp = 1;
+
+	for(j=0; j < tmp; j++) { // Temp
+		if(temp < myData->testCond[ch].SQ_Charge.COL[j]) break;
+	}
+	j = j - 1;
+	if(j < 0){
+		j = 0;
+	}
+	tmp = myData->testCond[ch].SQ_Charge.row_num;
+	if(tmp > (MAX_SQ_ROW_DATA)) tmp = MAX_SQ_ROW_DATA; //MAX_SQ_ROW_DATA : 20
+	if(tmp <= 0) tmp = 1;
+
+	//shhw_230525s
+	if(row2 > 1) { //using row2 option
+		for(i = sequence_count; i < tmp; i++) {
+			if(row2_val < myData->testCond[ch].SQ_Charge.div_voltage[i][j]) break;
+		}
+		if((i >= tmp) && (row2_val >= myData->testCond[ch].SQ_Charge.div_voltage[tmp-1][j])) {
+			myData->cData[ch].misc.sequence_end_flag = P1;
+			i = tmp-1;
+		}
+	}
+	if(row > 1) {
+		for(k = sequence_count; k < tmp; k++) { // SOC
+			if(SOC < myData->testCond[ch].SQ_Charge.ROW[k]) break;
+		}
+		if((k >= tmp) && (SOC >= myData->testCond[ch].SQ_Charge.ROW[tmp-1])) {
+			myData->cData[ch].misc.sequence_end_flag = P1;
+			k = tmp-1;
+		}
+	}
+	if(row2 == 1 || k > i) i = k;
+	//shhw_230525e
+
+	sequence_count = i;
+	i = i -1;
+	if(i < 0){
+	   	i = 0;
+		sequence_count = 0;
+	}
+	myData->cData[ch].misc.sequence_count = sequence_count;
+	val = myData->testCond[ch].SQ_Charge.limit_current[sequence_count][j];
+
+	return (long)val;
+}
+//jhkw_221205e

@@ -751,6 +751,74 @@ typedef struct s_test_cond_usermap_data_tag { //kjhw_140828
 	long				reserved1[3];
 } S_TEST_COND_USERMAP_DATA;
 
+typedef struct s_test_cond_charging_rpt_soc_set_data_tag {
+	unsigned long	counter[16];
+	unsigned long	endSOC[16];
+	unsigned long	maxCounter;
+	unsigned char	from_endsoc_to_rptsoc_set[16];
+} S_TEST_COND_CHARGING_RPT_SOC_SET_DATA;
+
+typedef struct s_user_define_mode_tag {
+	long	ref;
+	long	rptSOC;
+	long	endSOC;
+	unsigned char	org_mode;
+	unsigned char	mode;
+	unsigned char	soc_tracking_use;
+	unsigned char	from_endsoc_to_rptsoc_set;
+
+	unsigned long	charging_counter;
+	unsigned long	charging_counter_rpt_soc;
+} S_USER_DEFINE_MODE;
+
+typedef struct s_test_cond_charging_count_set_data_tag {
+	unsigned long	counter[16];
+	long	refP[16];
+	unsigned char	mode[16];
+	unsigned char	soc_tracking_use[16];
+	unsigned long	maxCounter;
+} S_TEST_COND_CHARGING_COUNT_SET_DATA;
+
+typedef struct s_test_cond_user_define_mode_data_tag {
+	S_TEST_COND_CHARGING_RPT_SOC_SET_DATA	charging_rpt_soc_set;
+	S_TEST_COND_CHARGING_COUNT_SET_DATA	charging_count_set;
+} S_TEST_COND_USER_DEFINE_MODE_DATA;
+
+//20181219 KHK---------------------------------
+typedef struct s_test_cond_soc_tracking_data_tag {
+	unsigned char		row;
+	unsigned char		col;
+	unsigned char		interpolation;
+	unsigned char		reserved;
+	unsigned short int				temp_num;
+	unsigned short int				soc_num;
+	long							maxI;
+	long							minI;
+	long				temp[MAX_SOC_TRACKING_DATA];
+	long				SOC[MAX_SOC_TRACKING_DATA];
+	long				limit_current[MAX_SOC_TRACKING_DATA][MAX_SOC_TRACKING_DATA];
+	float				tracking_data_A[MAX_SOC_TRACKING_DATA][MAX_SOC_TRACKING_DATA];
+	float				tracking_data_B[MAX_SOC_TRACKING_DATA][MAX_SOC_TRACKING_DATA];
+} S_TEST_COND_SOC_TRACKING_DATA;
+
+//jhkw_221205s
+typedef struct s_test_cond_sequence_charge_data_tag {
+	unsigned char		row;
+	unsigned char		col;
+	unsigned char		row2;
+	unsigned char		row_num;
+	unsigned char		col_num;
+	unsigned char		row2_num;
+	unsigned char		reserved[2];
+	long				maxI;
+	long				minI;
+	long				ROW[MAX_SQ_ROW_DATA];
+	long				COL[MAX_SQ_COL_DATA];
+	long				div_voltage[MAX_SQ_ROW_DATA][MAX_SQ_COL_DATA];
+	long				limit_current[MAX_SQ_ROW_DATA][MAX_SQ_COL_DATA];
+} S_TEST_COND_SEQUENCE_CHARGE_DATA;
+//jhkw_221205e
+
 typedef struct s_test_condition_tag {
 	long				common_object[MAX_COM_TEST_OBJECT];
 	long				local_object[MAX_TEST_STEP][MAX_LOC_TEST_OBJECT];
@@ -764,7 +832,10 @@ typedef struct s_test_condition_tag {
 	S_TEST_COND_PATTERN_DATA	pattern[MAX_PATTERN_DATA];
 	S_TEST_COND_EXTERNAL_DATA	external_data[2];
 	S_TEST_COND_USERMAP_DATA	usermap; //kjhw_140828
-	
+	S_TEST_COND_SOC_TRACKING_DATA	SOC_tracking[2];
+	S_TEST_COND_SEQUENCE_CHARGE_DATA SQ_Charge;
+	S_TEST_COND_USER_DEFINE_MODE_DATA user_define_mode;
+
 	unsigned char		aux_group_cnt[MAX_CH_8][MAX_TEST_STEP][10];		//khj_210303 //jhj_250615 s
 	unsigned char		aux_group_flag[MAX_CH_8][MAX_TEST_STEP][10];
 	unsigned char		can_group_cnt[MAX_CH_8][MAX_TEST_STEP][10];

@@ -356,6 +356,7 @@
 #define P1_MODE_CR							8
 #define P1_MODE_CP_CC						9
 #define P1_MODE_CC_CP						10	//kjh_160623 only bms
+#define P1_MODE_USER						11	//20181219 KHK User Define Mode
 
 //comparison operators
 #define P1_COMP_NONE						0

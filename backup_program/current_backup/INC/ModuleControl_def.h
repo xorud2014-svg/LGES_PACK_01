@@ -23,6 +23,9 @@
 #define MAX_EOL_DATA						200
 #define MAX_USERMAP_ROW_DATA				22 //kjhw_140828
 #define MAX_USERMAP_COL_DATA				22 //kjhw_140828
+#define MAX_SOC_TRACKING_DATA				20 //20181219 KHK
+#define MAX_SQ_ROW_DATA						20 //jhkw_221205 //shhw_230525  15 -> 20
+#define MAX_SQ_COL_DATA						20 //jhkw_221205 //shhw_230525 	10 -> 20
 
 //step type
 #define STEP_IDLE							0

@@ -6788,6 +6788,9 @@ void cStepCharge(int ch)
 	long val;
 	double tmp1;
 	int idx; //kjhw_150821
+	int mode; //20181219 KHK
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
+	S_MSG_VAL SendMsg; //20181219 KHK
 
 	tmp1 = 0.0;
 	idxStepNo = myCh->op.idxStepNo;
@@ -6954,6 +6957,80 @@ void cStepCharge(int ch)
 			memset((char *)&myCh->misc.aux_codeCount, 0, sizeof(char) * MAX_AUX_CODE);	//ktg_250415
 			memset((char *)&myCh->misc.can_codeCount, 0, sizeof(char) * MAX_CAN_CODE);
 
+
+		//20181219 KHK---------------------------------------------------
+		idx = IDX_LOC_OBJ_MODE;
+		mode = (int)myTestCond->local_object[idxStepNo][idx];
+		if(mode == MODE_USER) {
+			if(myCh->op.charging_counter
+				>= myTestCond->user_define_mode.charging_count_set.maxCounter-1) {
+				myCh->op.charging_counter = -1;
+			}
+			if(myCh->op.charging_counter_rpt_soc
+				>= myTestCond->user_define_mode.charging_rpt_soc_set.maxCounter-1) {
+				myCh->op.charging_counter_rpt_soc = -1;
+			}
+			myCh->op.charging_counter++;
+			myCh->op.charging_counter_rpt_soc++;
+
+			user_mode = cFind_User_Define_Mode(ch);
+			if(user_mode.charging_counter > 0) {
+//				myCh->op.charging_counter++;
+			}
+			if(user_mode.charging_counter_rpt_soc > 0) {
+//				myCh->op.charging_counter_rpt_soc++;
+			}
+
+			myCh->op.stepMode = (unsigned char)user_mode.mode;
+			if(user_mode.soc_tracking_use == P1) {
+				idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+				if(myTestCond->local_object[idxStepNo][idx] == P1) {
+					if(myData->ChAttribute[ch].chNo_master > 0) {
+						SendMsg.msg = MSG_MODULE_DATASAVE_READ_SOC_TRACKING_FILE;
+						SendMsg.val[0] = ch;
+						i = IDX_LOC_OBJ_PATTERN_INDEX;
+						val = myTestCond->local_object[idxStepNo][i];
+						SendMsg.val[1] = (int)val;
+						send_msg(MODULE_TO_DATASAVE, (char *)&SendMsg);
+					}
+					myCh->signal[C_SIG_READ_END_SOC_TRACKING_FILE] = P0;
+					myCh->op.phase = P30;
+					return;
+				}
+			}
+		} else {
+			idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+			if(myTestCond->local_object[idxStepNo][idx] == P1) {
+				if(myData->ChAttribute[ch].chNo_master > 0) {
+					SendMsg.msg = MSG_MODULE_DATASAVE_READ_SOC_TRACKING_FILE;
+					SendMsg.val[0] = ch;
+					i = IDX_LOC_OBJ_PATTERN_INDEX;
+					val = myTestCond->local_object[idxStepNo][i];
+					SendMsg.val[1] = (int)val;
+					send_msg(MODULE_TO_DATASAVE, (char *)&SendMsg);
+				}
+				myCh->signal[C_SIG_READ_END_SOC_TRACKING_FILE] = P0;
+				myCh->op.phase = P30;
+				return;
+			}
+		}
+//--------------------------------------------------------------
+		//jhkw_221205s
+		idx = IDX_LOC_OBJ_SEQUENCE_CHARGE_FLAG;
+		if(myTestCond->local_object[idxStepNo][idx] == P1) {
+			if(myData->ChAttribute[ch].chNo_master > 0) {
+				SendMsg.msg = MSG_MODULE_DATASAVE_READ_SEQUENCE_CHARGE_FILE;
+				SendMsg.val[0] = ch;
+				i = IDX_LOC_OBJ_PATTERN_INDEX;
+				val = myTestCond->local_object[idxStepNo][i];
+				SendMsg.val[1] = (int)val;
+				send_msg(MODULE_TO_DATASAVE, (char *)&SendMsg);
+			}
+			myCh->signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] = P0;
+			myCh->op.phase = P31;
+			return;
+		}
+		//jhkw_221205e
 			switch(myData->AppControl.config.systemModel) {
 				case C_LGC_50V_40A_10A_4A: //csk_120206
 				case C_LGC_50V_40A_10A_4A_2:
@@ -7977,6 +8054,186 @@ void cStepCharge(int ch)
 			myCh->op.phase = P11;
 			break;
 		default: break;
+	//20181219 KHK------------------------------------------------------
+	case P30:
+		if(myCh->signal[C_SIG_CMD_STOP] == P1) {
+			myCh->op.code = C_CD_FAULT_STOP_CMD;
+			myCh->op.select = SAVE_FLAG_SAVING_END;
+			myCh->misc.saveCode = myCh->op.code;
+			send_save_msg(ch);
+			myCh->signal[C_SIG_CMD_STOP] = P0;
+			myCh->op.phase = P100;
+			break;
+		}
+		if(myCh->signal[C_SIG_READ_END_SOC_TRACKING_FILE] == P1){
+			myCh->signal[C_SIG_READ_END_SOC_TRACKING_FILE] = P0;
+			switch(myData->AppControl.config.systemModel) {
+				default:
+					tmp = 4;
+					break;
+			}
+			if(tmp == 0) {
+				myCh->signal[C_SIG_OUT_SWITCH] = P71;
+				myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+				myCh->op.phase = P1;
+			} else if(tmp == 1) {
+				if(myCh->op.code == C_CD_NONE
+					|| (myCh->op.code >= C_CD_END_START
+					&& myCh->op.code <= C_CD_END_END)) {
+					myCh->signal[C_SIG_OUT_SWITCH] = P71;
+					myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+					myCh->op.phase = P1;
+				} else {
+					myCh->misc.checkDelayTime_day = 0;
+					myCh->misc.checkDelayTime = 0;
+					myCh->misc.sensCountFlag = P2;
+					myCh->op.phase = P110;
+				}
+			} else if(tmp == 2) {
+				myCh->op.code = C_CD_END_INTERNAL_SKIP;
+				myCh->op.select = SAVE_FLAG_SAVING_END;
+				myCh->misc.saveCode = myCh->op.code;
+				myCh->misc.active_division = ACTIVE_DIV_NEXT;
+				send_save_msg(ch);
+				myCh->op.phase = P100;
+			} else if(tmp == 3) {
+				if(myCh->signal[C_SIG_BMS_ACTIVE] == P1) {
+					myCh->op.phase = P131;
+				} else {
+					myCh->signal[C_SIG_OUT_SWITCH] = P71;
+					myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+					myCh->op.phase = P1;
+				}
+			} else if(tmp == 4) {
+				for(i=0; i < 3; i++) {
+					j = (int)myData->ChAttribute[ch].chNo_slave[i] - 1;
+					if(j >= 0) {
+						myData->cData[j]
+							.signal[C_SIG_READ_END_SOC_TRACKING_FILE] = P0;
+						myData->cData[j]
+							.signal[C_SIG_OUT_SWITCH] = P73;
+						myData->cData[j]
+							.signal[C_SIG_SEMI_SWITCH] = P0;
+						myData->cData[j]
+							.op.phase = P1;
+					}
+				}
+				myCh->signal[C_SIG_OUT_SWITCH] = P73;
+				myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+				myCh->op.phase = P1;
+			}
+		}else if(myCh->signal[C_SIG_READ_END_SOC_TRACKING_FILE] == P2){
+			myCh->signal[C_SIG_READ_END_SOC_TRACKING_FILE] = P0;
+			myCh->op.code = C_CD_FAULT_READ_SOC_TRACKING_FILE;
+			myCh->op.select = SAVE_FLAG_SAVING_ETC;
+			myCh->misc.saveCode = myCh->op.code;
+			send_save_msg(ch);
+			myCh->op.phase = P100;
+			for(i=0; i < 3; i++) {
+				j = (int)myData->ChAttribute[ch].chNo_slave[i] - 1;
+				if(j >= 0) {
+					myData->cData[j]
+						.signal[C_SIG_READ_END_SOC_TRACKING_FILE] = P0;
+					myData->cData[j].op.code = C_CD_FAULT_READ_SOC_TRACKING_FILE;
+					myData->cData[j].op.select = SAVE_FLAG_SAVING_ETC;
+					myData->cData[j].misc.saveCode
+						= myData->cData[j].op.code;
+					myData->cData[j].op.phase = P100;
+				}
+			}
+		}
+		break;
+	//--------------------------------------------------------
+	//jhkw_221205s
+	case P31:
+		if(myCh->signal[C_SIG_CMD_STOP] == P1) {
+			myCh->op.code = C_CD_FAULT_STOP_CMD;
+			myCh->op.select = SAVE_FLAG_SAVING_END;
+			myCh->misc.saveCode = myCh->op.code;
+			send_save_msg(ch);
+			myCh->signal[C_SIG_CMD_STOP] = P0;
+			myCh->op.phase = P100;
+			break;
+		}
+		if(myCh->signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] == P1){
+			myCh->signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] = P0;
+			switch(myData->AppControl.config.systemModel) {
+				default:
+					tmp = 4;
+					break;
+			}
+			if(tmp == 0) {
+				myCh->signal[C_SIG_OUT_SWITCH] = P71;
+				myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+				myCh->op.phase = P1;
+			} else if(tmp == 1) {
+				if(myCh->op.code == C_CD_NONE
+					|| (myCh->op.code >= C_CD_END_START
+					&& myCh->op.code <= C_CD_END_END)) {
+					myCh->signal[C_SIG_OUT_SWITCH] = P71;
+					myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+					myCh->op.phase = P1;
+				} else {
+					myCh->misc.checkDelayTime_day = 0;
+					myCh->misc.checkDelayTime = 0;
+					myCh->misc.sensCountFlag = P2;
+					myCh->op.phase = P110;
+				}
+			} else if(tmp == 2) {
+				myCh->op.code = C_CD_END_INTERNAL_SKIP;
+				myCh->op.select = SAVE_FLAG_SAVING_END;
+				myCh->misc.saveCode = myCh->op.code;
+				myCh->misc.active_division = ACTIVE_DIV_NEXT;
+				send_save_msg(ch);
+				myCh->op.phase = P100;
+			} else if(tmp == 3) {
+				if(myCh->signal[C_SIG_BMS_ACTIVE] == P1) {
+					myCh->op.phase = P131;
+				} else {
+					myCh->signal[C_SIG_OUT_SWITCH] = P71;
+					myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+					myCh->op.phase = P1;
+				}
+			} else if(tmp == 4) {
+				for(i=0; i < 3; i++) {
+					j = (int)myData->ChAttribute[ch].chNo_slave[i] - 1;
+					if(j >= 0) {
+						myData->cData[j]
+							.signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] = P0;
+						myData->cData[j]
+							.signal[C_SIG_OUT_SWITCH] = P73;
+						myData->cData[j]
+							.signal[C_SIG_SEMI_SWITCH] = P0;
+						myData->cData[j]
+							.op.phase = P1;
+					}
+				}
+				myCh->signal[C_SIG_OUT_SWITCH] = P73;
+				myCh->signal[C_SIG_SEMI_SWITCH] = P0;
+				myCh->op.phase = P1;
+			}
+		}else if(myCh->signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] == P2){
+			myCh->signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] = P0;
+			myCh->op.code = C_CD_FAULT_READ_SQ_CHARGE_FILE;
+			myCh->op.select = SAVE_FLAG_SAVING_ETC;
+			myCh->misc.saveCode = myCh->op.code;
+			send_save_msg(ch);
+			myCh->op.phase = P100;
+			for(i=0; i < 3; i++) {
+				j = (int)myData->ChAttribute[ch].chNo_slave[i] - 1;
+				if(j >= 0) {
+					myData->cData[j]
+						.signal[C_SIG_READ_END_SEQUENCE_CHARGE_FILE] = P0;
+					myData->cData[j].op.code = C_CD_FAULT_READ_SQ_CHARGE_FILE;
+					myData->cData[j].op.select = SAVE_FLAG_SAVING_ETC;
+					myData->cData[j].misc.saveCode
+						= myData->cData[j].op.code;
+					myData->cData[j].op.phase = P100;
+				}
+			}
+		}
+		break;
+	//jhkw_221205e
 	}
 }
 

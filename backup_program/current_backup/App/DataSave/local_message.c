@@ -40,6 +40,7 @@ void msgParsing_Module_to_DataSave(int fromPs, int idx, S_MSG_VAL *RecvMsg)
 {
 	unsigned char chFlag, chFlag1;
 	int group, ch, i, j, k, toPs, rtn=0, code;
+	int idx2, stepNo, idxStepNo;	//20181219 KHK
 //#ifdef __B_TYPE__
 	int count; //kjhw_120504 Vref x 2
 //#endif
@@ -171,6 +172,21 @@ void msgParsing_Module_to_DataSave(int fromPs, int idx, S_MSG_VAL *RecvMsg)
 			ch = RecvMsg->val[0];
 
 			i = read_test_cond_pattern_file_coa(psName, ch, RecvMsg->val[1], 1);	//ktg_220512	//shh_220607
+//20181219 KHK--------------------------------------------
+		//jhkw_201102s
+		idx2 = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+		stepNo = (int)RecvMsg->val[1];
+		if(myData->testCond[ch].local_object[stepNo][idx2] == P1){
+			i += Read_SOC_Tracking_File(psName, ch, stepNo, 0); //charge
+		}
+
+		idx2 = IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG;
+		stepNo = (int)RecvMsg->val[1];
+		if(myData->testCond[ch].local_object[stepNo][idx2] == P1){
+			i += Read_SOC_Tracking_File(psName, ch, stepNo, 1); //discharge
+		}
+		//jhkw_201102e
+//----------------------------------------------------------
 #ifdef __COC__
 			i = Read_Pattern_File_2(psName, ch, RecvMsg->val[1]);
 #endif
@@ -186,7 +202,30 @@ void msgParsing_Module_to_DataSave(int fromPs, int idx, S_MSG_VAL *RecvMsg)
 				SendMsg.val[0], SendMsg.val[1],
 				(int)myData->cData[ch].signal[C_SIG_OUT_SWITCH]);
 			break;
-		case MSG_MODULE_DATASAVE_READ_USERMAP_FILE: //kjwh_140828
+		//jhkw_221205s
+	case MSG_MODULE_DATASAVE_READ_SEQUENCE_CHARGE_FILE:
+		ch = RecvMsg->val[0];
+		i = Read_Sequence_Charge_File(psName, ch, RecvMsg->val[1]);
+		if(i >= 0) {
+			idx2 = IDX_LOC_OBJ_REF_I;
+			idxStepNo = myData->cData[ch].op.idxStepNo;
+			myData->testCond[ch].local_object[idxStepNo][idx2]
+				= myData->testCond[ch].SQ_Charge.maxI;
+		}
+		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+		toPs = DATASAVE_TO_MODULE;
+		SendMsg.msg = MSG_DATASAVE_MODULE_READ_END_SEQUENCE_CHARGE_FILE;
+		SendMsg.val[0] = ch;
+		if(i >= 0) SendMsg.val[1] = P1;
+		else SendMsg.val[1] = P2;
+		send_msg(toPs, (char *)&SendMsg);
+
+		userlog(DEBUG_LOG, psName, "read end  Sequence Charge file%d %d %d\n",
+			SendMsg.val[0], SendMsg.val[1],
+			(int)myData->cData[ch].signal[C_SIG_OUT_SWITCH]);
+		break;
+	//jhkw_221205e
+	case MSG_MODULE_DATASAVE_READ_USERMAP_FILE: //kjwh_140828
 			ch = RecvMsg->val[0];
 			i = read_test_cond_usermap_file_coa(psName, ch, RecvMsg->val[1]);
 

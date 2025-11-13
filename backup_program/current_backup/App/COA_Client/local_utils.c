@@ -1187,6 +1187,30 @@ int convert_test_cond(int ch)
 	myTestCond->common_object[idx]
 		= (long)myPs->testCond.header.totalPatternCount;
 
+//20181219 KHK --------------------------------------------------------
+	idx = IDX_COM_OBJ_SCHEDULE_LINK_FLAG;
+	myTestCond->common_object[idx] = (long)myPs->testCond.safety.schedule_link_flag;
+	userlog(DEBUG_LOG, psName,"Schedule Link Flag %d\n"
+		, myTestCond->common_object[idx]);
+
+	idx = IDX_COM_OBJ_USER_DEFINE_MODE_FLAG;
+	myTestCond->common_object[idx] = (long)myPs->testCond.safety.user_define_mode_flag;
+	userlog(DEBUG_LOG, psName,"Schedule user define mode %d\n"
+		, myTestCond->common_object[idx]);
+	if(myTestCond->common_object[idx] == P1){
+		rtn = Read_User_Define_Mode_Charging_Count_File(psName, ch);
+		if(rtn < 0) {
+			userlog(DEBUG_LOG, psName, "ch%d ChargingCount file error %d\n", ch+1, rtn);
+			return rtn;
+		}
+		rtn = Read_User_Define_Mode_Charging_RPT_SOC_File(psName, ch);
+		if(rtn < 0) {
+			userlog(DEBUG_LOG, psName, "ch%d Charging RPTSOC file error %d\n", ch+1, rtn);
+			return rtn;
+		}
+	}
+//---------------------------------------------------------------------
+
 	idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
 	attr_count = 1;
 	if(myData->ChAttribute[ch].opType != OP_INDEPENDENT) {
@@ -3153,9 +3177,11 @@ int convert_test_cond_charge_discharge_z(S_P1_TEST_COND_STEP *P1_stepCond, int c
 	int i, func_div;
 	int idx, idx2, fault_count;
 	int idx3, debug_mode, debug_step;	//csk_190213
+	int rtn;	//20181219 KHK
 	long mode, refV1, refV2, refI, l_val, l_val2, tmp, refP, refR;
 	long l_val3;	//csk_190213
 	long maxI, minI;		//csk_190718
+	long pattern_index;	//20181219 KHK
 	//unsigned long dv_time, di_time;	//jhkw_180823
 	double d_val1, d_val2;
 	double max_power;	//ktg_210310
@@ -3244,7 +3270,40 @@ int convert_test_cond_charge_discharge_z(S_P1_TEST_COND_STEP *P1_stepCond, int c
 	idx = IDX_LOC_OBJ_RANGE_V2;
 	myTestCond->local_object[step][idx] = l_val; //kjhw_120517e
 
+//20181219 KHK------------------------------------------------------
 	if(type == STEP_CHARGE) {
+		if(myTestCond->local_object[step][IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P1){
+			idx = IDX_LOC_OBJ_PATTERN_INDEX;
+			pattern_index = (long)step;
+			myTestCond->local_object[step][idx] = pattern_index;
+			//jhkw_201102s
+			//rtn = Read_SOC_Tracking_File(psName, ch, (int)pattern_index);
+			rtn = Read_SOC_Tracking_File(psName, ch, (int)pattern_index, 0);
+			//jhkw_201102e
+		}
+		if(rtn < 0) {
+			userlog(DEBUG_LOG, psName, "ch%d SOC file error %d\n", ch+1, rtn);
+			return rtn;
+		}
+		if(mode == MODE_USER) {
+			myTestCond->local_object[step][IDX_LOC_OBJ_USER_DEFINE_MODE_FLAG] = P1;
+		}
+	}
+//------------------------------------------------------------------
+
+	if(type == STEP_CHARGE) {
+		//jhkw_221205s
+		if(myTestCond->local_object[step][IDX_LOC_OBJ_SEQUENCE_CHARGE_FLAG] == P1){
+			idx = IDX_LOC_OBJ_PATTERN_INDEX;
+			pattern_index = (long)step;
+			myTestCond->local_object[step][idx] = pattern_index;
+			rtn = Read_Sequence_Charge_File(psName, ch, (int)pattern_index);
+		}
+		if(rtn < 0) {
+			userlog(DEBUG_LOG, psName, "ch%d Sequence Charge file error %d\n", ch+1, rtn);
+			return rtn;
+		}
+		//jhkw_221205e
 		if(mode == MODE_CP) {
 			refP = P1_stepCond->reference[0].refP;
 			if(refP < 0) refP = 0;
@@ -3939,6 +3998,27 @@ int convert_test_cond_pattern(S_P1_TEST_COND_STEP *P1_stepCond, int ch, int step
 		userlog(DEBUG_LOG, psName, "ch%d pattern file error %d\n", ch+1, rtn);
 		return rtn;
 	}
+	idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+	//if(myData->testCond[ch].local_object[step][idx] == P1){
+	if(myTestCond->local_object[step][idx] == P1){
+		rtn = Read_SOC_Tracking_File(psName, ch, (int)pattern_index, 0);
+	}
+	if(rtn < 0) {
+		userlog(DEBUG_LOG, psName, "ch%d Charge SOC file error %d\n", ch+1, rtn);
+		return rtn;
+	}
+
+	//jhkw_201102s
+	idx = IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG;
+	//if(myData->testCond[ch].local_object[step][idx] == P1){
+	if(myTestCond->local_object[step][idx] == P1){
+		rtn = Read_SOC_Tracking_File(psName, ch, (int)pattern_index, 1);
+	}
+	if(rtn < 0) {
+		userlog(DEBUG_LOG, psName, "ch%d DisCharge SOC file error %d\n", ch+1, rtn);
+		return rtn;
+	}
+	//jhkw_201102e
 
 	idx = IDX_LOC_OBJ_MODE;
 	mode = convert_step_mode(CONVERT_P1_TO_ORG, (long)P1_stepCond->header.mode);
@@ -4403,6 +4483,19 @@ int convert_test_cond_pattern(S_P1_TEST_COND_STEP *P1_stepCond, int ch, int step
 		myTestCond->local_object[step][idx] = P1_stepCond->reference[0]
 		.ValueRate_Compare;
 	}	//ktg_220829e
+	//----------------------------------------------------------------------
+	//jhkw_221205s
+	if(myTestCond->local_object[step][IDX_LOC_OBJ_SEQUENCE_CHARGE_FLAG] == P1){
+		idx = IDX_LOC_OBJ_PATTERN_INDEX;
+		pattern_index = (long)step;
+		myTestCond->local_object[step][idx] = pattern_index;
+		rtn = Read_Sequence_Charge_File(psName, ch, (int)pattern_index);
+	}
+	if(rtn < 0) {
+		userlog(DEBUG_LOG, psName, "ch%d Sequence Charge file error %d\n", ch+1, rtn);
+		return rtn;
+	}
+	//jhkw_221205e
 
 	//fault_condition
 	switch(myData->AppControl.config.systemModel) {

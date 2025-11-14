@@ -17552,21 +17552,39 @@ void cOutSwitch_P83_Pack1(int ch, int slot)
 			}
 		}
 
+		// SOC Tracking Limit Current for Master/Slave channels
 		if(val2 >= 0) {						//csk_190108s
-			if(myCh->misc.cmd_i[1] != val3) {
-				myCh->misc.cmd_i[1] = val3;
-				gc_can_flag = 1;
-			} else gc_can_flag = 0;
+			//jhkw_190314s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val3 *= attr_count;
+				val3 = cFind_SOC_Tracking_Limit_Current(ch, val3);//20181219 KHK
+				myData->cData[master_ch].misc.cmd_i[1] = val3;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[1] = val3;
+				}
+			}
+			//jhkw_190314e
+			if(val3 < 0) val3 = 0;
+			myCh->misc.cmd_i[1] = val3;
 		} else {
-			if(myCh->misc.cmd_i[1] != val4) {
-				myCh->misc.cmd_i[1] = val4;
-				ac_can_flag = 1;
-			} else ac_can_flag = 0;
-		}
-
-		if((gc_can_flag != 0) || (ac_can_flag != 0)) {
-			myCh->misc.fbCountI = 0;
-			myCh->misc.fbI = 0;
+			//jhkw_201102s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val4 *= attr_count;
+				val4 = cFind_SOC_Tracking_Limit_Current(ch, val4);//20181219 KHK
+				myData->cData[master_ch].misc.cmd_i[1] = val4;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[1] = val4;
+				}
+			}
+			//jhkw_201102e
+			if(val4 > 0) val4 = 0;
+			myCh->misc.cmd_i[1] = val4;
 		}									//csk_190108e
 	//kjhw_150914s
 	} else if(myCh->op.stepMode == MODE_CV) {
@@ -18720,21 +18738,39 @@ void cOutSwitch_P85_Pack1(int ch, int slot)
 			}
 		}
 
+		// SOC Tracking Limit Current for Master/Slave channels
 		if(val2 >= 0) {						//csk_190108s
-			if(myCh->misc.cmd_i[1] != val3) {
-				myCh->misc.cmd_i[1] = val3;
-				gc_can_flag = 1;
-			} else gc_can_flag = 0;
+			//jhkw_190314s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val3 *= attr_count;
+				val3 = cFind_SOC_Tracking_Limit_Current(ch, val3);//20181219 KHK
+				myData->cData[master_ch].misc.cmd_i[1] = val3;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[1] = val3;
+				}
+			}
+			//jhkw_190314e
+			if(val3 < 0) val3 = 0;
+			myCh->misc.cmd_i[1] = val3;
 		} else {
-			if(myCh->misc.cmd_i[1] != val4) {
-				myCh->misc.cmd_i[1] = val4;
-				ac_can_flag = 1;
-			} else ac_can_flag = 0;
-		}
-
-		if((gc_can_flag != 0) || (ac_can_flag != 0)) {
-			myCh->misc.fbCountI = 0;
-			myCh->misc.fbI = 0;
+			//jhkw_201102s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val4 *= attr_count;
+				val4 = cFind_SOC_Tracking_Limit_Current(ch, val4);//20181219 KHK
+				myData->cData[master_ch].misc.cmd_i[1] = val4;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[1] = val4;
+				}
+			}
+			//jhkw_201102e
+			if(val4 > 0) val4 = 0;
+			myCh->misc.cmd_i[1] = val4;
 		}									//csk_190108e
 	} else if(myCh->op.stepMode == MODE_CV) {	//kjhw_150914s
 		if(cmd_val >= myCh->op.Vsens) {
@@ -19420,23 +19456,41 @@ void cOutSwitch_P87_Pack1(int ch, int slot)
 			}
 		}
 
+		// SOC Tracking Limit Current for Master/Slave channels
 		if(val2 >= 0) {						//csk_190108s
-			if(myCh->misc.cmd_i[1] != val3) {
-				myCh->misc.cmd_i[1] = val3;
-				gc_can_flag = 1;
-			} else gc_can_flag = 0;
+			//jhkw_190314s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val3 *= attr_count;
+				val3 = cFind_SOC_Tracking_Limit_Current(ch, val3);//20181219 KHK
+				myData->cData[master_ch].misc.cmd_i[1] = val3;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[1] = val3;
+				}
+			}
+			//jhkw_190314e
+			if(val3 < 0) val3 = 0;
+			myCh->misc.cmd_i[1] = val3;
 		} else {
-			if(myCh->misc.cmd_i[1] != val4) {
-				myCh->misc.cmd_i[1] = val4;
-				ac_can_flag = 1;
-			} else ac_can_flag = 0;
-		}
-
-		if((gc_can_flag != 0) || (ac_can_flag != 0)) {
-			myCh->misc.fbCountI = 0;
-			myCh->misc.fbI = 0;
+			//jhkw_201102s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val4 *= attr_count;
+				val4 = cFind_SOC_Tracking_Limit_Current(ch, val4);//20181219 KHK
+				myData->cData[master_ch].misc.cmd_i[1] = val4;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[1] = val4;
+				}
+			}
+			//jhkw_201102e
+			if(val4 > 0) val4 = 0;
+			myCh->misc.cmd_i[1] = val4;
 		}									//csk_190108e
-				
+
 	} else if(myCh->op.stepMode == MODE_CV) {	//kjhw_150914s
 		if(cmd_val >= myCh->op.Vsens) { //charge
 			val2 = myTestCond->pattern[pattern_count].cmd_val[1] / attr_count;

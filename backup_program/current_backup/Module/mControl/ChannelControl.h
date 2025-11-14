@@ -187,5 +187,8 @@ int		output_watt_limited(int, int); //kjhw_130903
 int		output_voltage_limited(int, int); //jhkw_131023
 #endif
 
+long	cFind_SOC_Tracking_Limit_Current(int, long); //20181219 KHK
+long	cFind_SOC_Tracking_Current(int); //20181219 KHK
+S_USER_DEFINE_MODE	cFind_User_Define_Mode(int); //20181219 KHK
 
 #endif

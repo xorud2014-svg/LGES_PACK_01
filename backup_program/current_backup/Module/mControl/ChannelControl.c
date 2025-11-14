@@ -13430,35 +13430,45 @@ void cStepPattern(int ch)
 				if(myTestCond->pattern[0].t_val == 2) {
 					cCalculate_Temperature_Pattern(ch);
 					if(myTestCond->pattern[0].cmd_val[0] == 0) { //MODE_CC
-						myCh->misc.cmd_i[0] = myData->testCond[ch]
-							.pattern[1].cmd_val[3] / attr_count;
-						myCh->misc.cmd_i[1] = myData->testCond[ch]
-							.pattern[1].cmd_val[3] / attr_count;
+						refI = myData->testCond[ch].pattern[1].cmd_val[3];
+						refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+						myCh->misc.cmd_i[0] = refI;
+						refI = myData->testCond[ch].pattern[1].cmd_val[3];
+						refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+						myCh->misc.cmd_i[1] = refI;
 					} else if(myTestCond->pattern[0].cmd_val[0] == 1) {//MODE_CP
-						myCh->misc.cmd_p[0] = myData->testCond[ch]
-							.pattern[1].cmd_val[3] / attr_count;
-						myCh->misc.cmd_p[1] = myData->testCond[ch]
-							.pattern[1].cmd_val[3] / attr_count;
+						refP = myData->testCond[ch].pattern[1].cmd_val[3] / attr_count;
+						refP = cFind_SOC_Tracking_Limit_Current(ch, refP);
+						myCh->misc.cmd_p[0] = refP;
+						myCh->misc.cmd_p[1] = refP;
 					}
 					myCh->misc.cmd_t[0] = 100;
 				} else {
 					if(myTestCond->pattern[0].cmd_val[0] == 0) { //MODE_CC
+						refI = myTestCond->pattern[1].cmd_val[0];
+						refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
 						myCh->misc.cmd_i[0]
-							= myTestCond->pattern[1].cmd_val[0] / attr_count;
+							= refI;
+						refI = myTestCond->pattern[1].cmd_val[1];
+						refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
 						myCh->misc.cmd_i[1]
-							= myTestCond->pattern[1].cmd_val[1] / attr_count;
+							= refI;
 					//kjhw_150914s
 					} else if(myTestCond->pattern[0].cmd_val[0] == 2) {//MODE_CV
-						myCh->misc.cmd_i[0]
-							= myTestCond->pattern[1].cmd_val[1] / attr_count;
-						myCh->misc.cmd_i[1]
-							= myTestCond->pattern[1].cmd_val[2] / attr_count;
+						refI = myTestCond->pattern[1].cmd_val[1];
+						refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+						myCh->misc.cmd_i[0] = refI;
+						refI = myTestCond->pattern[1].cmd_val[2];
+						refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+						myCh->misc.cmd_i[1] = refI;
 					//kjhw_150914e
 					} else { //MODE_CP
-						myCh->misc.cmd_p[0]
-							= myTestCond->pattern[1].cmd_val[0] / attr_count;
-						myCh->misc.cmd_p[1]
-							= myTestCond->pattern[1].cmd_val[1] / attr_count;
+						refP = myTestCond->pattern[1].cmd_val[0] / attr_count;
+						refP = cFind_SOC_Tracking_Limit_Current(ch, refP);
+						myCh->misc.cmd_p[0] = refP;
+						refP = myTestCond->pattern[1].cmd_val[1] / attr_count;
+						refP = cFind_SOC_Tracking_Limit_Current(ch, refP);
+						myCh->misc.cmd_p[1] = refP;
 					}
 					myCh->misc.cmd_t[0] = myTestCond->pattern[1].t_val * 100;
 				}
@@ -13481,48 +13491,46 @@ void cStepPattern(int ch)
 							cCalculate_Temperature_Pattern(ch);
 							if(myTestCond->pattern[0].cmd_val[0] == 0) {
 								//MODE_CC
-								myData->cData[j].misc.cmd_i[0]
-									= myData->testCond[ch]
-									.pattern[1].cmd_val[3] / attr_count;
-								myData->cData[j].misc.cmd_i[1]
-									= myData->testCond[ch]
-									.pattern[1].cmd_val[3] / attr_count;
+								refI = myData->testCond[ch].pattern[1].cmd_val[3];
+								refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+								myData->cData[j].misc.cmd_i[0] = refI;
+								refI = myData->testCond[ch].pattern[1].cmd_val[3];
+								refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+								myData->cData[j].misc.cmd_i[1] = refI;
 							} else if(myTestCond->pattern[0].cmd_val[0] == 1) {
 								//MODE_CP
-								myData->cData[j].misc.cmd_p[0]
-									 = myData->testCond[ch]
-									.pattern[1].cmd_val[3] / attr_count;
-								myData->cData[j].misc.cmd_p[1]
-									= myData->testCond[ch]
-									.pattern[1].cmd_val[3] / attr_count;
+								refP = myData->testCond[ch].pattern[1].cmd_val[3] / attr_count;
+								refP = cFind_SOC_Tracking_Limit_Current(ch, refP);
+								myData->cData[j].misc.cmd_p[0] = refP;
+								myData->cData[j].misc.cmd_p[1] = refP;
 							}
 							myData->cData[j].misc.cmd_t[0] = 100;
 						} else {
 							if(myTestCond->pattern[0].cmd_val[0] == 0) {
 								//MODE_CC
-								myData->cData[j].misc.cmd_i[0]
-									= myTestCond->pattern[1].cmd_val[0]
-									/ attr_count;
-								myData->cData[j].misc.cmd_i[1]
-									= myTestCond->pattern[1].cmd_val[1]
-									/ attr_count;
+								refI = myTestCond->pattern[1].cmd_val[0];
+								refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+								myData->cData[j].misc.cmd_i[0] = refI;
+								refI = myTestCond->pattern[1].cmd_val[1];
+								refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+								myData->cData[j].misc.cmd_i[1] = refI;
 							//kjhw_150914s
 							} else if(myTestCond->pattern[0].cmd_val[0] == 2) {
 								//MODE_CV
-								myCh->misc.cmd_i[0]
-									= myTestCond->pattern[1].cmd_val[1]
-									/ attr_count;
-								myCh->misc.cmd_i[1]
-									= myTestCond->pattern[1].cmd_val[2]
-									/ attr_count;
+								refI = myTestCond->pattern[1].cmd_val[1];
+								refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+								myData->cData[j].misc.cmd_i[0] = refI;
+								refI = myTestCond->pattern[1].cmd_val[2];
+								refI = cFind_SOC_Tracking_Limit_Current(ch, refI);//20181219 KHK
+								myData->cData[j].misc.cmd_i[1] = refI;
 							//kjhw_150914e
 							} else { //MODE_CP
-								myData->cData[j].misc.cmd_p[0]
-									= myTestCond->pattern[1].cmd_val[0]
-									/ attr_count;
-								myData->cData[j].misc.cmd_p[1]
-									= myTestCond->pattern[1].cmd_val[1]
-									/ attr_count;
+								refP = myTestCond->pattern[1].cmd_val[0] / attr_count;
+								refP = cFind_SOC_Tracking_Limit_Current(ch, refP);
+								myData->cData[j].misc.cmd_p[0] = refP;
+								refP = myTestCond->pattern[1].cmd_val[1] / attr_count;
+								refP = cFind_SOC_Tracking_Limit_Current(ch, refP);
+								myData->cData[j].misc.cmd_p[1] = refP;
 							}
 							myData->cData[j].misc.cmd_t[0]
 								= myTestCond->pattern[1].t_val * 100;
@@ -35270,7 +35278,7 @@ void cSoftFeedback(int ch)
 void cSoftFeedback_A1(int ch)
 {
 	short int func_div, func_div1, func_div2, func_div3, scan_ch, idxStepNo;
-	int idx, cp_feedback, group, i, module_ch, cmp_flag, tmp;
+	int idx, cp_feedback, group, i, j, module_ch, cmp_flag, tmp;
 	int gc_can_flag, ac_can_flag;		//csk_190108
 	long val1, val2, val3, check_t1, check_t2, check_t2a, check_t3, check_t3a;
 	long attr_count, val3a, val4a;
@@ -35281,6 +35289,9 @@ void cSoftFeedback_A1(int ch)
 	double v_cmp_p, v_cmp_n, i_cmp_p, i_cmp_n, p_cmp_p, p_cmp_n, tmp1, tmp2;
 	double v_cmp_p2, v_cmp_n2;
 	long ratioV=0; //kjh_211021
+	long ratioI=0; //kjh_211021
+	double ratioP=0.0; //jhkw_231127
+	double limit_power=0.0; //jhkw_190329
 
 	if(ch < myPs->config.chInGroup[0]) group = 0;
 	else group = 1;
@@ -35438,12 +35449,51 @@ void cSoftFeedback_A1(int ch)
 			}
 		}
 
+		//jhkw_190329s
+		limit_power = 0;
+		if(myCh->op.stepType == STEP_CHARGE) {
+			//jhkw_190425s
+			idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+			if(myTestCond->local_object[idxStepNo][idx] == P1){
+				val3a = cFind_SOC_Tracking_Limit_Current(ch, val3a);
+			}
+			//jhkw_190425e
+			idx = IDX_LOC_OBJ_LIMIT_CURRENT_UPPER;
+			if(myTestCond->local_object[idxStepNo][idx] != 0){
+				limit_power = (double)(myCh->misc.tmpVsens / ratioV)
+					* (double)((double)myTestCond->local_object[idxStepNo][idx] / (double)ratioI)
+					/ ratioP;
+				if(labs(val3a) > (labs(limit_power) / attr_count)){
+					val3a = labs(limit_power) / attr_count;
+				}
+			}
+		} else {
+			idx = IDX_LOC_OBJ_LIMIT_CURRENT_LOWER;
+			if(myTestCond->local_object[idxStepNo][idx] != 0){
+				limit_power = (double)(myCh->misc.tmpVsens / ratioV)
+					* (double)((double)myTestCond->local_object[idxStepNo][idx] / (double)ratioI)
+					/ ratioP;
+				if(labs(val4a) > (labs(limit_power) / attr_count)){
+					val4a = labs(limit_power) / attr_count;
+				}
+			}
+		}
+		//jhkw_190329e
+
 		//if(val3 >= 0) {
 		if(myCh->op.stepType == STEP_CHARGE) {
 			myCh->misc.cmd_p[1] = val3a;
 		} else {
 			myCh->misc.cmd_p[1] = val4a;
 		}
+		//jhkw_190425s
+		for(i=0; i < 3; i++) {
+			j = (int)myData->ChAttribute[ch].chNo_slave[i] - 1;
+			if(j >= 0) {
+				myData->cData[j].misc.cmd_p[1] = myCh->misc.cmd_p[1];
+			}
+		}
+		//jhkw_190425e
 		val3 = myCh->misc.cmd_p[1];
 	}  //kjh_111013_e
 
@@ -36628,6 +36678,352 @@ void cSoftFeedback_A1(int ch)
 	//ktg_231219e
 }
 
+//20181219 KHK----------------------------------------------------------
+void cSoftFeedback_Pattern_SOC_Tracking(int ch)
+{
+	short int func_div, func_div1, func_div2, func_div3, idxStepNo;
+	int idx, pattern_index, pattern_count, i, module_ch, cmp_flag, tmp, j;
+	int flag; //kjhw_180325
+	int master_ch; //jhkw_190620
+	long val1, val2, val3, time_val, attr_count, val3a, val4a;
+	long val2a, val2b; //kjhw_150914
+	long cmd_val; //kjhw_150914
+	unsigned long pattern_time;
+	float v_cmp_p, v_cmp_n, i_cmp_p, i_cmp_n, p_cmp_p, p_cmp_n, tmp1, tmp2;
+	float v_cmp_p2, v_cmp_n2, SOC, temp;
+	long ratioV, ratioI, tmp_l = 0; //jhkw_231127
+	double ratioP; //jhkw_231127
+	float tmp_f = 0.0;  //jhkw_231127
+	double limit_power;	//jhkw_190329
+	long val5a = 0;
+
+    idxStepNo = myCh->op.idxStepNo;
+
+	SOC = (float)myCh->op.SOC;
+	temp = (float)myCh->op.temp;
+
+	val2 = myCh->misc.cmd_i[0]; //kjhw_140106
+	ratioV = myData->mData.ratioV;  //jhkw_231127s
+	ratioI = myData->mData.ratioI;
+	ratioP = myData->mData.ratioP;  //jhkw_231127e
+	switch(myCh->op.stepType) {
+		case STEP_CHARGE:
+			val1 = myCh->misc.cmd_v[0];
+			break;
+		case STEP_DISCHARGE:
+		case STEP_Z:
+			val1 = myCh->misc.cmd_v[1];
+			break;
+		case STEP_PATTERN:
+			//kjhw_150914s
+			if(myTestCond->pattern[0].cmd_val[0] == 2) { //MODE_CV
+				if(myCh->misc.semiSwitchState == SEMI_I_P) {
+					val1 = myCh->misc.cmd_v[0];
+					val2 = myCh->misc.cmd_i[0];
+				} else { //SEMI_I_N
+					val1 = myCh->misc.cmd_v[1];
+					val2 = myCh->misc.cmd_i[1];
+				}
+			//kjhw_150914e
+			} else { //MODE_CC, MODE_CP
+				if(val2 >= 0) val1 = myCh->misc.cmd_v[0]; //charge
+				else val1 = myCh->misc.cmd_v[1]; //discharge
+			}
+			break;
+		default:
+			val1 = myCh->misc.cmd_v[0];
+			break;
+	}
+	//shht_240629s
+	if((myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P1) //Use SOC Tracking
+		||(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG]) == P1) {
+
+		idx = IDX_LOC_OBJ_PATTERN_INDEX;
+		pattern_index = (int)myTestCond->local_object[idxStepNo][idx];
+    	pattern_count = (int)myCh->misc.pattern_count;
+		if(pattern_count < 1) pattern_count = 1;
+
+		if(myTestCond->pattern[0].t_val == 2) {
+			val3 = myTestCond->pattern[1].cmd_val[3];
+		} else {
+			val3 = myTestCond->pattern[pattern_count].cmd_val[0];
+		}
+			//val3 = myCh->misc.cmd_p[0];
+	} else {  //Not use SOC Tracking
+		val3 = myCh->misc.cmd_p[0];
+	}
+	//val3 = myCh->misc.cmd_p[0];
+	//shht_240629e
+	if((myTestCond->pattern[0].cmd_val[0] == 1) //MODE_CP kjhw_150210
+		&& (myTestCond->pattern[0].t_val != 2)) { //not temp //jhkw_161026
+		idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+		attr_count = myTestCond->common_object[idx];
+
+		module_ch = find_master_ch(ch);
+		if(module_ch < 0) module_ch = ch; //kjg_w
+
+		cmp_flag = 0;
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_GENERATION_POWER) {
+				cmp_flag = 1;
+				break;
+			}
+		}
+		if(cmp_flag == 0) {
+			tmp = 0;
+		} else {
+			tmp = myData->canReceiveDataCount[module_ch][0]
+				+ myData->canReceiveDataCount[module_ch][1];
+		}
+		val3a = val3;
+		for(i=0; i < tmp; i++) {
+			func_div = CAN_RX_FUNC_DIV_GENERATION_POWER;
+			func_div1 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div;
+			func_div2 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div2;
+			func_div3 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div3;
+			if(func_div1 == func_div || func_div2 == func_div
+				|| func_div3 == func_div) {
+				tmp_f = myData->CanData[module_ch][i].f_val[0]; //jhkw_231127s
+				tmp_f = tmp_f * myData->mData.patt_ratioP;
+				tmp_l = (long)tmp_f / attr_count;
+				if(val3 >= 0) {
+					if(val3 > tmp_l) val3a = tmp_l;
+				} else {
+					if((val3 * (-1)) > tmp_l) val3a = (tmp_l * (-1));
+				}   //jhkw_231127e
+			}
+		}
+
+		cmp_flag = 0;
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_AVAILABLE_POWER) {
+				cmp_flag = 1;
+				break;
+			}
+		}
+		if(cmp_flag == 0) {
+			tmp = 0;
+		} else {
+			tmp = myData->canReceiveDataCount[module_ch][0]
+				+ myData->canReceiveDataCount[module_ch][1];
+		}
+		val4a = val3;
+		for(i=0; i < tmp; i++) {
+			func_div = CAN_RX_FUNC_DIV_AVAILABLE_POWER;
+			func_div1 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div;
+			func_div2 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div2;
+			func_div3 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div3;
+			if(func_div1 == func_div || func_div2 == func_div
+				|| func_div3 == func_div) {
+				tmp_f = myData->CanData[module_ch][i].f_val[0]; //jhkw_231127s
+				tmp_f = tmp_f * myData->mData.patt_ratioP;
+				tmp_l = (long)tmp_f / attr_count;
+				if(val3 >= 0) {
+					if(val3 > tmp_l) val4a = tmp_l;
+				} else {
+					if((val3 * (-1)) > tmp_l) val4a = (tmp_l * (-1));
+				}   //jhkw_231127e
+			}
+		}
+
+		//jhkw_190329s
+		limit_power = 0;
+		if(val3 >= 0) {
+			//jhkw_190620s
+			idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+			if(myTestCond->local_object[idxStepNo][idx] == P1){
+				val3a = cFind_SOC_Tracking_Limit_Current(ch, val3a);
+			}
+			//jhkw_190620e
+			idx = IDX_LOC_OBJ_LIMIT_CURRENT_UPPER;
+			if(myTestCond->local_object[idxStepNo][idx] != 0){
+				limit_power = (double)(myCh->misc.tmpVsens / ratioV)
+					* (double)((double)myTestCond->local_object[idxStepNo][idx] / (double)ratioI) //shh_check
+					/ ratioP;
+				if(labs(val3a) > (labs(limit_power) / attr_count)){
+					val3a = labs(limit_power) / attr_count;
+					val5a = myTestCond->local_object[idxStepNo][idx];
+				}
+			}
+		} else {
+			//jhkw_201102s
+			idx = IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG;
+			if(myTestCond->local_object[idxStepNo][idx] == P1){
+				val4a = cFind_SOC_Tracking_Limit_Current(ch, val4a);
+			}
+			//jhkw_201102e
+			idx = IDX_LOC_OBJ_LIMIT_CURRENT_LOWER;
+			if(myTestCond->local_object[idxStepNo][idx] != 0){
+				limit_power = (double)(myCh->misc.tmpVsens / ratioV)
+					* (double)((double)myTestCond->local_object[idxStepNo][idx] / (double)ratioI) //shh_check
+					/ ratioP;
+				if(labs(val4a) > (labs(limit_power) / attr_count)){
+					val4a = labs(limit_power) / attr_count;
+					if(val4a > 0) val4a = val4a * (-1);
+				}
+			}
+		}
+		//jhkw_190329e
+		if(val3 >= 0) {
+			myCh->misc.cmd_p[1] = val3a;
+		} else {
+			myCh->misc.cmd_p[1] = val4a;
+		}
+		//jhkw_190620s
+		for(i=0; i < 3; i++) {
+			j = (int)myData->ChAttribute[ch].chNo_slave[i] - 1;
+			if(j >= 0) {
+				myData->cData[j].misc.cmd_p[1] = myCh->misc.cmd_p[1];
+			}
+		}
+		//jhkw_190620e
+		val3 = myCh->misc.cmd_p[1];
+	} //kjh_111013_e
+	if((myTestCond->pattern[0].cmd_val[0] == 0)	//MODE_CC
+		&& (myTestCond->pattern[0].t_val != 2)) { //not temp //jhkw_161026
+		idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+		attr_count = myTestCond->common_object[idx];
+
+		module_ch = find_master_ch(ch);
+		if(module_ch < 0) module_ch = ch;
+
+		cmp_flag = 0;
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_GENERATION_CURRENT) {
+				cmp_flag = 1;
+				break;
+			}
+		}
+		if(cmp_flag == 0) {
+			tmp = 0;
+		} else {
+			tmp = myData->canReceiveDataCount[module_ch][0]
+				+ myData->canReceiveDataCount[module_ch][1];
+		}
+		val2a = val2;
+		for(i=0; i < tmp; i++) {
+			func_div = CAN_RX_FUNC_DIV_GENERATION_CURRENT;
+			func_div1 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div;
+			func_div2 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div2;
+			func_div3 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div3;
+			if(func_div1 == func_div || func_div2 == func_div
+				|| func_div3 == func_div) {
+				tmp_f = myData->CanData[module_ch][i].f_val[0]; //jhkw_231127s
+				tmp_f = tmp_f * myData->mData.patt_ratioP;
+				tmp_l = (long)tmp_f / attr_count;
+				if(val2 >= 0) {
+					if(val2 > tmp_l) val2a = tmp_l;
+				} else {
+					if((val2 * (-1)) > tmp_l) val2a = (tmp_l * (-1));
+				}   //jhkw_231127e
+			}
+		}
+
+		cmp_flag = 0;
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_AVAILABLE_CURRENT) {
+				cmp_flag = 1;
+				break;
+			}
+		}
+		if(cmp_flag == 0) {
+			tmp = 0;
+		} else {
+			tmp = myData->canReceiveDataCount[module_ch][0]
+				+ myData->canReceiveDataCount[module_ch][1];
+		}
+		val2b = val2;
+		for(i=0; i < tmp; i++) {
+			func_div = CAN_RX_FUNC_DIV_AVAILABLE_CURRENT;
+			func_div1 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div;
+			func_div2 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div2;
+			func_div3 = myData->canReceiveSetData
+				.normalData[module_ch][i].function_div3;
+			if(func_div1 == func_div || func_div2 == func_div
+				|| func_div3 == func_div) {
+				tmp_f = myData->CanData[module_ch][i].f_val[0]; //jhkw_231127s
+				tmp_f = tmp_f * myData->mData.patt_ratioP;
+				tmp_l = (long)tmp_f / attr_count;
+				if(val2 >= 0) {
+					if(val2 > tmp_l) val2b = tmp_l;
+				} else {
+					if((val2 * (-1)) > tmp_l) val2b = (tmp_l * (-1));
+				}   //jhkw_231127e
+			}
+		}
+
+		tmp = 0;
+		if(val2 >= 0) {
+			//jhkw_190620s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val2a *= attr_count;
+				val2a = cFind_SOC_Tracking_Limit_Current(ch, val2a);
+			} else {
+				for(i=0; i < 3; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					val2a = myData->cData[master_ch].misc.cmd_i[1];
+					break;
+				}
+			}
+			//jhkw_190620e
+			if(val2a < 0) val2a = 0;
+			if(myCh->misc.cmd_i[1] != val2a) {
+				tmp = 1;
+			}
+			myCh->misc.cmd_i[1] = val2a;
+		} else {
+			//jhkw_201102s
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				val2b *= attr_count;
+				val2b = cFind_SOC_Tracking_Limit_Current(ch, val2b);
+			} else {
+				for(i=0; i < 3; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					val2b = myData->cData[master_ch].misc.cmd_i[1];
+					break;
+				}
+			}
+			//jhkw_201102e
+			if(val2b > 0) val2b = 0;
+			if(myCh->misc.cmd_i[1] != val2b) {
+				tmp = 1;
+			}
+			myCh->misc.cmd_i[1] = val2b;
+		}
+		val2 = myCh->misc.cmd_i[1];
+		if(tmp == 1) {
+			cCalCmdI(ch, val2, 0, myCh->op.rangeI);
+			myCh->misc.fbCountV = 0;
+			myCh->misc.fbV = 0;
+			myCh->misc.fbCountI = 0;
+			myCh->misc.fbI = 0;
+		}
+	} //kjhw_150914e
+}
+
 void cSoftFeedback_A2(int ch)
 {
 	short int func_div, func_div1, func_div2, func_div3, idxStepNo;
@@ -36644,6 +37040,14 @@ void cSoftFeedback_A2(int ch)
 	long ratioV=0; //kjh_211021
 
 	idxStepNo = myCh->op.idxStepNo;
+
+	//20181219 KHK----------------------------------------
+	//SOC Tracking Flag 확인
+	if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P1
+		|| myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG] == P1) {
+		cSoftFeedback_Pattern_SOC_Tracking(ch);
+		return;
+	}
 
 	val2 = myCh->misc.cmd_i[0]; //kjhw_140106
 	switch(myCh->op.stepType) {
@@ -41662,5 +42066,789 @@ int output_voltage_limited(int ch, int idxStepNo)
 	}
 	return rtn;
 }
+
+//20181219 KHK------------------------------------------------------
+long	cFind_SOC_Tracking_Limit_Current(int ch, long refI)
+{
+	//SOC Tracking for Pattern Step
+
+	unsigned char type, interpolation, row, col;
+	int i, j, tmp, tmp1, idxStepNo, check_i;
+	int idx, func_div, attr_count, master_ch;
+	long	SOC, temp, val, val1, val2, diff, diff_current, soc1, soc2;
+	float A, B;
+	double limit_current; //jhkw_190425
+	long ratioV, ratioI;	//jhkw_231127
+	double ratioP;	//jhkw_231127
+
+    idxStepNo = myCh->op.idxStepNo;
+	idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+	attr_count = myTestCond->common_object[idx];
+	type = SOC = temp = 0;
+
+	ratioV = myData->mData.ratioV;	//jhkw_231127s
+	ratioI = myData->mData.ratioI;
+	ratioP = myData->mData.ratioP;	//jhkw_231127e
+	if(refI > 0) {
+		if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P0){
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				refI = refI / attr_count;
+			}
+			return refI;
+		} else {
+			type = 0;	//charge
+		}
+	} else {
+		if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_DISCHARGE_SOC_TRACKING_FLAG] == P0){
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				refI = refI / attr_count;
+			}
+			return refI;
+		} else {
+			type = 1;	//discharge
+			refI = refI * (-1);
+		}
+	}
+
+	//jhkw_190425s
+	limit_current = 0;
+	if(myCh->op.stepMode == MODE_CP) {
+		//Conversion Power(W) -> Current(I)
+		limit_current = refI;
+		limit_current /= (double)myCh->misc.tmpVsens;
+		limit_current *= myData->mData.cp_to_cc;	//jhkw_231127
+		refI = limit_current * attr_count;
+	}
+	//jhkw_190425e
+
+	interpolation = myData->testCond[ch].SOC_tracking[type].interpolation;
+	row = myData->testCond[ch].SOC_tracking[type].row;
+	col = myData->testCond[ch].SOC_tracking[type].col;
+    idxStepNo = myCh->op.idxStepNo;
+	if(row == 1) {
+		SOC = (long)myCh->op.SOC;
+	} else if(row == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_ROW) {
+				SOC = myCh->misc.can_data_l[0] / 100;
+			}
+		}
+	} else if(row == 3) {
+		SOC = myCh->misc.maxAuxV / 100;
+	} else if(row == 4) {
+		SOC = myCh->misc.sum_AmpareHour / 100;
+	} else {
+		SOC = 0;
+	}
+
+	if(col == 1) {
+		for(i=0; i < MAX_AUX_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_AUX_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == AUX_V_FUNC_DIV_NONE) continue;
+			if(func_div == AUX_FUNC_DIV_MAX_AUXT) {
+				temp = myCh->misc.maxAuxT;
+			}else if(func_div == AUX_FUNC_DIV_MIN_AUXT) {
+				temp = myCh->misc.minAuxT;
+			}else if(func_div == AUX_FUNC_DIV_DIFF_AUXT) {
+				temp = myCh->misc.diffAuxT;
+			}else if(func_div == AUX_FUNC_DIV_AVG_AUXT) {
+				temp = myCh->misc.avgAuxT;
+			}
+		}
+	} else if(col == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_COL) {
+				temp = myCh->misc.can_data_l[1];
+			}
+		}
+	} else {
+		temp = 0;
+	}
+
+	tmp = myData->testCond[ch].SOC_tracking[type].soc_num;
+	if(tmp > (MAX_SOC_TRACKING_DATA -5)) tmp = MAX_SOC_TRACKING_DATA - 5; //15
+	if(tmp <= 0) tmp = 1;
+
+	for(i=0; i < tmp; i++) { // SOC
+		if(SOC < myData->testCond[ch].SOC_tracking[type].SOC[i]) break;
+	}
+	i = i -1;
+	if(i < 0){
+	   	i = 0;
+	}
+	check_i = i;
+	if(check_i >= myData->testCond[ch].SOC_tracking[type].soc_num-1){
+		check_i = myData->testCond[ch].SOC_tracking[type].soc_num-2;
+		if(check_i < 0)
+			check_i = 0;
+	}
+
+	tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+	if(tmp > MAX_SOC_TRACKING_DATA) tmp = MAX_SOC_TRACKING_DATA; //20
+	if(tmp <= 0) tmp = 1;
+
+	for(j=0; j < tmp; j++) { // Temp
+		if(temp < myData->testCond[ch].SOC_tracking[type].temp[j]) break;
+	}
+	j = j - 1;
+	if(j < 0){
+		j = 0;
+	}
+
+	//shhw_240816s
+	if(interpolation == 1)
+	{
+		//Calculation for the Interpolation value
+		tmp1 = myData->testCond[ch].SOC_tracking[type].soc_num;
+		tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+		if(temp > myData->testCond[ch].SOC_tracking[type].temp[tmp-1]){
+			temp = myData->testCond[ch].SOC_tracking[type].temp[tmp-1];
+			j = tmp-2;
+			if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+				i = 0;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+				i = tmp1 -1;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else{
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+			}
+		}else if(temp < myData->testCond[ch].SOC_tracking[type].temp[0]){
+			temp = myData->testCond[ch].SOC_tracking[type].temp[0];
+			j = 0;
+			if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+				i = 0;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2  = val1;
+			}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+				i = tmp1 -1;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2  = val1;
+			}else{
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+			}
+		}else{
+			if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+				i = 0;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+				i = tmp1 -1;
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 = val1;
+			}else{
+				val1 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+				val2 =  (long)(temp
+						* myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+						+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+			}
+		}
+
+		soc1 = myData->testCond[ch].SOC_tracking[type].SOC[check_i];
+		soc2 = myData->testCond[ch].SOC_tracking[type].SOC[check_i+1];
+		diff = soc2 - soc1;
+		if(diff != 0){
+			diff_current = val2 - val1;
+			if(diff_current != 0){
+				A = diff_current/ diff;
+				B = val1 - A * soc1;
+			}else{
+				A = 0.0;
+				B = val1;
+			}
+		}else{
+			A = 0.0;
+			B = val1;
+		}
+		val = (float)SOC * A + B;
+		if(refI > val) refI = val;
+	} else {
+		//Step Mode(non interpolation Mode)
+		val = myData->testCond[ch].SOC_tracking[type].limit_current[i][j];
+		if(refI > val) refI = val;
+	}
+	//shhw_240816e
+
+	if(type == 1) {
+		if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_LIMIT_CURRENT_LOWER] != 0){
+			if(labs(refI)
+				> labs(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_LIMIT_CURRENT_LOWER])){
+				refI = myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_LIMIT_CURRENT_LOWER];
+				//if(refI > 0) refI = refI * (-1);
+			}
+		}
+		if(refI > 0) refI = refI * (-1);
+	}
+	limit_current = 0;
+	if(myCh->op.stepMode == MODE_CP) {
+	//Conversion Current(I) -> Power(W)
+	//jhkw_190425s
+	//	limit_current = (double)(myCh->misc.tmpVsens / ratioV)
+	//		* (double)(refI / ratioI) / ratioP;
+	//	refI = limit_current / attr_count;
+		myCh->misc.socRefI = refI; //shht_240629(241022)
+		limit_current = (double)(myCh->misc.tmpVsens / ratioV);
+		limit_current *= (double)((double)refI / (double)ratioI);
+	    limit_current /= ratioP;
+		refI = limit_current / attr_count;
+	//jhkw_190425e
+	} else {
+		refI = refI / attr_count;
+	}
+	master_ch = find_master_ch(ch);
+	if(myData->ChAttribute[ch].chNo_master == 0) {
+		if(myCh->op.stepMode == MODE_CP) {
+			refI = myData->cData[master_ch].misc.cmd_p[1];
+		}
+	}
+	return refI;
+}
+//------------------------------------------------------------
+//20181219 KHK----------------------------------------------
+long	cFind_SOC_Tracking_Current(int ch)
+{
+	//Charge SOC
+	unsigned char type, interpolation, row, col;
+	int i, j, tmp, tmp1, idx, func_div, idxStepNo, check_i;
+	long temp=0, SOC, val=0, val1, val2, diff, diff_current, soc1, soc2;
+	float A, B;
+
+	type = SOC = 0;
+	interpolation = myData->testCond[ch].SOC_tracking[type].interpolation;
+	row = myData->testCond[ch].SOC_tracking[type].row;
+	col = myData->testCond[ch].SOC_tracking[type].col;
+    idxStepNo = myCh->op.idxStepNo;
+	if(row == 1) {
+		SOC = (long)myCh->op.SOC;
+	} else if(row == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_ROW) {
+				SOC = myCh->misc.can_data_l[0] / 100;
+			}
+		}
+	} else if(row == 3) {
+		SOC = myCh->misc.maxAuxV / 100;
+	} else if(row == 4) {
+		SOC = myCh->misc.sum_AmpareHour / 100;
+	} else {
+		SOC = 0;
+	}
+
+	if(col == 1) {
+		for(i=0; i < MAX_AUX_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_AUX_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == AUX_V_FUNC_DIV_NONE) continue;
+			if(func_div == AUX_FUNC_DIV_MAX_AUXT) {
+				temp = myCh->misc.maxAuxT;
+			}else if(func_div == AUX_FUNC_DIV_MIN_AUXT) {
+				temp = myCh->misc.minAuxT;
+			}else if(func_div == AUX_FUNC_DIV_DIFF_AUXT) {
+				temp = myCh->misc.diffAuxT;
+			}else if(func_div == AUX_FUNC_DIV_AVG_AUXT) {
+				temp = myCh->misc.avgAuxT;
+			}
+		}
+	} else if(col == 2) {
+		for(i=0; i < MAX_CAN_FUNCTION; i++) {
+			idx = IDX_LOC_OBJ_CAN_FUNC_DIV_1 + i;
+			func_div = (int)myTestCond->local_object[idxStepNo][idx];
+			if(func_div == CAN_RX_FUNC_DIV_NONE) continue;
+			if(func_div == CAN_RX_FUNC_DIV_C_TABLE_COL) {
+				temp = myCh->misc.can_data_l[1];
+			}
+		}
+	} else {
+		temp = 0;
+	}
+//	temp = 15000.0;//KHK Test
+//	SOC = 100;//KHK Test
+
+	tmp = myData->testCond[ch].SOC_tracking[type].soc_num;
+	if(tmp > (MAX_SOC_TRACKING_DATA -5)) tmp = MAX_SOC_TRACKING_DATA - 5; //15
+	if(tmp <= 0) tmp = 1;
+
+	for(i=0; i < tmp; i++) { // SOC
+		if(SOC < myData->testCond[ch].SOC_tracking[type].SOC[i]) break;
+	}
+	i = i -1;
+	if(i < 0){
+	   	i = 0;
+	}
+	check_i = i;
+	if(check_i >= myData->testCond[ch].SOC_tracking[type].soc_num-1){
+		check_i = myData->testCond[ch].SOC_tracking[type].soc_num-2;
+		if(check_i < 0)
+			check_i = 0;
+	}
+
+	tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+	if(tmp > MAX_SOC_TRACKING_DATA) tmp = MAX_SOC_TRACKING_DATA; //20
+	if(tmp <= 0) tmp = 1;
+
+	for(j=0; j < tmp; j++) { // Temp
+		if(temp < myData->testCond[ch].SOC_tracking[type].temp[j]) break;
+	}
+	j = j - 1;
+	if(j < 0){
+		j = 0;
+	}
+
+	//shhw_240816s
+	if(interpolation == 0) {
+		//for SOC Step Mode
+		val = myData->testCond[ch].SOC_tracking[type].limit_current[i][j];
+	 	return val;
+	}
+	//shhw_240816e
+	tmp1 = myData->testCond[ch].SOC_tracking[type].soc_num;
+	tmp = myData->testCond[ch].SOC_tracking[type].temp_num;
+	if(temp > myData->testCond[ch].SOC_tracking[type].temp[tmp-1]){
+		temp = myData->testCond[ch].SOC_tracking[type].temp[tmp-1];
+		j = tmp-2;
+		if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+			i = 0;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+			i = tmp1 -1;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else{
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+		}
+	}else if(temp < myData->testCond[ch].SOC_tracking[type].temp[0]){
+		temp = myData->testCond[ch].SOC_tracking[type].temp[0];
+		j = 0;
+		if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+			i = 0;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2  = val1;
+		}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+			i = tmp1 -1;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2  = val1;
+		}else{
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+		}
+	}else{
+		if(j == 19) j = 18;	//shhw_221209
+
+		if(SOC <= myData->testCond[ch].SOC_tracking[type].SOC[0]){
+			i = 0;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else if(SOC >= myData->testCond[ch].SOC_tracking[type].SOC[tmp1-1]){
+			i = tmp1 -1;
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 = val1;
+		}else{
+			val1 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i][j]);
+			val2 =  (long)(temp * myData->testCond[ch].SOC_tracking[type].tracking_data_A[i+1][j]
+					+ myData->testCond[ch].SOC_tracking[type].tracking_data_B[i+1][j]);
+
+		}
+	}
+
+	soc1 = myData->testCond[ch].SOC_tracking[type].SOC[check_i];
+	soc2 = myData->testCond[ch].SOC_tracking[type].SOC[check_i+1];
+	diff = soc2 - soc1;
+	if(diff != 0){
+		diff_current = val2 - val1;
+		if(diff_current != 0){
+			A = diff_current/ diff;
+			B = val1 - A * soc1;
+		}else{
+			A = 0.0;
+			B = val1;
+		}
+	}else{
+		A = 0.0;
+		B = val1;
+	}
+	val = (float)SOC * A + B;
+	return (long)val;
+}
+//jhkw_201102e
+//------------------------------------------------------------
+
+//20181219 KHK------------------------------------------------
+S_USER_DEFINE_MODE	cFind_User_Define_Mode(int ch)
+{
+	int idxStepNo, idx, i, count, mode;
+	int j, master_ch; //jhkw_190314
+	long val, val2, l_val=0;
+	double tmp1;
+	long ratioV, ratioI;	//jhkw_231127
+	double ratioP;	//jhkw_231127
+
+	S_USER_DEFINE_MODE user_mode;
+
+    idxStepNo = myCh->op.idxStepNo;
+
+	ratioV = myData->mData.ratioV;	//jhkw_231127s
+	ratioI = myData->mData.ratioI;
+	ratioP = myData->mData.ratioP;	//jhkw_231127e
+	if(myCh->op.stepType != STEP_CHARGE){
+		idx = IDX_LOC_OBJ_MODE;
+		user_mode.mode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+		user_mode.org_mode = user_mode.mode;
+		idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+		user_mode.soc_tracking_use = myTestCond->local_object[idxStepNo][idx];
+		if(user_mode.mode == MODE_CP){
+			idx = IDX_LOC_OBJ_REF_P;
+			user_mode.ref = myTestCond->local_object[idxStepNo][idx];
+		}else{
+			idx = IDX_LOC_OBJ_REF_I;
+			user_mode.ref = myTestCond->local_object[idxStepNo][idx];
+		}
+		idx = IDX_LOC_OBJ_END_RPT_SOC;
+		user_mode.rptSOC = myTestCond->local_object[idxStepNo][idx];
+		user_mode.charging_counter = 0;
+		user_mode.charging_counter_rpt_soc = 0;
+		return user_mode;
+	}else{
+		idx = IDX_LOC_OBJ_MODE;
+		user_mode.org_mode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+		idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+		user_mode.soc_tracking_use = myTestCond->local_object[idxStepNo][idx];
+		if(user_mode.org_mode == MODE_CP){
+			idx = IDX_LOC_OBJ_REF_P;
+			user_mode.ref = myTestCond->local_object[idxStepNo][idx];
+		}else{
+			idx = IDX_LOC_OBJ_REF_I;
+			user_mode.ref = myTestCond->local_object[idxStepNo][idx];
+		}
+
+		idx = IDX_LOC_OBJ_END_RPT_SOC;
+		user_mode.rptSOC = myTestCond->local_object[idxStepNo][idx];
+		user_mode.charging_counter = 0;
+		user_mode.charging_counter_rpt_soc = 0;
+		if(user_mode.org_mode != MODE_USER){
+			user_mode.mode = (unsigned char)user_mode.org_mode;
+			return user_mode;
+		}
+	}
+
+	count = myCh->op.charging_counter;
+	if(count < 0) count = 0;
+	if(count >= myTestCond->user_define_mode.charging_count_set.maxCounter)
+		count = myTestCond->user_define_mode.charging_count_set.maxCounter-1;
+	for(i = 0; i < 16; i++){
+		if(count < (int)myTestCond->user_define_mode.charging_count_set.counter[i]){
+			user_mode.charging_counter
+				= myTestCond->user_define_mode.charging_count_set.counter[i];
+			mode = (unsigned char)myTestCond->user_define_mode.charging_count_set.mode[i];
+			user_mode.mode
+				= convert_step_mode(CONVERT_P1_TO_ORG, (long)mode);
+			user_mode.ref
+				= (long)myTestCond->user_define_mode.charging_count_set.refP[i];
+			user_mode.soc_tracking_use
+				= (unsigned char)myTestCond->user_define_mode.charging_count_set.soc_tracking_use[i];
+			//------------------------------------------------------
+			idx = IDX_LOC_OBJ_SOC_TRACKING_FLAG;
+			myTestCond->local_object[idxStepNo][idx]
+				= user_mode.soc_tracking_use;
+			//------------------------------------------------------
+			break;
+		}
+	}
+	count = myCh->op.charging_counter_rpt_soc;
+	if(count < 0) count = 0;
+	if(count >= myTestCond->user_define_mode.charging_rpt_soc_set.maxCounter)
+		count = myTestCond->user_define_mode.charging_rpt_soc_set.maxCounter-1;
+	for(i = 0; i < 16; i++){
+		if(count < (int)myTestCond->user_define_mode.charging_rpt_soc_set.counter[i]){
+			user_mode.charging_counter_rpt_soc
+				= myTestCond->user_define_mode.charging_rpt_soc_set.counter[i];
+
+			idx = IDX_LOC_OBJ_END_SOC;
+			myTestCond->local_object[idxStepNo][idx]
+				= myTestCond->user_define_mode.charging_rpt_soc_set.endSOC[i];
+			make_loc_chCode_cond((S_TEST_CONDITION *)myTestCond, idxStepNo,
+				C_CD_END_SOC, 1, COMP_GREATER_THAN_OR_EQUAL_TO, idx); //>=
+
+			user_mode.endSOC
+				= myTestCond->user_define_mode.charging_rpt_soc_set.endSOC[i];
+			user_mode.from_endsoc_to_rptsoc_set
+				= myTestCond->user_define_mode.charging_rpt_soc_set.from_endsoc_to_rptsoc_set[i];
+			if(user_mode.from_endsoc_to_rptsoc_set == P1){
+				user_mode.rptSOC
+					= myTestCond->user_define_mode.charging_rpt_soc_set.endSOC[i];
+				idx = IDX_LOC_OBJ_END_RPT_SOC;
+				myTestCond->local_object[idxStepNo][idx]
+					= myTestCond->user_define_mode.charging_rpt_soc_set.endSOC[i];
+			}
+			break;
+		}
+	}
+
+//KHKW ---------------------------------
+	idx = IDX_LOC_OBJ_RANGE_I;
+	myCh->op.rangeI
+		= (unsigned char)myTestCond->local_object[idxStepNo][idx];
+// ------------------------------------
+
+	switch(user_mode.mode){
+		case MODE_CV:
+		case MODE_CC_CV:
+			idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+			val2 = myTestCond->common_object[idx];
+			if(user_mode.soc_tracking_use == P1){
+				val = cFind_SOC_Tracking_Current(ch);  //SOC 호출 1
+			}else{
+				val = user_mode.ref;
+			}
+			//jhkw_190314e
+			/*
+			idx = IDX_LOC_OBJ_REF_I;
+			myTestCond->local_object[idxStepNo][idx] = val;
+			myCh->misc.cmd_i[0] = val / val2;
+			*/
+			idx = IDX_LOC_OBJ_REF_I;
+			master_ch = find_master_ch(ch);
+			if(myData->ChAttribute[ch].chNo_master != 0) {
+				myData->cData[master_ch].misc.cmd_i[0] = val / val2;
+				myData->testCond[master_ch].local_object[idxStepNo][idx] = val;
+				for(i=0; i < 3; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[0] = val / val2;
+					break;
+				}
+			}
+			//jhkw_190314e
+			break;
+		case MODE_CC:
+			idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+			val2 = myTestCond->common_object[idx];
+			val = user_mode.ref;
+			//current filtering--------
+			val = user_mode.ref;
+			if(val > myPs->config.maxI[l_val] * val2)
+				val = myPs->config.maxI[l_val] * val2;
+			idx = IDX_LOC_OBJ_REF_I;
+			myTestCond->local_object[idxStepNo][idx] = val;
+			myCh->misc.cmd_i[0] = val / val2;
+			//-----------------------
+			//range select-----------
+			/*val = myCh->misc.cmd_i[0];
+			idx = IDX_LOC_OBJ_RANGE_I;
+			myTestCond->local_object[idxStepNo][idx] = RANGE1 -1;
+			if(val <= (myData->mData.config.maxI[3])) {
+				l_val = RANGE4 - 1;
+			} else if(val <= (myData->mData.config.maxI[2])) {
+				l_val = RANGE3 - 1;
+			} else if(val <= (myData->mData.config.maxI[1])) {
+				l_val = RANGE2 - 1;
+			} else {
+				l_val = RANGE1 - 1;
+			}
+
+			if((l_val+1) > (long)myData->mData.config.rangeI) {
+				l_val = (long)myData->mData.config.rangeI - 1;
+			}
+			myTestCond->local_object[idxStepNo][idx] = l_val;
+			myCh->op.rangeI
+			 = myTestCond->local_object[idxStepNo][idx]; */
+			//-----------------------
+			break;
+		case MODE_CP:
+			idx = IDX_LOC_OBJ_RANGE_I;
+			myTestCond->local_object[idxStepNo][idx] = RANGE1 -1;
+			myCh->op.rangeI
+				= myTestCond->local_object[idxStepNo][idx];
+
+			tmp1 = (double)(myPs->config.maxV[myCh->op.rangeV] / ratioV)
+				* (double)(myPs->config.maxI[myCh->op.rangeI] / ratioI)
+				/ ratioP;
+			idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+			val2 = myTestCond->common_object[idx];
+
+			val = user_mode.ref;
+			if(val > (long)tmp1 * val2) val = (long)tmp1 * val2;
+			else if(val < 0) val = 0;
+
+			tmp1 = (double)val
+				/ (double)myCh->misc.tmpVsens;
+			tmp1 *= myData->mData.cp_to_cc; //Current	//jhkw_231127
+
+			idx = IDX_LOC_OBJ_REF_P;
+			myTestCond->local_object[idxStepNo][idx] = val;
+
+			myCh->misc.cmd_p[0] = val / val2;
+
+			val = (long)tmp1;
+			if(val > myPs->config.maxI[myCh->op.rangeI] * val2) {
+				val = myPs->config.maxI[myCh->op.rangeI] * val2;
+			} else if(val < 0) val = 0;
+
+			idx = IDX_LOC_OBJ_REF_I;
+			myTestCond->local_object[idxStepNo][idx] = val;
+			myCh->misc.cmd_i[0] = val / val2;
+			//range select-----------
+			/*val = myCh->misc.cmd_i[0];
+			idx = IDX_LOC_OBJ_RANGE_I;
+			if(val <= (myData->mData.config.maxI[3])) {
+				l_val = RANGE4 - 1;
+			} else if(val <= (myData->mData.config.maxI[2])) {
+				l_val = RANGE3 - 1;
+			} else if(val <= (myData->mData.config.maxI[1])) {
+				l_val = RANGE2 - 1;
+			} else {
+				l_val = RANGE1 - 1;
+			}
+
+			if((l_val+1) > (long)myData->mData.config.rangeI) {
+				l_val = (long)myData->mData.config.rangeI - 1;
+			}
+			myTestCond->local_object[idxStepNo][idx] = l_val;
+			myCh->op.rangeI
+			 = myTestCond->local_object[idxStepNo][idx];*/
+			//-----------------------
+
+			break;
+		case MODE_CR:
+			idx = IDX_LOC_OBJ_RANGE_I;
+			myTestCond->local_object[idxStepNo][idx] = RANGE1 -1;
+			myCh->op.rangeI
+				= myTestCond->local_object[idxStepNo][idx];
+
+			idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+			val2 = myTestCond->common_object[idx];
+			idx = IDX_LOC_OBJ_REF_R;
+			tmp1 = (double)(myCh->misc.cmd_v[0]
+				- myCh->misc.tmpVsens)
+				/ (double)myTestCond->local_object[idxStepNo][idx]
+				* 1000.0;
+			val = (long)tmp1;
+			if(val > myPs->config.maxI[myCh->op.rangeI] * val2)
+				val = myPs->config.maxI[myCh->op.rangeI] * val2;
+			else if(val < 0) val = 0;
+			idx = IDX_LOC_OBJ_REF_I;
+			myTestCond->local_object[idxStepNo][idx] = val;
+
+			if(user_mode.soc_tracking_use == P1){
+				myCh->misc.cmd_i[0]
+					= (cFind_SOC_Tracking_Current(ch) / val2);  //SOC 호출 2
+			}else{
+				myCh->misc.cmd_i[0] = val / val2;
+				//range select-----------
+				/*val = myCh->misc.cmd_i[0];
+				idx = IDX_LOC_OBJ_RANGE_I;
+				myTestCond->local_object[idxStepNo][idx] = RANGE1 -1;
+				if(val <= (myData->mData.config.maxI[3])) {
+					l_val = RANGE4 - 1;
+				} else if(val <= (myData->mData.config.maxI[2])) {
+					l_val = RANGE3 - 1;
+				} else if(val <= (myData->mData.config.maxI[1])) {
+					l_val = RANGE2 - 1;
+				} else {
+					l_val = RANGE1 - 1;
+				}
+
+				if((l_val+1) > (long)myData->mData.config.rangeI) {
+					l_val = (long)myData->mData.config.rangeI - 1;
+				}
+				myTestCond->local_object[idxStepNo][idx] = l_val;
+				myCh->op.rangeI
+				 = myTestCond->local_object[idxStepNo][idx];*/
+				//-----------------------------
+			}
+			break;
+		default:
+			idx = IDX_LOC_OBJ_RANGE_I;
+			myTestCond->local_object[idxStepNo][idx] = RANGE1 -1;
+			myCh->op.rangeI
+				= myTestCond->local_object[idxStepNo][idx];
+
+			idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+			val2 = myTestCond->common_object[idx];
+			if(user_mode.soc_tracking_use == P1){
+				myCh->misc.cmd_i[0]
+					= (cFind_SOC_Tracking_Current(ch) / val2);  //SOC 호출 3
+			}else{
+				myCh->misc.cmd_i[0]
+					= user_mode.ref / val2;
+				//range select-----------
+				/*val = myCh->misc.cmd_i[0];
+				idx = IDX_LOC_OBJ_RANGE_I;
+				myTestCond->local_object[idxStepNo][idx] = RANGE1 -1;
+				if(val <= (myData->mData.config.maxI[3])) {
+					l_val = RANGE4 - 1;
+				} else if(val <= (myData->mData.config.maxI[2])) {
+					l_val = RANGE3 - 1;
+				} else if(val <= (myData->mData.config.maxI[1])) {
+					l_val = RANGE2 - 1;
+				} else {
+					l_val = RANGE1 - 1;
+				}
+
+				if((l_val+1) > (long)myData->mData.config.rangeI) {
+					l_val = (long)myData->mData.config.rangeI - 1;
+				}
+				myTestCond->local_object[idxStepNo][idx] = l_val;
+				myCh->op.rangeI
+				 = myTestCond->local_object[idxStepNo][idx];*/
+				//-----------------------
+
+			}
+			break;
+		}
+
+	return user_mode;
+}
+
 #endif
 

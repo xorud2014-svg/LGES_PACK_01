@@ -1,0 +1,58 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/darren@hiebert.com/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://darren.hiebert.com/ctags/	/official site/
+!_TAG_PROGRAM_VERSION	3.4	/with C, C++, Eiffel, Fortran, and Java  support/
+BYTES_TO_RECEIVE	comm.h	15;"	d
+BccCheck	main.c	/^int BccCheck(int count)$/;"	f
+BccCreate	main.c	/^void BccCreate(int count)$/;"	f
+Bps	comm.h	/^} Bps;$/;"	t
+CMD_ACK	main.h	11;"	d
+CMD_ALL_OFF	main.h	9;"	d
+CMD_NACK	main.h	12;"	d
+CMD_ONE_OFF	main.h	8;"	d
+CMD_ONE_ON	main.h	7;"	d
+CMD_TEST	main.h	10;"	d
+CodeCheck	main.c	/^int CodeCheck(int count)$/;"	f
+CommParam	comm.h	/^} CommParam;$/;"	t
+DATA_LENGHT	comm.h	14;"	d
+DATA_START	comm.h	12;"	d
+DATA_STOP	comm.h	13;"	d
+ETX	main.h	5;"	d
+Flow	comm.h	/^} Flow;$/;"	t
+ReceiveDataPrint	main.c	/^void ReceiveDataPrint(int count)$/;"	f
+RetryCheck	main.c	/^int RetryCheck(void)$/;"	f
+STX	main.h	4;"	d
+SWITCH_ADDR	main.h	6;"	d
+SendDataPrint	main.c	/^void SendDataPrint(int count)$/;"	f
+SendSerialData	main.c	/^int SendSerialData(void)$/;"	f
+TMT_B12	comm.h	/^	TMT_B12,$/;"	e
+TMT_B192	comm.h	/^	TMT_B192$/;"	e
+TMT_B24	comm.h	/^	TMT_B24,$/;"	e
+TMT_B3	comm.h	/^	TMT_B3,$/;"	e
+TMT_B48	comm.h	/^	TMT_B48,$/;"	e
+TMT_B6	comm.h	/^	TMT_B6,$/;"	e
+TMT_B96	comm.h	/^	TMT_B96,$/;"	e
+TMT_FNONE	comm.h	/^	TMT_FNONE$/;"	e
+TMT_FRTSCTS	comm.h	/^	TMT_FRTSCTS,$/;"	e
+TMT_FXONXOFF	comm.h	/^	TMT_FXONXOFF,$/;"	e
+TransData	main.c	/^void TransData(int cmd, int ch, int val)$/;"	f
+_COMM_H_	comm.h	2;"	d
+_MAIN_H_	main.h	2;"	d
+bps	comm.h	/^	Bps   bps;$/;"	m	struct:
+closetty	comm.c	/^int closetty(int fd)$/;"	f
+comm_param	main.c	/^CommParam comm_param = { "\/dev\/ttyS0", TMT_B96, TMT_FXONXOFF};$/;"	v
+delay	comm.c	/^void delay(int sec)$/;"	f
+device	comm.h	/^	char device[11];$/;"	m	struct:
+flow	comm.h	/^	Flow  flow;$/;"	m	struct:
+main	main.c	/^int main(int argc, char *argv[])$/;"	f
+oldtrm	comm.c	/^static struct termios oldtrm;$/;"	v	file:
+opentty	comm.c	/^int opentty(void)$/;"	f
+retry	main.c	/^int retryCount, retry;$/;"	v
+retryCount	main.c	/^int retryCount, retry;$/;"	v
+rxData	main.c	/^char rxData[256], txData[256];$/;"	v
+rxsettings	comm.c	/^int rxsettings(char *buf, int length)$/;"	f
+send	comm.c	/^int send(int fd, char *msg, int len)$/;"	f
+txData	main.c	/^char rxData[256], txData[256];$/;"	v
+txsettings	comm.c	/^int txsettings(char *buf, int length)$/;"	f

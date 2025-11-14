@@ -1,0 +1,11979 @@
+#include <rtl_core.h>
+#include <asm/io.h>
+#include <pthread.h>
+#include "../../INC/datastore.h"
+#include "common_utils.h"
+#include "local_message.h"
+#include "InOutControl.h"
+
+extern S_SYSTEM_DATA *myData;
+extern S_MODULE_DATA *myPs;
+extern S_DIO *myDio;
+
+void InOutControl(int index)
+{
+	int tmp;
+	int systemModel; //shhw_241021
+
+	systemModel = myData->AppControl.config.systemModel; //shhw_241021
+
+	if(myDio->config.dio_Control_Flag == P0) {
+		//kjg_111002
+		switch(index) {
+			case 0: //internal io
+				/*if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+					myDio->misc.delayTimer += myDio->config.scan_period;
+				}*/
+				I_InScan();
+				tmp = I_In_FlagCheck_PowerSwitch();
+				break;
+			case 1: //module io
+				break;
+			case 2: //channel io
+				break;
+			case 3: //external io
+				break;
+			default: break;
+		}
+
+		return;
+	}
+
+	switch(index) {
+		case 0: //internal io
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				myDio->misc.delayTimer += myDio->config.scan_period;
+			}
+			I_InScan();
+			I_In_FlagCheck();
+			I_OutScan();
+			break;
+		case 1: //module io
+			M_InScan();
+			M_In_FlagCheck();
+			M_OutScan();
+			break;
+		case 2: //channel io
+			C_InScan();
+			C_In_FlagCheck();
+			break;
+		case 3: //external io
+			E_InScan();
+			E_In_FlagCheck();
+			E_OutScan();
+#if defined __COB__
+			tmp = 0;
+			switch(myData->AppControl.config.systemModel) {
+				case F_SDI_5V_400A_200A_100A_10A:
+				case F_SDI_5V_400A_200A_100A_10A_2:
+					tmp = 1;
+					break;
+				case F_SDI_5V_450A_200A_100A_10A:
+					tmp = 2;
+					break;
+				default:
+					break;
+			}
+			if(tmp == 1) {
+				//for SDI 400A calibration
+				if(myData->AppControl.config.debugType >= 1
+					&& myData->AppControl.config.debugType <= 12) {
+					Select_OutPoint(2, (int)myData->AppControl.config
+						.debugType, O_RUN_RELAY, ON);
+				}
+				Select_OutPoint(2, 1, O_SELECT_VO_VS, ON);
+				Select_OutPoint(2, 2, O_SELECT_VO_VS, ON);
+			} else if(tmp == 2) {
+				Select_OutPoint(2, 1, O_SELECT_VO_VS, ON);
+				Select_OutPoint(2, 2, O_SELECT_VO_VS, ON);
+				Select_OutPoint(3, 1, O_SELECT_VO_VS, ON);
+				Select_OutPoint(3, 2, O_SELECT_VO_VS, ON);
+			}
+
+			tmp = 0;
+			switch(myData->AppControl.config.systemModel) {
+				case F_SDI_5V_50A_5A:
+				case F_SDI_5V_400A_200A_100A_10A:
+					tmp = 1;
+					break;
+				default:
+					break;
+			}
+			if(tmp == 1) {
+				if(Read_InPoint(1, 1, I_JIG_TRAY_STATE) == P1
+					&& Read_InPoint(1, 2, I_JIG_TRAY_STATE) == P0) { //tray load
+					Select_OutPoint(1, 0, O_JIG_ROLL_CYLINDER_ON_OFF, OFF);
+				} else {
+					if(myData->jData[0].jigState == J_DISCONTACT) {
+						Select_OutPoint(1, 0, O_JIG_ROLL_CYLINDER_ON_OFF, ON);
+					} else {
+						Select_OutPoint(1, 0, O_JIG_ROLL_CYLINDER_ON_OFF, OFF);
+					}
+				}
+
+				if(Read_InPoint(2, 1, I_JIG_TRAY_STATE) == P1
+					&& Read_InPoint(2, 2, I_JIG_TRAY_STATE) == P0) { //tray load
+					Select_OutPoint(2, 0, O_JIG_ROLL_CYLINDER_ON_OFF, OFF);
+				} else {
+					if(myData->jData[1].jigState == J_DISCONTACT) {
+						Select_OutPoint(2, 0, O_JIG_ROLL_CYLINDER_ON_OFF, ON);
+					} else {
+						Select_OutPoint(2, 0, O_JIG_ROLL_CYLINDER_ON_OFF, OFF);
+					}
+				}
+			}
+#endif
+			DIO_Signal();
+			break;
+		default: break;
+	}
+}
+
+void DIO_Signal(void)
+{
+	/*Simplication - shh_250417*/
+	switch(myData->AppControl.config.systemModel) {
+		case C_SKI_20V_300A_200A_100A_12KW:		//shh_231204	
+		case C_SKI_20V_300A_200A_100A_12KW_2:	//shh_231204
+		case C_SKI_30V_600A_400A_200A_100A_36KW:	//ksh_250418
+		case C_SKI_50V_500A_250A_25KW:	//ktg_190715
+		case C_SK_60V_300A_10A:
+		case C_SKI_100V_100A_10A_10KW:  //jhk_120329
+		case C_SKI_100V_300A_150A_50A_10A_60KW: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_2: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_3: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_4: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_5: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_6: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_7: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_8: //kjh_120527
+		case C_SKI_400V_100A_10A_40KW: //jhk_120112
+		case C_SKI_450V_100A_50A_25A_90KW:	//phb_240507
+		case C_SK_450V_200A_10A_90KW:
+		case C_SKI_450V_200A_100A_90KW:		//sec_221223
+		//case C_SKE_600V_400A_100A_50A_25A_240KW:	//jhkw_130924
+		//case C_SKI_1200V_250A_100A_50A_300KW:	//jhk_131209
+			//inverter 1ea
+			DIO_Signal_RemotePs_Pack1();
+			DIO_RippleSwitch(); //for C_LGC_500V_20A
+			break;
+		case C_SKI_50V_500A_400A_200A_100A_100KW:	//jhk_180119
+		case C_SKI_50V_500A_400A_200A_100A_100KW_2:	//jhk_180119
+		case C_SKI_50V_1000A_500A_300A_100KW:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_2:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_3:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_4:	//ktg_190711
+		case C_NORTHVOLT_60V_400A_200A_96KW:	//khj_191203
+		case C_SKI_60V_400A_200A_100A_96KW:		//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_2:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_3:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_4:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_5:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_6:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_7:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_8:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_9:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_10:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_11:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_12:	//ktg_190319
+		case C_DAEHWA_60V_500A_250A_50A_60KW:	//jhk_160913
+		case C_DAEHWA_60V_500A_250A_50A_60KW_2:	//jhk_160913
+		case C_SKI_120V_400A_100A_192KW:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_2:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_3:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_4:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_5:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_6:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_7:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_8:	//jhk_170628
+		case C_SKI_120V_400A_200A_100A_50A_192KW:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_2:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_3:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_4:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_5:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_6:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_7:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_8:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_9:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_10:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_11:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_12:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_13:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_14:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_15:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_16:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_17:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_18:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_192KW:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_2:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_3:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_4:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_5:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_6:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_7:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_8:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_9:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_10:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_11:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_12:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_13:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_14:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_15:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_16:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_17:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_18:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_19:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_20:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_21:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_22:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_23:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_24:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_25:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_26:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_27:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_28:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_29:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_30:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_31:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_32:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_33:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_34:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_35:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_36:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_37:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_38:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_39:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_40:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_41:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_42:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_43:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_44:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_45:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_46:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_47:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_48:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_49:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_50:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_51:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_52:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_53:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_54:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_55:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_56:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_57:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_58:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_59:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_60:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_61:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_62:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_63:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_64:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_65:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_66:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_67:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_68:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_69:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_70:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_71:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_72:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_73:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_74:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_75:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_76:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_77:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_78:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_79:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_80:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_81:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_82:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_83:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_84:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_85:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_86:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_87:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_88:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_89:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_90:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_91:	//khj_200308
+		////////////////////////////////////////////////////////
+		case C_SKI_120V_400A_200A_100A_192KW_92:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_93:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_94:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_95:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_96:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_97:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_98:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_99:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_100:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_101:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_102:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_103:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_104:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_105:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_106:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_107:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_108:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_109:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_110:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_111:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_112:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_113:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_114:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_115:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_116:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_117:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_118:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_119:	//khj_200308
+		////////////////////////////////////////////////////////
+		case C_SKI_120V_400A_200A_100A_192KW_120:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_121:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_122:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_123:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_124:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_125:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_126:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_127:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_128:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_129:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_130:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_131:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_132:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_133:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_134:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_135:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_136:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_137:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_138:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_139:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_140:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_141:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_142:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_143:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_144:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_145:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_146:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_147:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_148:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_149:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_150:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_151:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_152:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_153:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_154:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_155:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_156:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_157:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_158:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_159:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_160:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_161:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_162:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_163:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_164:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_165:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_166:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_167:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_168:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_169:	//ktg_200410
+		case C_KATECH_120V_400A_200A_100A_192KW:	//shh_200702
+		case C_TEST_120V_400A_200A_100A_192KW:		//shh_200723
+		case C_SKI_120V_400A_200A_100A_192KW_170:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_171:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_172:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_173:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_174:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_175:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_176:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_177:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_178:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_179:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_180:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_181:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_182:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_183:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_184:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_185:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_186:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_187:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_188:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_189:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_190:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_191:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_192:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_193:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_194:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_195:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_196:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_197:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_198:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_199:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_200:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_201:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_202:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_203:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_204:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_205:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_206:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_207:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_208:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_209:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_210:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_211:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_212:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_213:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_214:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_215:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_216:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_217:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_218:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_219:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_220:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_221:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_222:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_223:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_224:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_225:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_226:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_227:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_228:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_229:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_230:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_231:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_232:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_233:	//ktg_200908
+		case C_SKI_120V_400A_200A_100A_192KW_234:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_235:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_236:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_237:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_238:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_239:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_240:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_241:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_242:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_243:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_244:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_245:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_246:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_247:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_248:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_249:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_250:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_251:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_252:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_253:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_254:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_255:	//shh_220113
+		case C_SKI_120V_425A_200A_100A_50A_192KW:       //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_2:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_3:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_4:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_5:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_6:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_7:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_8:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_9:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_10:    //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_11:    //phb_230206
+		case C_SKI_120V_425A_300A_200A_100A_192KW:      //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_2:    //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_3:    //phb_230105
+		case C_SKI_180V_425A_200A_100A_192KW:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_2:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_3:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_4:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_5:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_6:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_7:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_8:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_9:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_10:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_11:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_12:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_13:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_14:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_15:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_16:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_17:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_18:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_19:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_20:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_21:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_22:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_23:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_24:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_25:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_26:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_27:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_28:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_29:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_30:	//sec_221221
+		case C_NORTHVOLT_200V_400A_200A_160KW:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_2:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_3:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_4:	//ktg_191203
+			//inverter 2ea MC 1ea
+			DIO_Signal_RemotePs_Pack1_Block2();
+			break;
+		case C_SK_450V_200A_10A_180KW:
+		case C_SKC_600V_200A_100A_50A_240KW: //jhkw_120807
+		case C_SKC_600V_200A_100A_50A_240KW_2: //jhkw_121019
+			//inverter 2ea
+			DIO_Signal_RemotePs_Pack2();
+			break;
+		case C_SK_450V_200A_10A_360KW:
+			//inverter 4ea
+			DIO_Signal_RemotePs_Pack3();
+			break;
+		//kjhw_131213
+		//Dsp use Pack
+		case C_NORTHVOLT_400V_200A_100A_160KW:		//ktg_200415
+		case C_DAEHWA_600V_400A_200A_100A_200KW:	//jhk_170120
+		case C_DAEHWA_750V_300A_100A_150KW:	//jhk_170203
+			//inv_Dsp 1ea inv_block 1ea
+			DIO_Signal_RemotePs_Pack_Dsp1_block1();
+			break;
+		case C_SKI_500V_450A_200A_450KW:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_2:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_3:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_4:		//ktg_200410
+		case C_SKI_500V_450A_200A_450KW_5:		//ktg_200410
+		case C_SKI_500V_450A_200A_450KW_6:		//ktg_200410
+		case C_DAEHWA_800V_200A_50A_160KW:	//jhk_160831
+		case C_SKI_1200V_250A_100A_50A_300KW:	//jhk_131209
+			//inv_Dsp 1ea inv_block 2ea
+			DIO_Signal_RemotePs_Pack_Dsp1_block2();
+			break;
+		case C_SKI_450V_150A_100A_50A_260KW:	//sec_221215
+		case C_SKI_450V_150A_100A_50A_260KW_2:	//sec_221215
+			//inv_Dsp 2ea inv_block 2ea
+			DIO_Signal_RemotePs_Pack_Dsp2_block2();	//jhkw_181114
+			break;
+		case C_SKI_180V_600A_300A_100A_320KW:       //phb_230220
+		case C_SKI_180V_600A_300A_100A_320KW_2:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_3:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_4:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_5:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_6:		//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_7:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_8:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_9:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_10:	//shh_231004		
+		case C_SKI_180V_600A_300A_100A_320KW_11:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_12:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_13:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_14:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_15:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_16:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_17:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_18:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_19:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_20:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_21:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_22:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_23:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_24:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_25:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_26:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_27:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_28:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_29:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_30:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_31:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_32:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_33:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_34:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_35:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_36:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_37:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_38:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_39:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_40:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_41:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_42:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_43:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_44:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_45:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_46:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_47:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_48: 	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_49:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_50:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_51:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_52:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_53:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_54:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_55:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_56:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_57:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_58:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_59:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_60:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_61:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_62:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_63:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_64:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_65:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_66:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_67:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_68:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_69:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_70:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_71:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_72:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_73:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_74:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_75:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_76:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_77:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_78:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_79:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_80:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_81:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_82:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_83:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_84:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_85:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_86:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_87:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_88:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_89:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_90:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_91:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_92:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_93:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_94:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_95:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_96:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_97:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_98:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_99:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_100:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_101:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_102:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_103:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_104:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_105:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_106:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_107:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_108:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_109:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_110:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_111:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_112:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_113:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_114:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_115:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_116:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_117:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_118:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_119:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_120:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_121:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_122:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_123:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_124:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_125:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_126:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_127:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_128:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_129:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_130:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_131:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_132:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_133:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_134:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_135:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_136:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_137:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_138:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_139:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_140:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_141:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_142:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_143:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_144:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_145:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_146:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_147:	//shh_240326
+			//inv_Dsp 2ea mc 1ea
+			DIO_Signal_RemotePs_Pack_Dsp2_block2_2();	//phbw_230223
+			break;
+		case C_SKI_260V_425A_200A_442KW:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_2:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_3:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_4:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_5:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_6:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_7:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_8:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_9:	//shh_211020
+		case C_SKI_260V_425A_250A_50A_442KW: //shh_240620
+		case C_SKI_1000V_400A_200A_100A_450KW:	//sec_230103
+		case C_SKI_1000V_400A_200A_100A_450KW_2:	//sec_230426	//phb_240418
+		case C_SKI_1000V_400A_200A_100A_450KW_3:	//phb_240418
+		case C_SKI_1200V_500A_400A_300A_200A_600KW:     //phb_230116
+		case C_SKI_1500V_350A_300A_200A_100A_450KW:     //phb_230117
+		case C_SKI_1500V_400A_100A_500KW:	//jhk_180610
+			//inv_Dsp 1ea inv_block 2ea * 2
+			DIO_Signal_RemotePs_Pack_Dsp2_block4();
+			break;
+		case C_SKI_2000V_300A_200A_100A_50A_600KW:  //phb_230320
+			//inv_Dsp 3ea signal 6ea
+			DIO_Signal_RemotePs_Pack_Dsp3_block6();		//phb_230324
+			break;
+		default:
+			DIO_Signal_RemotePs_General1();
+			DIO_JigSwitch();
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_General1(void)
+{
+	int index, group, ch;
+
+	group = 0; ch = 0;
+
+	if((myDio->signal[DIO_SIG_REMOTE_PS] >= P1)
+		&& (myDio->signal[DIO_SIG_REMOTE_PS] <= P8)) {
+		index = (int)myDio->signal[DIO_SIG_REMOTE_PS] - 1;
+		Select_OutPoint(group, ch, O_PS1 + index, ON);
+		if(myDio->signal[DIO_SIG_REMOTE_PS] != P8)
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+		else myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+	} else if((myDio->signal[DIO_SIG_REMOTE_PS] >= P101)
+		&& (myDio->signal[DIO_SIG_REMOTE_PS] <= P108)) {
+		index = (int)myDio->signal[DIO_SIG_REMOTE_PS] - 101;
+		Select_OutPoint(group, ch, O_PS1 + index, OFF);
+		if(myDio->signal[DIO_SIG_REMOTE_PS] != P108)
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+		else myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+	}
+}
+
+void DIO_Signal_RemotePs_General2(void)
+{
+	int index, group, ch, flag1, flag2;
+	long delayCount;
+
+	group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, ch, O_MAIN_MC, OFF);
+				Select_OutPoint(group, ch, O_SUB_MC, OFF);
+/*				ch = 1;
+				for(index=0; index < 8; index++) {
+					Select_OutPoint(group, ch, O_PS1+index, ON);
+				}
+				ch = 2;
+				for(index=0; index < 8; index++) {
+					Select_OutPoint(group, ch, O_PS1+index, ON);
+				}
+				ch = 3;
+				for(index=0; index < 8; index++) {
+					Select_OutPoint(group, ch, O_PS1+index, ON);
+				}
+				ch = 4;
+				for(index=0; index < 8; index++) {
+					Select_OutPoint(group, ch, O_PS1+index, ON);
+				}*/
+			} else {
+				Select_OutPoint(group, ch, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P2:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_EMG_SWITCH);
+			flag2 = Read_InPoint(group, ch, I_SUB_EMG);
+			if(flag1 == OFF && flag2 == OFF) {
+				delayCount = 500; //5sec
+				if(myDio->misc.delayCount > delayCount) {
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				}
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_SUB_MC);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, ch, O_MAIN_MC, ON);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P4:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1000msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P5:
+			flag1 = Read_InPoint(group, ch, I_SUB_MC);
+			flag2 = Read_InPoint(group, ch, I_MAIN_MC);
+			if(flag1 == ON && flag2 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, ch, O_SUB_MC, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			ch = 1;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, ON);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P8:
+			ch = 2;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, ON);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P9:
+			ch = 3;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, ON);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P10:
+			ch = 4;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, ON);
+			}
+			myDio->misc.delayCount = 0;
+
+			switch(myData->AppControl.config.systemModel) {
+				case C_KATECH_20V_1000A_500A_100A: //csk_120309
+				case C_LGC_50V_40A_10A_4A: //kjg_120225
+				case C_LGC_50V_40A_10A_4A_2:
+				case C_LGC_50V_40A_10A_4A_3:
+				case C_LGC_50V_40A_10A_4A_4:
+					for(ch=0; ch < myPs->config.installedCh; ch++) {
+						Select_OutPoint(0, ch+1, O_OUT_VS_ISOLATION, ON);
+						Select_OutPoint(0, ch+1, O_OUT_VP_ISOLATION, ON);
+						Select_OutPoint(0, ch+1, O_OUT_VB_ISOLATION, ON);
+						Select_OutPoint(0, ch+1, O_OUT_VIN_ISOLATION, ON);
+
+						//SR_OPEN
+						Select_OutPoint(0, ch+1, O_CABLE_CHECK_SR, OFF);
+						Select_OutPoint(1, ch+1, O_CABLE_CHECK_SR, OFF);
+
+						Select_OutPoint(0, ch+1, O_CALI_VP_VB, OFF);
+					}
+					break;
+				default:
+					break;
+			}
+
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			Select_OutPoint(group, ch, O_SUB_MC, OFF);
+			ch = 1;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, OFF);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P102:
+			ch = 2;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, OFF);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P103:
+			ch = 3;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, OFF);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P104:
+			ch = 4;
+			for(index=0; index < 8; index++) {
+				Select_OutPoint(group, ch, O_PS1+index, OFF);
+			}
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P105:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P106:
+			Select_OutPoint(group, ch, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack1(void)
+{
+	int flag1, flag2, flag3, flag4, flag5, flag6, flag7, flag8, i, group, ch; //phb_230710
+	//int flag1, flag2, flag3, flag4, flag5, flag6, flag7, flag8, i, group, ch;
+	//S_MSG_VAL SendMsg; //kjhw_130830
+
+	group = 0; ch = 1;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0:
+			Select_OutPoint(group, ch, O_INVERTER_RUN2, ON); //jhkw_160617 //shh_231204
+			break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, ch, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, ch, O_INVERTER_RESET, OFF);
+			}
+			switch(myData->AppControl.config.systemModel) {
+				case C_SBL_150V_250A_10A_38KW: //lki_111010
+				case C_SBL_150V_250A_10A_75KW_4:
+				case C_SBL_150V_250A_10A_75KW_5:
+					for(i=0; i < myPs->config.installedCh; i++) {
+						//SR_OPEN
+						Select_OutPoint(0, i+1, O_CABLE_CHECK_SR, OFF);
+						Select_OutPoint(1, i+1, O_CABLE_CHECK_SR, OFF);
+
+						Select_OutPoint(0, i+1, O_CALI_VP_VB, OFF);
+					}
+					break;
+				default:
+					break;
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, ch, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, ch, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, ch, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, ch, I_MCCB_FAIL); //lki_111010
+			flag6 = Read_InPoint(group, ch, I_INVERTER_OC);
+			flag7 = Read_InPoint(group, ch, I_INVERTER_ETC);
+			flag8 = Read_InPoint(group, ch, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+				&& flag5 == OFF && flag6 == OFF && flag7 == OFF && flag8 == OFF) {
+				Select_OutPoint(group, ch, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, ch, I_SUB_MC);
+			flag3 = Read_InPoint(group, ch, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, ch, O_SUB_MC_IN, OFF);//jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, ch, O_SUB_MC_IN, ON);//jhkw_131209
+			}
+			break;
+		case P5:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, ch, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, ch, I_MAIN_MC);
+			flag3 = Read_InPoint(group, ch, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, ch, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, ch, O_MAIN_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, ch, O_MAIN_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, ch, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, ch, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, ch, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, ch, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			//if(myDio->misc.delayCount > 5) { //50msec
+			if(myDio->misc.delayCount > 10) { //100msec
+				flag1 = Read_InPoint(group, ch, I_SUB_MC); //jhkw_131209
+				if(flag1 == OFF) {
+					Select_OutPoint(group, ch, O_SUB_MC_IN, OFF); //jhkw_131209
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, ch, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, ch, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, ch, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, ch, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, ch, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					 && flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, ch, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			Select_OutPoint(group, ch, O_INVERTER_RESET, ON); //kjhw_150726
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, ch, O_INVERTER_RESET, OFF); //kjhw_150726
+			}
+			break;
+		case P14:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, ch, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, ch, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, ch, O_INVERTER_RUN, ON);
+				Select_OutPoint(group, ch, O_INVERTER_RUN2, OFF); //jhkw_160617 //shh_231204
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, ch, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, ch, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, ch, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, ch, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, ch, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				for(i=0; i < myPs->config.installedCh; i++) {
+					Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, ch, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, ch, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			myDio->misc.delayCount = 0; //kjhw_130830
+			Select_OutPoint(group, ch, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P150;
+			break;
+		case P199:
+			//kjhw_130830
+			//myDio->misc.delayCount++;
+			//if(myDio->misc.delayCount > 1000) { //10sec
+				//flag5 = Read_InPoint(group, ch, I_MCCB_FAIL);
+				//if(flag5 == ON) {
+				//	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				//	SendMsg.msg = MSG_IO_MODULE_EXIT;
+				//	SendMsg.val[0] = M_CD_FAULT_MCCB;
+				//	SendMsg.val[1] = 10 + 1;
+				//	send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+				//}
+			//}
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack2(void)
+{
+	int flag1, flag2, flag3, flag4, flag5, flag6, flag7, i, group, ch;
+
+	group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0:
+			//jhkw_160617s
+			Select_OutPoint(group, 1, O_INVERTER_RUN2, ON);
+			Select_OutPoint(group, 2, O_INVERTER_RUN2, ON);
+			//jhkw_160617e
+			break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			//kjg_w flag5 I_MCCB_FAIL
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					 && flag5 == OFF && flag6 == OFF && flag7 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_SUB_MC);
+			flag3 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL);
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					 && flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				//jhkw_160617s
+				Select_OutPoint(group, 1, O_INVERTER_RUN2, OFF);
+				//jhkw_160617e
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				Select_OutPoint(group, 1, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			Select_OutPoint(group, 1, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			Select_OutPoint(group, 1, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P32;
+			break;
+		case P32:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+				&& flag5 == OFF && flag6 == OFF && flag7 == OFF) {
+				Select_OutPoint(group, 2, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P33:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P34:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_SUB_MC);
+			flag3 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P35:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P36:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 2, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P37:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P38:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P39:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 2, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P40:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P41:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P42:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P43:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P44:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				//jhkw_160617s
+				Select_OutPoint(group, 2, O_INVERTER_RUN2, OFF);
+				//jhkw_160617e
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P45:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P46:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				Select_OutPoint(group, 2, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P47:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P48:
+			Select_OutPoint(group, 2, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P49:
+			Select_OutPoint(group, 2, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			Select_OutPoint(group, 2, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack3(void)
+{
+	int flag1, flag2, flag3, flag4, flag5, flag6, flag7, i, group, ch;
+
+	group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 3, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 4, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 3, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 4, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2: //inverter 1
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF && flag7 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_SUB_MC);
+			flag3 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				Select_OutPoint(group, 1, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			Select_OutPoint(group, 1, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			Select_OutPoint(group, 1, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P20;
+			break;
+		case P20: //inverter 2
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF && flag7 == OFF) {
+				Select_OutPoint(group, 2, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P21:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P22:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_SUB_MC);
+			flag3 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P23:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P24:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 2, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P25:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P26:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P27:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 2, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P28:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P29:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P30:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P31:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P32:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P33:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P34:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				Select_OutPoint(group, 2, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P35:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P36:
+			Select_OutPoint(group, 2, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P37:
+			Select_OutPoint(group, 2, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P40;
+			break;
+		case P40: //inverter 3
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 3, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 3, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 3, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 3, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF && flag7 == OFF) {
+				Select_OutPoint(group, 3, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P41:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P42:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 3, I_SUB_MC);
+			flag3 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P43:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P44:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 3, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P45:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P46:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 3, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P47:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 3, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P48:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 3, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P49:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P50:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 3, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 3, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 3, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 3, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 3, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P51:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P52:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, 3, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P53:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P54:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				Select_OutPoint(group, 3, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P55:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P56:
+			Select_OutPoint(group, 3, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P57:
+			Select_OutPoint(group, 3, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P60;
+			break;
+		case P60: //inverter 4
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 4, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 4, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 4, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 4, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 4, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF && flag7 == OFF) {
+				Select_OutPoint(group, 4, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P61:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P62:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 4, I_SUB_MC);
+			flag3 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL);//phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P63:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P64:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 4, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P65:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P66:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 4, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P67:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 4, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P68:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 4, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P69:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P70:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 4, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 4, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 4, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 4, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 4, I_INVERTER_ETC);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					&& flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 4, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P71:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P72:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF) {
+				Select_OutPoint(group, 4, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P73:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P74:
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF && flag5 == OFF) {
+				Select_OutPoint(group, 4, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P75:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P76:
+			Select_OutPoint(group, 4, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P77:
+			Select_OutPoint(group, 4, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_SUB_MC, OFF);
+			Select_OutPoint(group, 3, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 3, O_SUB_MC, OFF);
+			Select_OutPoint(group, 4, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 4, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P111;
+			break;
+		case P140:
+			//wait for main mc active
+			Select_OutPoint(group, 2, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P141;
+			break;
+		case P170:
+			//wait for main mc active
+			Select_OutPoint(group, 3, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P171;
+			break;
+		case P199:
+			//wait for main mc active
+			Select_OutPoint(group, 4, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+void DIO_Signal_RemotePs_Pack1_Block2(void)
+{
+	int flag1, flag2, flag3, flag4, flag5, flag6, flag7, i, group, ch;
+	int flag8, flag9, flag10, flag11, flag12, flag13;
+	//S_MSG_VAL SendMsg; //kjhw_130830
+
+	group = 0; ch = 1;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: 
+			//jhkw_160617s	
+			Select_OutPoint(group, 1, O_INVERTER_RUN2, ON);
+			Select_OutPoint(group, 2, O_INVERTER_RUN2, ON);
+			//jhkw_160617e
+			break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+			}
+			switch(myData->AppControl.config.systemModel) {
+				case C_SBL_150V_250A_10A_38KW: //lki_111010
+				case C_SBL_150V_250A_10A_75KW_4:
+				case C_SBL_150V_250A_10A_75KW_5:
+					for(i=0; i < myPs->config.installedCh; i++) {
+						//SR_OPEN
+						Select_OutPoint(0, i+1, O_CABLE_CHECK_SR, OFF);
+						Select_OutPoint(1, i+1, O_CABLE_CHECK_SR, OFF);
+
+						Select_OutPoint(0, i+1, O_CALI_VP_VB, OFF);
+					}
+					break;
+				default:
+					break;
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 1, I_MCCB_FAIL); //lki_111010
+			flag6 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag7 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag8 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag9 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag10 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag11 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag12 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag13 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+				&& flag5 == OFF && flag6 == OFF && flag7 == OFF
+				&& flag8 == OFF && flag9 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF && flag13 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_SUB_MC);
+			flag3 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag4 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag5 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON || flag4 == ON || flag5 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);//jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON);//jhkw_131209
+			}
+			break;
+		case P5:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag2 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag1 == ON && flag2 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag4 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag6 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag7 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == OFF || flag4 == ON
+				|| flag5 == OFF || flag6 == ON || flag7 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag3 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag4 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag5 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag1 == ON || flag2 == OFF || flag3 == ON || flag4 == ON || flag5 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			//if(myDio->misc.delayCount > 5) { //50msec
+			if(myDio->misc.delayCount > 10) { //100msec
+				flag1 = Read_InPoint(group, 1, I_SUB_MC); //jhkw_131209
+				if(flag1 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag3 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag4 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag5 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag6 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag7 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag8 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag9 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag10 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+					 && flag5 == OFF && flag6 == OFF && flag7 == OFF
+					 && flag8 == OFF && flag9 == OFF && flag10 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			Select_OutPoint(group, 1, O_INVERTER_RESET, ON); //kjhw_150726
+			Select_OutPoint(group, 2, O_INVERTER_RESET, ON); //kjhw_150726
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF); //kjhw_150726
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF); //kjhw_150726
+			}
+			break;
+		case P14:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag6 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+				&& flag5 == OFF && flag6 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+			    //jhkw_160617s	
+			    Select_OutPoint(group, 1, O_INVERTER_RUN2, OFF);
+			    Select_OutPoint(group, 2, O_INVERTER_RUN2, OFF);
+			    //jhkw_160617e
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.dio_sig_remote_ps
+				= myDio->signal[DIO_SIG_REMOTE_PS]; //kjhw_150725 volvo suzhou
+			myDio->misc.delayCount++;
+			flag1 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag2 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag3 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag4 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag5 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag6 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag7 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag8 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag9 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL);  //phb_230710
+			flag10 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710  
+			if(flag1 == OFF && flag2 == OFF && flag3 == OFF && flag4 == OFF
+				&& flag5 == OFF && flag6 == OFF && flag7 == OFF
+				&& flag8 == OFF && flag9 == OFF && flag10 == OFF) {
+				for(i=0; i < myPs->config.installedCh; i++) {
+					Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			myDio->misc.delayCount = 0; //kjhw_130830
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P150;
+			break;
+		case P199:
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack_Dsp1_block1(void)
+{
+/*
+	int flag1, flag2, flag3, flag4, flag5, flag6, flag7, i, group, ch;
+	S_MSG_VAL SendMsg; //kjhw_130830
+
+	group = 0; ch = 1;
+*/
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, flag08, i, group, ch;
+	//S_MSG_VAL SendMsg; //kjhw_130830
+
+	group = 0; ch = 1;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag07 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag08 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF && flag08 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_SUB_MC);
+			flag03 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 1, I_SUB_MC); //jhkw_131209
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF 
+				&& flag04 == OFF && flag05 == OFF) {
+				for(i = 0; i < myPs->config.installedCh; i++) {		//ktg_200821
+					Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}	
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			myDio->misc.delayCount = 0;
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+			break;
+		case P199:
+			//kjhw_130830
+			//myDio->misc.delayCount++;
+			//if(myDio->misc.delayCount > 1000) { //10sec
+			//	flag01 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			//	if(flag01 == ON) {
+			//		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			//		SendMsg.msg = MSG_IO_MODULE_EXIT;
+			//		SendMsg.val[0] = M_CD_FAULT_MCCB;
+			//		SendMsg.val[1] = 10 + 1;
+			//		send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			//	}
+			//}
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+void DIO_Signal_RemotePs_Pack_Dsp1_block2(void)
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+	int flag08, flag09, flag10, flag11, flag12, flag13, flag14;
+	//S_MSG_VAL SendMsg; //kjhw_130830
+
+	group = 0; ch = 1;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag07 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag08 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag09 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag10 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag11 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag12 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag13 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag14 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+			   	&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF && flag13 == OFF && flag14 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_SUB_MC);
+			flag03 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag04 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag05 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710 
+			if(flag01 == ON || flag02 == OFF || flag03 == ON || flag04 == ON || flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140630
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag06 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag07 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON
+				|| flag05 == OFF || flag06 == ON || flag07 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag04 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag05 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON || flag04 == ON || flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 1, I_SUB_MC); //jhkw_131209
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag09 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag10 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag11 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag08 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag09 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag10 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF) {
+				for(i=0; i < myPs->config.installedCh; i++) {
+					Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			myDio->misc.delayCount = 0;
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+			break;
+		case P199:
+			//kjhw_130830
+			//myDio->misc.delayCount++;
+			//if(myDio->misc.delayCount > 1000) { //10sec
+			//	flag01 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			//	if(flag01 == ON) {
+			//		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			//		SendMsg.msg = MSG_IO_MODULE_EXIT;
+			//		SendMsg.val[0] = M_CD_FAULT_MCCB;
+			//		SendMsg.val[1] = 10 + 1;
+			//		send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			//	}
+			//}
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack_Dsp2_block2(void)
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+	int flag08, flag09, flag10, flag11, flag12;
+
+	group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag08 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag09 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag10 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag11 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag12 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_SUB_MC);
+			flag03 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON);
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON);
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 1, I_SUB_MC);
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF && flag05 == OFF) {
+				Select_OutPoint(group, 1, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			Select_OutPoint(group, 1, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			Select_OutPoint(group, 1, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P32;
+			break;
+		case P32:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag08 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF && flag08 == OFF) {
+				Select_OutPoint(group, 2, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P33:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P34:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_SUB_MC);
+			flag03 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) { 
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, ON);
+			}
+			break;
+		case P35:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P36:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 2, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P37:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P38:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_MAIN_MC);
+			flag03 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, ON);
+			}
+			break;
+		case P39:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 2, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P40:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P41:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 2, I_SUB_MC);
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P42:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+					&& flag05 == OFF && flag06 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P43:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P44:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF) {	
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P45:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P46:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF && flag05 == OFF) {
+				Select_OutPoint(group, 1, O_CONVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_CONVERTER_RESET, ON);
+				Select_OutPoint(group, 3, O_CONVERTER_RESET, ON);
+				Select_OutPoint(group, 4, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P47:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P48:
+			Select_OutPoint(group, 1, O_CONVERTER_RESET, OFF);
+			Select_OutPoint(group, 2, O_CONVERTER_RESET, OFF);
+			Select_OutPoint(group, 3, O_CONVERTER_RESET, OFF);
+			Select_OutPoint(group, 4, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P49:
+			Select_OutPoint(group, 2, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			Select_OutPoint(group, 2, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+			break;
+		case P199:
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+//shhw_231013s
+void DIO_Signal_RemotePs_Pack_Dsp2_block2_TR1_FUSE(void)		
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+    int flag08, flag09, flag10, flag11;
+
+    group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+        case P0: break;
+        case P1:
+            if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+                break;
+            } else {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+            }
+            myDio->misc.delayCount = 0;
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+        case P2:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+            flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+            flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+            flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+            flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+            flag07 = Read_InPoint(group, 1, I_MCCB_FAIL);
+            flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+            flag09 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            flag10 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag11 = Read_InPoint(group, 3, I_FUSE_FAIL); //TR1_FUSE
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+                && flag05 == OFF && flag06 == OFF && flag07 == OFF
+                && flag08 == OFF && flag09 == OFF && flag10 == OFF && flag11 == OFF ) {
+                Select_OutPoint(group, 1, O_SUB_MC, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+            }
+            break;		
+		case P3:
+            //wait for sub mc active
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 10) { //100msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P4:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_SUB_MC);
+            flag03 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag04 = Read_InPoint(group, 3, I_FUSE_FAIL); //TR1_FUSE
+			
+            if(flag01 == ON || flag02 == OFF || flag03 == ON || flag04 == ON) {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+                //Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+            } else {
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+                Select_OutPoint(group, 1, O_SUB_MC_IN, ON);
+                //Select_OutPoint(group, 2, O_SUB_MC_IN, ON);
+            }
+            break;
+        case P5:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+            flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+            if(flag01 == ON && flag02 == ON) {
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                //if(myDio->misc.delayCount > 1000) { //10sec
+                if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+		case P6:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 100) { //1sec
+                Select_OutPoint(group, 1, O_MAIN_MC, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P7:
+            //wait for main mc active
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 10) { //100msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P8:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_MAIN_MC);
+            flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+            flag04 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            flag05 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag06 = Read_InPoint(group, 3, I_FUSE_FAIL); //TR1_FUSE
+            if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON || flag05 == OFF || flag06 == ON) {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF);
+                //Select_OutPoint(group, 2, O_MAIN_MC_IN, OFF);
+            } else {
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+                Select_OutPoint(group, 1, O_MAIN_MC_IN, ON);
+                //Select_OutPoint(group, 2, O_MAIN_MC_IN, ON);
+            }
+            break;
+        case P9:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 50) { //500msec
+                Select_OutPoint(group, 1, O_SUB_MC, OFF);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P10:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+            flag03 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            flag04 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 3, I_FUSE_FAIL); //TR1_FUSE
+            if(flag01 == ON || flag02 == OFF || flag03 == ON || flag04 == OFF || flag05 == ON) {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+            } else {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+		case P11:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 50) { //500msec
+                flag01 = Read_InPoint(group, 1, I_SUB_MC);
+                if(flag01 == OFF) {
+                    Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+                    //Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+                    myDio->misc.delayCount = 0;                                   
+                    myDio->signal[DIO_SIG_REMOTE_PS]++;                           
+                } else {                                                          
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;                      
+                }                                                                 
+            }                                                                     
+            break;                                                                
+        case P12:                                                                 
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+            flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+            flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+            flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+            flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+            flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+            flag09 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+            flag10 = Read_InPoint(group, 2, I_INVERTER_OC);
+            flag11 = Read_InPoint(group, 2, I_INVERTER_ETC);
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+					 && flag05 == OFF && flag06 == OFF && flag07 == OFF
+                     && flag08 == OFF && flag09 == OFF && flag10 == OFF && flag11 == OFF) {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+                myDio->misc.delayCount++;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                if(myDio->misc.delayCount > 10) { //100msec
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+		case P13:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 5) { //50msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P14:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+            flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+            flag04 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+            flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+            flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF
+				&& flag04 == OFF && flag05 == OFF && flag06 == OFF) {
+                Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+                //Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                if(myDio->misc.delayCount > 10) { //100msec
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+        case P15:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 5) { //50msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P16:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+            flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+            flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+            flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+            flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+            flag08 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag09 = Read_InPoint(group, 3, I_FUSE_FAIL); //TR1_FUSE
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+            	&& flag05 == OFF && flag06 == OFF && flag07 == OFF && flag08 == OFF && flag09 == OFF) {
+				for(i=0; i < myPs->config.installedCh; i++) {
+                	Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                if(myDio->misc.delayCount > 100) { //1sec
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+        case P17:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 5) { //50msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+		case P18:
+			for(i=0; i < myPs->config.installedCh; i++) {
+            	Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+            myDio->misc.delayCount = 0;
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+        case P19:                                                                                   
+			for(i=0; i < myPs->config.installedCh; i++) {
+            Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}		
+            myDio->misc.delayCount = 0;                                                              
+            myDio->signal[DIO_SIG_REMOTE_PS] = P100;                                               
+            break;                                                                       			
+        case P100: break;                                                                
+ 		case P101:                                          
+            myDio->misc.delayCount = 0;                                                       
+            for(i=0; i < myPs->config.installedCh; i++) {                                     
+                Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);  //kjhw_131106                 
+                Select_OutPoint(group, i+1, O_I_RANGE1, OFF);                                 
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);                        
+                Select_OutPoint(group, i+1, O_I_RANGE3, OFF);   //kjhw_131106        
+                Select_OutPoint(group, i+1, O_I_RANGE4, OFF);   //kjhw_131106        
+                Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+            }
+            Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+            Select_OutPoint(group, 1, O_SUB_MC, OFF);
+            //Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+        case P110:
+            //wait for sub mc active
+            Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+            myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+            break;
+        case P199:
+            myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+            break;
+        case P200: break;
+        default:
+            myDio->misc.delayCount++;
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+	}	
+}
+void DIO_Signal_RemotePs_Pack_Dsp2_block2_2(void)		//phbw_230223
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+    int flag08, flag09, flag10, flag11;
+
+    group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+        case P0: break;
+        case P1:
+            if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+                break;
+            } else {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+            }
+            myDio->misc.delayCount = 0;
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+        case P2:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+            flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+            flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+            flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+            flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+            flag07 = Read_InPoint(group, 1, I_MCCB_FAIL);
+            flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+            flag09 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            flag10 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+                && flag05 == OFF && flag06 == OFF && flag07 == OFF
+                && flag08 == OFF && flag09 == OFF && flag10 == OFF) {
+                Select_OutPoint(group, 1, O_SUB_MC, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+            }
+            break;		
+		case P3:
+            //wait for sub mc active
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 10) { //100msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P4:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_SUB_MC);
+            flag03 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+                //Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+            } else {
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+                Select_OutPoint(group, 1, O_SUB_MC_IN, ON);
+                //Select_OutPoint(group, 2, O_SUB_MC_IN, ON);
+            }
+            break;
+        case P5:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+            flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+            if(flag01 == ON && flag02 == ON) {
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                //if(myDio->misc.delayCount > 1000) { //10sec
+                if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+		case P6:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 100) { //1sec
+                Select_OutPoint(group, 1, O_MAIN_MC, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P7:
+            //wait for main mc active
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 10) { //100msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P8:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_MAIN_MC);
+            flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+            flag04 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            flag05 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+            if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON || flag05 == OFF) {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF);
+                //Select_OutPoint(group, 2, O_MAIN_MC_IN, OFF);
+            } else {
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+                Select_OutPoint(group, 1, O_MAIN_MC_IN, ON);
+                //Select_OutPoint(group, 2, O_MAIN_MC_IN, ON);
+            }
+            break;
+        case P9:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 50) { //500msec
+                Select_OutPoint(group, 1, O_SUB_MC, OFF);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P10:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+            flag03 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            flag04 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+            if(flag01 == ON || flag02 == OFF || flag03 == ON || flag04 == OFF) {
+                myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+            } else {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+		case P11:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 50) { //500msec
+                flag01 = Read_InPoint(group, 1, I_SUB_MC);
+                if(flag01 == OFF) {
+                    Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+                    //Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+                    myDio->misc.delayCount = 0;                                   
+                    myDio->signal[DIO_SIG_REMOTE_PS]++;                           
+                } else {                                                          
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;                      
+                }                                                                 
+            }                                                                     
+            break;                                                                
+        case P12:                                                                 
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+            flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+            flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+            flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+            flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+            flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+            flag09 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+            flag10 = Read_InPoint(group, 2, I_INVERTER_OC);
+            flag11 = Read_InPoint(group, 2, I_INVERTER_ETC);
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+					 && flag05 == OFF && flag06 == OFF && flag07 == OFF
+                     && flag08 == OFF && flag09 == OFF && flag10 == OFF && flag11 == OFF) {
+                Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+                //Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+                myDio->misc.delayCount++;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                if(myDio->misc.delayCount > 10) { //100msec
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+		case P13:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 5) { //50msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P14:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+            flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+            flag04 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+            flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+            flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF
+				&& flag04 == OFF && flag05 == OFF && flag06 == OFF) {
+                Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+                //Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                if(myDio->misc.delayCount > 10) { //100msec
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+        case P15:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 5) { //50msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+        case P16:
+            myDio->misc.delayCount++;
+            flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+            flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+            flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+            flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+            flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+            flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+            flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+            flag08 = Read_InPoint(group, 2, I_FUSE_FAIL);
+            if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+            	&& flag05 == OFF && flag06 == OFF && flag07 == OFF && flag08 == OFF) {
+				for(i=0; i < myPs->config.installedCh; i++) {
+                	Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            } else {
+                if(myDio->misc.delayCount > 100) { //1sec
+                    myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+                }
+            }
+            break;
+        case P17:
+            myDio->misc.delayCount++;
+            if(myDio->misc.delayCount > 5) { //50msec
+                myDio->misc.delayCount = 0;
+                myDio->signal[DIO_SIG_REMOTE_PS]++;
+            }
+            break;
+		case P18:
+			for(i=0; i < myPs->config.installedCh; i++) {
+            	Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+            myDio->misc.delayCount = 0;
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+        case P19:                                                                                   
+			for(i=0; i < myPs->config.installedCh; i++) {
+            Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}		
+            myDio->misc.delayCount = 0;                                                              
+            myDio->signal[DIO_SIG_REMOTE_PS] = P100;                                               
+            break;                                                                       			
+        case P100: break;                                                                
+ 		case P101:                                          
+            myDio->misc.delayCount = 0;                                                       
+            for(i=0; i < myPs->config.installedCh; i++) {                                     
+                Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);  //kjhw_131106                 
+                Select_OutPoint(group, i+1, O_I_RANGE1, OFF);                                 
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);                        
+                Select_OutPoint(group, i+1, O_I_RANGE3, OFF);   //kjhw_131106        
+                Select_OutPoint(group, i+1, O_I_RANGE4, OFF);   //kjhw_131106        
+                Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+            }
+            Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+            Select_OutPoint(group, 1, O_SUB_MC, OFF);
+            //Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+        case P110:
+            //wait for sub mc active
+            Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+            myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+            break;
+        case P199:
+            myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+            break;
+        case P200: break;
+        default:
+            myDio->misc.delayCount++;
+            myDio->signal[DIO_SIG_REMOTE_PS]++;
+            break;
+	}	
+}
+//shhw_231013e
+void DIO_Signal_RemotePs_Pack_Dsp2_block4(void)
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+	int flag08, flag09, flag10, flag11, flag12;
+
+	group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag08 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag09 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag10 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag11 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag12 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_SUB_MC);
+			flag03 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON);
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF
+				|| flag04 == OFF || flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON);
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 1, I_SUB_MC);
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag08 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF && flag08 == OFF) {
+				Select_OutPoint(group, 1, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			Select_OutPoint(group, 1, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			Select_OutPoint(group, 1, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P32;
+			break;
+		case P32:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag08 = Read_InPoint(group, 4, I_INVERTER_OT);
+			flag09 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF) {
+				Select_OutPoint(group, 2, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P33:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P34:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_SUB_MC);
+			flag03 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, ON);
+			}
+			break;
+		case P35:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P36:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 2, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P37:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P38:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_MAIN_MC);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF
+				|| flag04 == OFF || flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, ON);
+			}
+			break;
+		case P39:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 2, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P40:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P41:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 2, I_SUB_MC);
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P42:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 4, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 4, I_INVERTER_OT);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+					&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+					&& flag08 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P43:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P44:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {	
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P45:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P46:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag08 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF && flag08 == OFF) {
+				Select_OutPoint(group, 2, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P47:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P48:
+			Select_OutPoint(group, 2, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P49:
+			Select_OutPoint(group, 2, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			Select_OutPoint(group, 2, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+			break;
+		case P199:
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack_Dsp2_block4_2(void)
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+	int flag08, flag09, flag10, flag11,flag12;
+
+	group = 0; ch = 0;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag08 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag09 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag10 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag11 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag12 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 1, I_SUB_MC);
+			flag04 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag05 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == ON || flag03 == OFF || flag04 == ON || flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON);
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 1, I_MAIN_MC);
+			flag04 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag06 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag07 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == ON || flag03 == OFF
+				|| flag04 == OFF || flag05 == OFF || flag06 == ON || flag07 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON);
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag06 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == ON || flag03 == OFF
+				|| flag04 == OFF || flag05 == ON || flag06 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 1, I_SUB_MC);
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF);
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P15:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P16:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag08 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag09 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag10 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF) {
+				Select_OutPoint(group, 1, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P17:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P18:
+			Select_OutPoint(group, 1, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P19:
+			Select_OutPoint(group, 1, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P32;
+			break;
+		case P32:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag05 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag08 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag09 = Read_InPoint(group, 4, I_INVERTER_OT);
+			flag10 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag11 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF && flag11 == OFF) {
+				Select_OutPoint(group, 2, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P33:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P34:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 2, I_SUB_MC);
+			flag04 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag05 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == ON || flag03 == OFF 
+				|| flag04 == ON || flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, ON);
+			}
+			break;
+		case P35:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140903
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P36:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 2, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P37:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P38:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 2, I_MAIN_MC);
+			flag04 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag06 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag07 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == ON || flag03 == OFF
+				|| flag04 == OFF || flag05 == OFF || flag06 == ON || flag07 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, OFF);
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, ON);
+			}
+			break;
+		case P39:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 2, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P40:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag06 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == ON || flag03 == OFF
+				|| flag04 == OFF || flag05 == ON || flag06 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P41:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 2, I_SUB_MC);
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 2, O_SUB_MC_IN, OFF);
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P42:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 4, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 4, I_INVERTER_OT);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+					&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+					&& flag08 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P43:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P44:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF) {	
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P45:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P46:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 3, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 4, I_FUSE_FAIL);
+			flag06 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag07 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag08 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			flag09 = Read_InPoint(group, 3, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag10 = Read_InPoint(group, 4, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF) {
+				Select_OutPoint(group, 2, O_CONVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P47:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P48:
+			Select_OutPoint(group, 2, O_CONVERTER_RESET, OFF);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P49:
+			Select_OutPoint(group, 2, O_SELECT_VO_VS, ON);
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);	//kjhw_131106
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			Select_OutPoint(group, 2, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+			break;
+		case P199:
+			myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}
+
+void DIO_Signal_RemotePs_Pack_Dsp3_block6(void)		//phb_230324s
+{
+	int flag01, flag02, flag03, flag04, flag05, flag06, flag07, i, group, ch;
+	int flag08, flag09, flag10, flag11, flag12, flag13, flag14, flag15;
+
+	group = 0; ch = 1;
+
+	switch(myDio->signal[DIO_SIG_REMOTE_PS]) {
+		case P0: break;
+		case P1:
+			if(myDio->misc.delayTimer < myDio->config.dioDelay) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 3, O_INVERTER_RESET, ON);
+				break;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 3, O_INVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P2:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag07 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag08 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag09 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag10 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag11 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag12 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag13 = Read_InPoint(group, 3, I_INVERTER_OT);
+			flag14 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag15 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+			   	&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF && flag13 == OFF
+				&& flag14 == OFF && flag15 == OFF) {
+				Select_OutPoint(group, 1, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P3:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P4:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_SUB_MC);
+			flag03 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_SUB_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P5:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON && flag03 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140630
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P6:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 1, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P7:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P8:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL); //62A
+			flag02 = Read_InPoint(group, 1, I_MAIN_MC); //611
+			flag03 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE); //610
+			flag04 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE); //611
+			flag05 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE); //620
+			flag06 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == OFF
+				|| flag05 == OFF || flag06 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 1, O_MAIN_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P9:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 1, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P10:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 2, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 3, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == OFF
+				|| flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P11:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 1, I_SUB_MC); //jhkw_131209
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 1, O_SUB_MC_IN, OFF); //jhkw_131209
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P12:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 1, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 1, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 1, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 2, I_INVERTER_OT);
+			flag09 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag10 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag11 = Read_InPoint(group, 3, I_INVERTER_HV_FAULT);
+			flag12 = Read_InPoint(group, 3, I_INVERTER_OT);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P13:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P14:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag07 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag08 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag09 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF
+				&& flag04 == OFF && flag05 == OFF && flag06 == OFF
+				&& flag07 == OFF && flag08 == OFF && flag09 == OFF) {
+			//	Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+			//	Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS] = P31;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P31:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P32:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag08 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag09 = Read_InPoint(group, 2, I_MCCB_FAIL);
+			flag10 = Read_InPoint(group, 5, I_INVERTER_OT);
+			flag11 = Read_InPoint(group, 3, I_INVERTER_OC);
+			flag12 = Read_InPoint(group, 3, I_INVERTER_ETC);
+			flag13 = Read_InPoint(group, 6, I_INVERTER_OT);
+			flag14 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			flag15 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+			   	&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF && flag13 == OFF
+				&& flag14 == OFF && flag15 == OFF) {
+				Select_OutPoint(group, 2, O_SUB_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			}
+			break;
+		case P33:
+			//wait for sub mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P34:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 2, I_SUB_MC);
+			flag03 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_SUB_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P35:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag02 = Read_InPoint(group, 5, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 6, I_INVERTER_PRE_CHARGE);
+			if(flag01 == ON && flag02 == ON && flag03 == ON) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				//if(myDio->misc.delayCount > 1000) { //10sec
+				if(myDio->misc.delayCount > 200) { //2sec //kjhw_140630
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P36:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 100) { //1sec
+				Select_OutPoint(group, 2, O_MAIN_MC, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P37:
+			//wait for main mc active
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 10) { //100msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P38:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL); //62A
+			flag02 = Read_InPoint(group, 2, I_MAIN_MC); //611
+			flag03 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE); //610
+			flag04 = Read_InPoint(group, 5, I_INVERTER_PRE_CHARGE); //611
+			flag05 = Read_InPoint(group, 6, I_INVERTER_PRE_CHARGE); //620
+			flag06 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == OFF
+				|| flag05 == OFF || flag06 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, OFF); //jhkw_131209
+			} else {
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+				Select_OutPoint(group, 2, O_MAIN_MC_IN, ON); //jhkw_131209
+			}
+			break;
+		case P39:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				Select_OutPoint(group, 2, O_SUB_MC, OFF);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P40:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_PRE_CHARGE);
+			flag03 = Read_InPoint(group, 5, I_INVERTER_PRE_CHARGE);
+			flag04 = Read_InPoint(group, 6, I_INVERTER_PRE_CHARGE);
+			flag05 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL);  //phb_230710
+			if(flag01 == ON || flag02 == OFF || flag03 == OFF || flag04 == OFF
+				|| flag05 == ON) {
+				myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+			} else {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, ON);
+				Select_OutPoint(group, 3, O_INVERTER_RESET, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P41:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				flag01 = Read_InPoint(group, 2, I_SUB_MC); //jhkw_131209
+				if(flag01 == OFF) {
+					Select_OutPoint(group, 2, O_SUB_MC_IN, OFF); //jhkw_131209
+					myDio->misc.delayCount = 0;
+					myDio->signal[DIO_SIG_REMOTE_PS]++;
+				} else {
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P42:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 4, I_INVERTER_HV_FAULT);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_OT);
+			flag03 = Read_InPoint(group, 2, I_POWER_TRANS_OT);
+			flag04 = Read_InPoint(group, 2, I_POWER_REACTOR_OT);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_OC);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_ETC);
+			flag07 = Read_InPoint(group, 5, I_INVERTER_HV_FAULT);
+			flag08 = Read_InPoint(group, 5, I_INVERTER_OT);
+			flag09 = Read_InPoint(group, 3, I_INVERTER_OC);
+			flag10 = Read_InPoint(group, 3, I_INVERTER_ETC);
+			flag11 = Read_InPoint(group, 6, I_INVERTER_HV_FAULT);
+			flag12 = Read_InPoint(group, 6, I_INVERTER_OT);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF && flag12 == OFF) {
+				Select_OutPoint(group, 2, O_INVERTER_RESET, OFF);
+				Select_OutPoint(group, 3, O_INVERTER_RESET, OFF);
+				myDio->misc.delayCount++;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P43:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P44:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 5, I_INVERTER_MODULE_R_FAIL);
+			flag05 = Read_InPoint(group, 5, I_INVERTER_MODULE_S_FAIL);
+			flag06 = Read_InPoint(group, 5, I_INVERTER_MODULE_T_FAIL);
+			flag07 = Read_InPoint(group, 6, I_INVERTER_MODULE_R_FAIL);
+			flag08 = Read_InPoint(group, 6, I_INVERTER_MODULE_S_FAIL);
+			flag09 = Read_InPoint(group, 6, I_INVERTER_MODULE_T_FAIL);
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF
+				&& flag04 == OFF && flag05 == OFF && flag06 == OFF
+				&& flag07 == OFF && flag08 == OFF && flag09 == OFF) {
+				Select_OutPoint(group, 1, O_INVERTER_RUN, ON);
+				Select_OutPoint(group, 2, O_INVERTER_RUN, ON);
+				Select_OutPoint(group, 3, O_INVERTER_RUN, ON);
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 10) { //100msec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P45:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 50) { //500msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P46:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 1, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 1, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 1, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 1, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 2, I_INVERTER_MODULE_R_FAIL);
+			flag06 = Read_InPoint(group, 2, I_INVERTER_MODULE_S_FAIL);
+			flag07 = Read_InPoint(group, 2, I_INVERTER_MODULE_T_FAIL);
+			flag08 = Read_InPoint(group, 3, I_INVERTER_MODULE_R_FAIL);
+			flag09 = Read_InPoint(group, 3, I_INVERTER_MODULE_S_FAIL);
+			flag10 = Read_InPoint(group, 3, I_INVERTER_MODULE_T_FAIL);
+			flag11 = Read_InPoint(group, 1, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF) {
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P47:
+			myDio->misc.delayCount++;
+			flag01 = Read_InPoint(group, 4, I_INVERTER_MODULE_R_FAIL);
+			flag02 = Read_InPoint(group, 4, I_INVERTER_MODULE_S_FAIL);
+			flag03 = Read_InPoint(group, 4, I_INVERTER_MODULE_T_FAIL);
+			flag04 = Read_InPoint(group, 2, I_FUSE_FAIL);
+			flag05 = Read_InPoint(group, 5, I_INVERTER_MODULE_R_FAIL);
+			flag06 = Read_InPoint(group, 5, I_INVERTER_MODULE_S_FAIL);
+			flag07 = Read_InPoint(group, 5, I_INVERTER_MODULE_T_FAIL);
+			flag08 = Read_InPoint(group, 6, I_INVERTER_MODULE_R_FAIL);
+			flag09 = Read_InPoint(group, 6, I_INVERTER_MODULE_S_FAIL);
+			flag10 = Read_InPoint(group, 6, I_INVERTER_MODULE_T_FAIL);
+			flag11 = Read_InPoint(group, 2, I_DC_LINK_FUSE_FAIL); //phb_230710
+			if(flag01 == OFF && flag02 == OFF && flag03 == OFF && flag04 == OFF
+				&& flag05 == OFF && flag06 == OFF && flag07 == OFF
+				&& flag08 == OFF && flag09 == OFF && flag10 == OFF
+				&& flag11 == OFF) {
+				for(i=0; i < myPs->config.installedCh; i++) {
+					Select_OutPoint(group, i+1, O_CONVERTER_RESET, ON);
+				}
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			} else {
+				if(myDio->misc.delayCount > 100) { //1sec
+					myDio->signal[DIO_SIG_REMOTE_PS] = P101;
+				}
+			}
+			break;
+		case P48:
+			myDio->misc.delayCount++;
+			if(myDio->misc.delayCount > 5) { //50msec
+				myDio->misc.delayCount = 0;
+				myDio->signal[DIO_SIG_REMOTE_PS]++;
+			}
+			break;
+		case P49:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_CONVERTER_RESET, OFF);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P50:
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_SELECT_VO_VS, ON);
+			}
+			myDio->misc.delayCount = 0;
+			myDio->signal[DIO_SIG_REMOTE_PS] = P100;
+			break;
+		case P100: break;
+		case P101:
+			myDio->misc.delayCount = 0;
+			for(i=0; i < myPs->config.installedCh; i++) {
+				Select_OutPoint(group, i+1, O_RUN_RELAY, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE1, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE2, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE3, OFF);
+				Select_OutPoint(group, i+1, O_I_RANGE4, OFF);
+				Select_OutPoint(group, i+1, O_PARALLEL, OFF);
+			}
+			Select_OutPoint(group, 1, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 2, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 3, O_INVERTER_RUN, OFF);
+			Select_OutPoint(group, 1, O_SUB_MC, OFF);
+			Select_OutPoint(group, 2, O_SUB_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+		case P110:
+			//wait for sub mc active
+			myDio->misc.delayCount = 0;
+			Select_OutPoint(group, 1, O_MAIN_MC, OFF);
+			Select_OutPoint(group, 2, O_MAIN_MC, OFF);
+			myDio->signal[DIO_SIG_REMOTE_PS] = P199;
+			break;
+		case P199:
+			//kjhw_130830
+			//myDio->misc.delayCount++;
+			//if(myDio->misc.delayCount > 1000) { //10sec
+			//	flag01 = Read_InPoint(group, 1, I_MCCB_FAIL);
+			//	if(flag01 == ON) {
+			//		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			//		SendMsg.msg = MSG_IO_MODULE_EXIT;
+			//		SendMsg.val[0] = M_CD_FAULT_MCCB;
+			//		SendMsg.val[1] = 10 + 1;
+			//		send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					myDio->signal[DIO_SIG_REMOTE_PS] = P200;
+			//	}
+			//}
+			break;
+		case P200: break;
+		default:
+			myDio->misc.delayCount++;
+			myDio->signal[DIO_SIG_REMOTE_PS]++;
+			break;
+	}
+}//phb_230324e
+void DIO_RippleSwitch(void)
+{
+	int group, ch;
+
+	group = 0; ch = 0;
+
+	if(myDio->signal[DIO_SIG_RIPPLE_SWITCH] == P1) {
+		myData->cData[ch].misc.ripple_out = P1;
+	}
+
+	if(myDio->signal[DIO_SIG_RIPPLE_SWITCH] == P11) {
+		myData->cData[ch].misc.ripple_out = P0;
+	}
+
+	if(myData->cData[ch].misc.ripple_out == P0) {
+		Select_OutPoint(group, ch+1, O_LAMP_RIPPLE_ON, OFF);
+	} else {
+		Select_OutPoint(group, ch+1, O_LAMP_RIPPLE_ON, ON);
+	}
+}
+
+void DIO_JigSwitch(void)
+{
+	int group, ch;
+	S_MSG_VAL	SendMsg;
+
+	group = 0; ch = 0;
+	switch(myDio->signal[DIO_SIG_IN_START1]) {
+		case P0:
+			if(myData->gData[group].state == G_STANDBY
+				&& Read_InPoint(group+1, ch, I_JIG_TRAY_STATE) == P1
+				&& Read_InPoint(group+1, ch, I_JIG_MAIN_CYLINDER_L_OFF) == P1
+				&& Read_InPoint(group+1, ch, I_JIG_SW_START) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_JIGM_TRY_CONTACT;
+				SendMsg.val[0] = group;
+				send_msg(MODULE_TO_JIGM, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START1] = P1;
+			}
+			break;
+		case P1:
+			if(Read_InPoint(group+1, ch, I_JIG_TRAY_STATE) == P1
+				&& Read_InPoint(group+1, ch, I_JIG_MAIN_CYLINDER_L_ON) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_COB_JIG_FUNCTION;
+				SendMsg.val[0] = 1; //start
+				send_msg(MODULE_TO_COB1 + group, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START1] = P2;
+			} else if(Read_InPoint(group+1, ch, I_JIG_SW_STOP) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_JIGM_TRY_DISCONTACT;
+				SendMsg.val[0] = group;
+				send_msg(MODULE_TO_JIGM, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START1] = P0;
+			}
+			break;
+		case P2:
+			if(myData->gData[group].state == G_STANDBY
+				&& Read_InPoint(group+1, ch, I_JIG_SW_STOP) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_JIGM_TRY_DISCONTACT;
+				SendMsg.val[0] = group;
+				send_msg(MODULE_TO_JIGM, (char *)&SendMsg);
+
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_COB_JIG_FUNCTION;
+				SendMsg.val[0] = 2; //stop
+				send_msg(MODULE_TO_COB1 + group, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START1] = P0;
+			} else if(myData->gData[group].state == G_RUN
+				|| myData->gData[group].state == G_PAUSE) {
+				myDio->signal[DIO_SIG_IN_START1] = P0;
+			}
+			break;
+		default: break;
+	}
+
+	group = 1; ch = 0;
+	switch(myDio->signal[DIO_SIG_IN_START2]) {
+		case P0:
+			if(myData->gData[group].state == G_STANDBY
+				&& Read_InPoint(group+1, ch, I_JIG_TRAY_STATE) == P1
+				//kjg_d && Read_InPoint(group+1, ch, I_JIG_MAIN_CYLINDER_L_OFF) == P1
+				&& Read_InPoint(group+1, ch, I_JIG_SW_START) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_JIGM_TRY_CONTACT;
+				SendMsg.val[0] = group;
+				send_msg(MODULE_TO_JIGM, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START2] = P1;
+			}
+			break;
+		case P1:
+			if(Read_InPoint(group+1, ch, I_JIG_TRAY_STATE) == P1
+				&& Read_InPoint(group+1, ch, I_JIG_MAIN_CYLINDER_L_ON) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_COB_JIG_FUNCTION;
+				SendMsg.val[0] = 1; //start
+				send_msg(MODULE_TO_COB1 + group, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START2] = P2;
+			} else if(Read_InPoint(group+1, ch, I_JIG_SW_STOP) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_JIGM_TRY_DISCONTACT;
+				SendMsg.val[0] = group;
+				send_msg(MODULE_TO_JIGM, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START2] = P0;
+			}
+			break;
+		case P2:
+			if(myData->gData[group].state == G_STANDBY
+				&& Read_InPoint(group+1, ch, I_JIG_SW_STOP) == P1) {
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_JIGM_TRY_DISCONTACT;
+				SendMsg.val[0] = group;
+				send_msg(MODULE_TO_JIGM, (char *)&SendMsg);
+
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_MODULE_COB_JIG_FUNCTION;
+				SendMsg.val[0] = 2; //stop
+				send_msg(MODULE_TO_COB1 + group, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_IN_START2] = P0;
+			} else if(myData->gData[group].state == G_RUN
+				|| myData->gData[group].state == G_PAUSE) {
+				myDio->signal[DIO_SIG_IN_START2] = P0;
+			}
+			break;
+		default: break;
+	}
+}
+
+unsigned char InCheck(int pos, int comp, unsigned char pn, int count)
+{
+	unsigned char val, flag1, flag2;
+
+	switch(pn) {
+		case 0: flag1 = OFF; flag2 = ON; break;
+		case 1: flag1 = ON; flag2 = OFF; break;
+		case 2: flag1 = OFF; flag2 = ON; break; //single trigger 0
+		default: flag1 = ON; flag2 = OFF; break; //single trigger 1
+	}
+
+	if(myDio->in.Flag[pos] >= 10) {
+		val = myDio->in.Flag[pos] % 10;
+		return val;
+	}
+
+	val = myDio->in.Flag[pos];
+
+	if(comp != 0) {
+		myDio->in.CountFlag_H[pos]++;
+		myDio->in.CountFlag_L[pos] = 0;
+	} else {
+		myDio->in.CountFlag_H[pos] = 0;
+		myDio->in.CountFlag_L[pos]++;
+	}
+
+	if(myDio->in.CountFlag_H[pos] >= count) {
+		if(myDio->in.CountFlag_H[pos] > 0) {
+			myDio->in.CountFlag_H[pos]--;
+		}
+		val = flag1;
+		myDio->in.Flag[pos] = val;
+		if(pn == 3) {
+			myDio->in.Flag[pos] += 10;
+		}
+	}
+
+	if(myDio->in.CountFlag_L[pos] >= count) {
+		if(myDio->in.CountFlag_L[pos] > 0) {
+			myDio->in.CountFlag_L[pos]--;
+		}
+		val = flag2;
+		myDio->in.Flag[pos] = val;
+		if(pn == 2) {
+			myDio->in.Flag[pos] += 10;
+		}
+	}
+
+	return val;
+}
+
+void I_InScan(void)
+{
+	unsigned char flag, input, pn;
+	int sensCount, inByte, position, point, byte_index, addr;
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	for(inByte=0; inByte < MAX_DIO_II_BYTES; inByte++) {
+		byte_index = inByte;
+		addr = myDio->function_set.in_address[byte_index];
+		if(addr == 0) continue;
+
+		input = inb(addr);
+		myDio->in.bytes[byte_index] = input;
+
+		flag = 0x01;
+		for(position=0; position < BITS_PER_BYTE; position++) {
+			point = byte_index * BITS_PER_BYTE + position;
+			
+			if(myDio->function_set.in_set[point].use == USE) {
+				pn = myDio->function_set.in_set[point].pn;
+				sensCount = (int)myDio->function_set.in_set[point].count;
+
+				myDio->in.function[point]
+					= InCheck(point, input & flag, pn, sensCount);
+			}
+			flag = flag << 1;
+		}
+	}
+}
+
+void I_In_FlagCheck(void)
+{
+	int rtn;
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	if(I_In_FlagCheck_PowerSwitch() < 0) return;
+	if(I_In_FlagCheck_Main_EmgSwitch() < 0) return;
+	if(I_In_FlagCheck_Sub_EmgSwitch() < 0) return;
+	if(myDio->signal[DIO_SIG_MAIN_EMG] != P0
+		|| myDio->signal[DIO_SIG_SUB_EMG] != P0) return;
+
+	if(I_In_FlagCheck_PowerFail() < 0) return; //for UPS
+	if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) return;
+
+	if(I_In_FlagCheck_PSFail() < 0) return; //for control power
+	if(myDio->signal[DIO_SIG_PS_FAIL] != P0) return;
+
+	if(I_In_FlagCheck_Chamber() < 0) return;
+
+	rtn = I_In_FlagCheck_Fan();
+}
+
+int I_In_FlagCheck_PowerSwitch(void)
+{
+	int rtn=0, group=0, ch=0;
+	S_MSG_VAL SendMsg;
+
+	if(Read_InPoint(group, ch, I_POWER_SWITCH) == P0) {
+		myDio->misc.powerSwitchTimer = 0;
+		myDio->signal[DIO_SIG_POWER_SWITCH] = P0;	
+		return 0;
+	}
+
+	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+
+	if(myPs->state != M_RUN) {
+		if(myDio->signal[DIO_SIG_POWER_SWITCH] == P0) {
+			myDio->misc.powerSwitchTimer += myDio->config.scan_period;
+			if(myDio->misc.powerSwitchTimer 
+				>= myDio->config.powerSwitchTimeout) { //3sec
+				//normal power off 
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_NORMAL_POWER_OFF;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_POWER_SWITCH] = P1;
+				rtn = -1;
+			}
+		} else if(myDio->signal[DIO_SIG_POWER_SWITCH] == P1) {
+			myDio->misc.powerSwitchTimer += myDio->config.scan_period;
+			if(myDio->misc.powerSwitchTimer
+				>= myDio->config.forcePowerSwitchTimeout) { //10sec
+				//force power off 
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_FORCE_POWER_OFF;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_POWER_SWITCH] = P2;	
+				rtn = -1;
+			}
+		}
+	} else {
+		if(myDio->signal[DIO_SIG_POWER_SWITCH] == P0) {
+			myDio->misc.powerSwitchTimer += myDio->config.scan_period;
+			if(myDio->misc.powerSwitchTimer 
+				>= myDio->config.powerSwitchTimeout) { //3sec
+				//warning before power off
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_WARNING_POWER_OFF;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_POWER_SWITCH] = P1;
+			}
+		} else if(myDio->signal[DIO_SIG_POWER_SWITCH] == P1) {
+			myDio->misc.powerSwitchTimer += myDio->config.scan_period;
+			if(myDio->misc.powerSwitchTimer
+				>= myDio->config.forcePowerSwitchTimeout) { //10sec
+				//force power off 
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_FORCE_POWER_OFF;
+				SendMsg.val[1] = 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				myDio->signal[DIO_SIG_POWER_SWITCH] = P2;
+				rtn = -1;
+			}
+		}
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_Main_EmgSwitch(void)
+{
+	int rtn=0, group=0, ch=0;
+	S_MSG_VAL SendMsg;
+
+	if(Read_InPoint(group, ch, I_EMG_SWITCH) == P1) {
+		if(myDio->signal[DIO_SIG_MAIN_EMG] == P0) {
+			myDio->signal[DIO_SIG_MAIN_EMG] = P1;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_MAIN_EMG_SWITCH;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+		}
+	} else {
+		if(myDio->signal[DIO_SIG_MAIN_EMG] != P0) {
+			myDio->signal[DIO_SIG_MAIN_EMG]++;
+			if(myDio->signal[DIO_SIG_MAIN_EMG] >= P100) {
+				myDio->signal[DIO_SIG_MAIN_EMG] = P0;
+			}
+		}
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_Sub_EmgSwitch(void)
+{
+	int rtn=0, group=0, ch=0;
+	S_MSG_VAL SendMsg;
+
+	if(Read_InPoint(group, ch, I_SUB_EMG) == P1) {
+		if(myDio->signal[DIO_SIG_SUB_EMG] == P0) {
+			myDio->signal[DIO_SIG_SUB_EMG] = P1;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_SUB_EMG_SWITCH;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+		}
+	} else {
+		if(myDio->signal[DIO_SIG_SUB_EMG] != P0) {
+			myDio->signal[DIO_SIG_SUB_EMG]++;
+			if(myDio->signal[DIO_SIG_SUB_EMG] >= P100) {
+				myDio->signal[DIO_SIG_SUB_EMG] = P0;
+			}
+		}
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_PowerFail(void)
+{
+	/*Simplication - shh_250417*/
+	int rtn;
+
+	switch(myData->AppControl.config.systemModel) {
+		case C_SKI_50V_500A_250A_25KW:	//ktg_190715
+		case C_SKI_50V_500A_400A_200A_100A_100KW:	//jhk_180119
+		case C_SKI_50V_500A_400A_200A_100A_100KW_2:	//jhk_180119
+		case C_SKI_50V_1000A_500A_300A_100KW:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_2:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_3:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_4:	//ktg_190711
+		case C_NORTHVOLT_60V_400A_200A_96KW:	//khj_191203
+		case C_SKI_60V_400A_200A_100A_96KW:		//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_2:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_3:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_4:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_5:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_6:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_7:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_8:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_9:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_10:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_11:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_12:	//ktg_190319
+		case C_DAEHWA_60V_500A_250A_50A_60KW:	//jhk_160913
+		case C_DAEHWA_60V_500A_250A_50A_60KW_2:	//jhk_160913
+		case C_SKI_120V_400A_100A_192KW:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_2:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_3:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_4:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_5:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_6:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_7:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_8:	//jhk_170628
+		case C_SKI_120V_400A_200A_100A_50A_192KW:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_2:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_3:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_4:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_5:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_6:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_7:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_8:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_9:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_10:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_11:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_12:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_13:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_14:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_15:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_16:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_17:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_18:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_192KW:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_2:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_3:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_4:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_5:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_6:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_7:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_8:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_9:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_10:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_11:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_12:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_13:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_14:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_15:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_16:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_17:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_18:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_19:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_20:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_21:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_22:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_23:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_24:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_25:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_26:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_27:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_28:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_29:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_30:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_31:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_32:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_33:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_34:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_35:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_36:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_37:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_38:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_39:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_40:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_41:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_42:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_43:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_44:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_45:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_46:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_47:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_48:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_49:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_50:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_51:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_52:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_53:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_54:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_55:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_56:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_57:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_58:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_59:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_60:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_61:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_62:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_63:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_64:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_65:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_66:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_67:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_68:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_69:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_70:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_71:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_72:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_73:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_74:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_75:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_76:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_77:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_78:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_79:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_80:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_81:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_82:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_83:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_84:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_85:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_86:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_87:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_88:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_89:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_90:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_91:	//khj_200308
+		////////////////////////////////////////////////////////
+		case C_SKI_120V_400A_200A_100A_192KW_92:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_93:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_94:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_95:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_96:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_97:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_98:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_99:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_100:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_101:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_102:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_103:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_104:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_105:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_106:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_107:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_108:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_109:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_110:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_111:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_112:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_113:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_114:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_115:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_116:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_117:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_118:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_119:	//khj_200308
+		////////////////////////////////////////////////////////
+		//case C_SKI_120V_400A_200A_100A_192KW_169:	//ktg_200410 //shh_240730
+		//case C_TEST_120V_400A_200A_100A_192KW:		//shh_200723
+		case C_SKI_120V_400A_200A_100A_192KW_170:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_171:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_172:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_173:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_174:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_175:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_176:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_177:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_178:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_179:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_180:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_181:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_182:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_183:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_184:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_185:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_186:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_187:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_188:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_189:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_190:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_191:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_192:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_193:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_194:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_195:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_196:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_197:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_198:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_199:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_200:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_201:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_202:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_203:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_204:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_205:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_206:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_207:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_208:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_209:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_210:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_211:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_212:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_213:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_214:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_215:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_216:	//shh_200905
+		//case C_SKI_120V_400A_200A_100A_192KW_232:	//shh_200914 //shh_240730
+		case C_SKI_120V_400A_200A_100A_192KW_233:	//ktg_200908
+		case C_SKI_120V_400A_200A_100A_192KW_234:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_235:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_236:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_237:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_238:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_239:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_240:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_241:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_242:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_243:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_244:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_245:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_246:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_247:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_248:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_249:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_250:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_251:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_252:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_253:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_254:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_255:	//shh_220113
+		/*22PPSCSA062 SKON China - 11Set //shh_250417s
+		case C_SKI_120V_425A_200A_100A_50A_192KW:       //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_2:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_3:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_4:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_5:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_6:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_7:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_8:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_9:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_10:    //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_11:    //phb_230206
+		*/								//shh_250417e
+		//case C_SKI_120V_425A_300A_200A_100A_192KW:      //phb_230105
+        //case C_SKI_120V_425A_300A_200A_100A_192KW_2:    //phb_230105
+        //case C_SKI_120V_425A_300A_200A_100A_192KW_3:    //phb_230105
+		case C_SKI_180V_425A_200A_100A_192KW:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_2:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_3:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_4:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_5:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_6:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_7:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_8:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_9:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_10:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_11:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_12:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_13:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_14:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_15:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_16:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_17:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_18:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_19:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_20:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_21:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_22:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_23:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_24:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_25:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_26:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_27:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_28:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_29:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_30:	//sec_221221
+		case C_SKI_180V_600A_300A_100A_320KW:       //phb_230220
+		//case C_SKI_180V_600A_300A_100A_320KW_47:	//shh_231004	//23PPSCSA029	
+		//case C_SKI_180V_600A_300A_100A_320KW_93:	//shh_240130	//23PPSCSA030
+		//case C_SKI_180V_600A_300A_100A_320KW_143:	//shh_240326	//23PPSCSA052
+		//case C_SKI_180V_600A_300A_100A_320KW_147:	//shh_240326	//24PPSCSA001	
+		case C_NORTHVOLT_200V_400A_200A_160KW:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_2:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_3:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_4:	//ktg_191203
+		//21PPSCSA052 SKON MOA 9SET - START //shh_250417
+		//case C_SKI_260V_425A_200A_442KW:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_2:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_3:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_4:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_5:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_6:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_7:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_8:	//shh_211020
+		//case C_SKI_260V_425A_200A_442KW_9:	//shh_211020
+		 //21PPSCSA052 SKON MOA 9SET - END
+		case C_SKI_450V_200A_100A_90KW:			//sec_221223
+		case C_SKI_450V_150A_100A_50A_260KW:	//sec_221215
+		case C_SKI_450V_150A_100A_50A_260KW_2:	//sec_221215
+		case C_SKI_500V_450A_200A_450KW:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_2:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_3:		//khj_200308
+		//case C_SKI_500V_450A_200A_450KW_4:		//ktg_200410 //shh_240730s
+		//case C_SKI_500V_450A_200A_450KW_5:		//ktg_200410
+		//case C_SKI_500V_450A_200A_450KW_6:		//ktg_200410 //shh_240730e
+		case C_SKE_600V_400A_100A_50A_25A_240KW:	//jhkw_130924
+		case C_DAEHWA_600V_400A_200A_100A_200KW:	//jhk_170120
+		case C_DAEHWA_750V_300A_100A_150KW:	//jhk_170203
+		case C_DAEHWA_800V_200A_50A_160KW:	//jhk_160831
+		case C_SKI_1000V_400A_200A_100A_450KW:	//sec_230103
+		case C_SKI_1200V_250A_100A_50A_300KW:	//jhk_131209
+		case C_SKI_1200V_500A_400A_300A_200A_600KW:     //phb_230116
+		case C_SKI_1500V_350A_300A_200A_100A_450KW:     //phb_230117
+		case C_SKI_1500V_400A_100A_500KW:	//jhk_180610
+		case C_SKI_2000V_300A_200A_100A_50A_600KW:  //phb_230320
+			rtn = I_In_FlagCheck_PowerFail_3();
+			break;
+		default:
+			rtn = I_In_FlagCheck_PowerFail_3(); //shh_240417
+			break;
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_PowerFail_1(void)
+{
+	int rtn=0, flag1, flag2, group, ch;
+	S_MSG_VAL SendMsg;
+
+	group = 0; ch = 0;
+	
+	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+
+	flag1 = Read_InPoint(group, ch, I_AC_POWER_FAIL);
+	flag2 = Read_InPoint(group, ch, I_UPS_BATTERY_FAIL);
+
+	if((flag1 == ON && flag2 == ON) || (flag1 == ON && flag2 == OFF)) {
+		myDio->misc.powerFailTimer += myDio->config.scan_period;
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			if(myDio->misc.powerFailTimer
+				>= myDio->config.powerFailTimeout1) { //0sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+				//to Pause : short power fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P0
+			|| myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			if(myDio->misc.powerFailTimer
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}	
+			if(flag2 == ON) {
+				myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+				if(myDio->misc.upsBatteryFailTimer
+					>= myDio->config.upsBatteryFailTimeout) { //2sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+					//to Shutdown : battery fail
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					rtn = -1;
+				}	
+			}
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			rtn = -1;
+		}
+	} else if(flag1 == OFF && flag2 == ON) { //battery fail
+		myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			if(myDio->misc.upsBatteryFailTimer
+				>= myDio->config.upsBatteryFailTimeout) { //2sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : battery fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+				SendMsg.val[1] = 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}	
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			rtn = -1;
+		}
+	} else {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] <= P2) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+		}
+		myDio->misc.powerFailTimer = 0;
+		myDio->misc.upsBatteryFailTimer = 0;
+	}
+	return rtn;
+}
+
+int I_In_FlagCheck_PowerFail_2(void)
+{
+	int rtn=0, flag1, flag2, group, ch;
+	S_MSG_VAL SendMsg;
+
+	group = 0; ch = 0;
+	
+	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+
+	flag1 = Read_InPoint(group, ch, I_AC_POWER_FAIL);
+	flag2 = Read_InPoint(group, ch, I_UPS_BATTERY_FAIL);
+
+	if((flag1 == ON && flag2 == ON) || (flag1 == ON && flag2 == OFF)) {
+		myDio->misc.powerFailTimer += myDio->config.scan_period;
+/*		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			if(myDio->misc.powerFailTimer
+				>= myDio->config.powerFailTimeout1) { //0sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+				//to Pause : short power fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}
+		} else*/ if(myDio->signal[DIO_SIG_POWER_FAIL] == P0
+			|| myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			if(myDio->misc.powerFailTimer
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}	
+			if(flag2 == ON) {
+				myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+				if(myDio->misc.upsBatteryFailTimer
+					>= myDio->config.upsBatteryFailTimeout) { //2sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+					//to Shutdown : battery fail
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					rtn = -1;
+				}	
+			}
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			rtn = -1;
+		}
+	} else if(flag1 == OFF && flag2 == ON) { //battery fail
+		myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			if(myDio->misc.upsBatteryFailTimer
+				>= myDio->config.upsBatteryFailTimeout) { //2sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : battery fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+				SendMsg.val[1] = 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}	
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			rtn = -1;
+		}
+	} else {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+		}
+		myDio->misc.powerFailTimer = 0;
+		myDio->misc.upsBatteryFailTimer = 0;
+	}
+	return rtn;
+}
+
+int I_In_FlagCheck_PowerFail_3(void)
+{
+	int rtn=0, flag1, flag2, group, ch;
+	S_MSG_VAL SendMsg;
+
+	group = 0; ch = 0;
+	
+	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+
+	flag1 = Read_InPoint(group, ch, I_AC_POWER_FAIL);
+	flag2 = Read_InPoint(group, ch, I_UPS_BATTERY_FAIL);
+
+	if((flag1 == ON && flag2 == ON) || (flag1 == ON && flag2 == OFF)) {
+/*		myDio->misc.powerFailTimer += myDio->config.scan_period;
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			if(myDio->misc.powerFailTimer
+				>= myDio->config.powerFailTimeout1) { //0sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+				//to Pause : short power fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}
+		} else*/ if(myDio->signal[DIO_SIG_POWER_FAIL] == P0
+			|| myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			/*if(myDio->misc.powerFailTimer
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}*/
+			if(flag2 == ON) {
+				myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+				if(myDio->misc.upsBatteryFailTimer
+					>= myDio->config.upsBatteryFailTimeout) { //2sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+					//to Shutdown : battery fail
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					rtn = -1;
+				}	
+			}
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			rtn = -1;
+		}
+	} else if(flag1 == OFF && flag2 == ON) { //battery fail
+		myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			if(myDio->misc.upsBatteryFailTimer
+				>= myDio->config.upsBatteryFailTimeout) { //2sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : battery fail
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+				SendMsg.val[1] = 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}	
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+			rtn = -1;
+		}
+	} else {
+//		if(myDio->signal[DIO_SIG_POWER_FAIL] == P2) {
+//			myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+//		}
+		//myDio->misc.powerFailTimer = 0;
+		myDio->misc.upsBatteryFailTimer = 0;
+	}
+	return rtn;
+}
+
+int I_In_FlagCheck_PowerFail_4(void)
+{
+	int rtn=0, flag1, flag2, group=0, ch=0;
+	S_MSG_VAL SendMsg;
+
+	flag1 = Read_InPoint(group, ch, I_AC_POWER_FAIL);
+	flag2 = Read_InPoint(group, ch, I_UPS_BATTERY_FAIL);
+
+	if(flag2 == ON) { //battery fail
+		if(myDio->signal[DIO_SIG_UPS_BATTERY_FAIL] == P0) {
+			myDio->misc.upsBatteryFailTimer += myDio->config.scan_period;
+			if(myDio->misc.upsBatteryFailTimer
+				>= myDio->config.upsBatteryFailTimeout) { //2sec
+				myDio->signal[DIO_SIG_UPS_BATTERY_FAIL] = P1;
+				//to Shutdown : battery fail
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_UPS_BATTERY;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+			}	
+		} else if(myDio->signal[DIO_SIG_UPS_BATTERY_FAIL] == P1) {
+			rtn = -1;
+		}
+	} else {
+		myDio->misc.upsBatteryFailTimer = 0;
+
+		if(Read_InPoint(group, ch, I_NO_POWER_OFF) == 0) { //power off
+		} else { //Don't power off
+			myDio->signal[DIO_SIG_UPS_BATTERY_FAIL] = P0;
+		}
+	}
+	return rtn;
+}
+
+int I_In_FlagCheck_PSFail(void)
+{
+	unsigned char flag1, flag2, flag3, flag4;
+	int rtn=0, group=0, ch=0, tmp;
+	S_MSG_VAL SendMsg;
+
+	if(myData->mData.signal[M_SIG_EXIT_TYPE] != P0
+		&& myData->mData.signal[M_SIG_EXIT_TYPE] != P5) return 0;
+	
+	memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+
+	switch(myData->AppControl.config.systemModel) {
+		case F_SDI_5V_400A_200A_100A_10A:
+		case F_SDI_5V_400A_200A_100A_10A_2:
+			tmp = 1;
+			break;
+		default:
+			tmp = 0;
+			break;
+	}
+	if(tmp == 0) {
+		flag1 = Read_InPoint(group, ch, I_PS_FAIL);
+		if(flag1 == ON) {
+			if(myDio->signal[DIO_SIG_PS_FAIL] == P0) {
+				myDio->signal[DIO_SIG_PS_FAIL] = P1;
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CONTROL_PS;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			if(myDio->signal[DIO_SIG_PS_FAIL] != P0) {
+				myDio->signal[DIO_SIG_PS_FAIL]++;
+				if(myDio->signal[DIO_SIG_PS_FAIL] >= P100) {
+					myDio->signal[DIO_SIG_PS_FAIL] = P0;
+				}
+			}
+		}
+	} else if(tmp == 1) {
+		flag1 = Read_InPoint(group, 1, I_PS_FAIL);
+		flag2 = Read_InPoint(group, 2, I_PS_FAIL);
+		if(flag1 == ON || flag2 == ON) {
+			if(myDio->signal[DIO_SIG_PS_FAIL] == P0) {
+				myDio->signal[DIO_SIG_PS_FAIL] = P1;
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CONTROL_PS;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_PS_FAIL] = P0;
+		}
+	}
+
+	switch(myData->AppControl.config.systemModel) {
+		case F_SDI_5V_450A_200A_100A_10A:
+			tmp = 1;
+			break;
+		default:
+			tmp = 0;
+			break;
+	}
+
+	if(tmp == 1) {
+		flag1 = Read_InPoint(group, 1, I_PS1_FAIL);
+		flag2 = Read_InPoint(group, 1, I_PS2_FAIL);
+		flag3 = Read_InPoint(group, 2, I_PS1_FAIL);
+		flag4 = Read_InPoint(group, 2, I_PS2_FAIL);
+		if(flag1 == ON || flag2 == ON || flag3 == ON || flag4 == ON) {
+			if(myPs->code != M_CD_FAULT_MAIN_PS
+				&& myPs->code != M_CD_FAULT_AC_POWER_SHORT
+				&& myPs->code != M_CD_FAULT_AC_POWER_LONG) {
+				if(myDio->signal[DIO_SIG_PS_FAIL] == P0) {
+					myDio->signal[DIO_SIG_PS_FAIL] = P1;
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					rtn = -1;
+					return rtn;
+				}
+			}
+		} else {
+			myDio->signal[DIO_SIG_PS_FAIL] = P0;
+		}
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_Chamber(void)
+{
+	/*Simplication - shh_250417*/
+	int rtn=0, chamber_group=0;
+
+	switch(myData->AppControl.config.systemModel) {
+		case C_SKI_400V_100A_10A_40KW:
+			rtn = I_In_FlagCheck_Chamber_5();	//jhkw_130711
+			break;
+		case C_SKC_600V_200A_100A_50A_240KW: //jhkw_120807
+			rtn = I_In_FlagCheck_Chamber_2();
+			break;
+		case C_NORTHVOLT_400V_200A_100A_160KW:         //ktg_200415
+		case C_NORTHVOLT_200V_400A_200A_160KW:	      //ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_2:     //ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_3:    //ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_4:   //ktg_191203
+			chamber_group = 2;
+			rtn = I_In_FlagCheck_Chamber_8(chamber_group);
+			break;
+		default:
+			break;
+	}
+	return rtn;
+}
+
+int I_In_FlagCheck_Chamber_1(void)
+{
+	int rtn=0;
+	S_MSG_VAL SendMsg;
+
+	if(Read_InPoint(1, 0, I_CHAMBER_FAULT) == P1
+		&& myData->gData[0].state == G_RUN) {
+		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+		SendMsg.msg = MSG_IO_MODULE_EXIT;
+		SendMsg.val[0] = G_CD_FAULT_JIG_DOOR_ERROR;
+		SendMsg.val[1] = 0;
+		send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		rtn = -1;
+	}
+
+	if(Read_InPoint(2, 0, I_CHAMBER_FAULT) == P1
+		&& myData->gData[1].state == G_RUN) {
+		memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+		SendMsg.msg = MSG_IO_MODULE_EXIT;
+		SendMsg.val[0] = G_CD_FAULT_JIG_DOOR_ERROR;
+		SendMsg.val[1] = 1;
+		send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		rtn = -1;
+	}
+	return rtn;
+}
+
+int I_In_FlagCheck_Chamber_2(void)
+{
+	int rtn=0, timer1, timer2;
+	S_MSG_VAL SendMsg;
+
+	timer1 = 1000; //1sec
+	timer2 = 30000; //30sec
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_EMG) == P1) {
+		if(myDio->misc.chamber_emg_timer < timer1) {
+			myDio->misc.chamber_emg_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_emg_timer == timer1) {
+			myDio->misc.chamber_emg_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_COIL_TRIP;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_emg_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_POWER) == P1) {
+		if(myDio->misc.chamber_power_timer < timer2) {
+			myDio->misc.chamber_power_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_power_timer == timer2) {
+			myDio->misc.chamber_power_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_POWER;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+
+		myDio->misc.chamber_door_open_timer = 0;
+		myDio->misc.chamber_over_temp_timer = 0;
+		myDio->misc.chamber_air_timer = 0;
+		myDio->misc.chamber_eocr_timer = 0;
+		myDio->misc.chamber_fan_timer = 0;
+		myDio->misc.chamber_fire_timer = 0;
+		myDio->misc.chamber_smoke_timer = 0;
+		myDio->misc.chamber_ref_timer = 0;
+		return 0;
+	} else {
+		myDio->misc.chamber_power_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_DOOR_OPEN) == P1) {
+		if(myDio->misc.chamber_door_open_timer < timer1) {
+			myDio->misc.chamber_door_open_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_door_open_timer == timer1) {
+			myDio->misc.chamber_door_open_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_DOOR_OPEN;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_door_open_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_OVER_TEMP) == P1) {
+		if(myDio->misc.chamber_over_temp_timer < timer1) {
+			myDio->misc.chamber_over_temp_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_over_temp_timer == timer1) {
+			myDio->misc.chamber_over_temp_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_OVER_TEMP;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_over_temp_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_AIR_PRESS) == P1) {
+		if(myDio->misc.chamber_air_timer < timer1) {
+			myDio->misc.chamber_air_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_air_timer == timer1) {
+			myDio->misc.chamber_air_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_AIR;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_air_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_EOCR) == P1) {
+		if(myDio->misc.chamber_eocr_timer < timer1) {
+			myDio->misc.chamber_eocr_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_eocr_timer == timer1) { //1sec
+			myDio->misc.chamber_eocr_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_REF;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_eocr_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_FAN) == P1) {
+		if(myDio->misc.chamber_fan_timer < timer1) {
+			myDio->misc.chamber_fan_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_fan_timer == timer1) {
+			myDio->misc.chamber_fan_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FAN;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_fan_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_FIRE) == P1) {
+		if(myDio->misc.chamber_fire_timer < timer1) {
+			myDio->misc.chamber_fire_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_fire_timer == timer1) {
+			myDio->misc.chamber_fire_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_fire_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->misc.chamber_smoke_timer < timer1) {
+			myDio->misc.chamber_smoke_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_smoke_timer == timer1) {
+			myDio->misc.chamber_smoke_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_smoke_timer = 0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_REF_ERROR) == P1) {
+		if(myDio->misc.chamber_ref_timer < timer1) {
+			myDio->misc.chamber_ref_timer += myDio->config.scan_period;
+		}
+		if(myDio->misc.chamber_ref_timer == timer1) { //1sec
+			myDio->misc.chamber_ref_timer += myDio->config.scan_period;
+
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_REF_ERROR;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->misc.chamber_ref_timer = 0;
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_Chamber_3(void)
+{
+	unsigned char cmp_time1, cmp_time2;
+	int rtn=0, timer2;
+	S_MSG_VAL SendMsg;
+
+	cmp_time1 = 100; //1sec
+	cmp_time2 = 30; //30sec
+	timer2 = 30000; //30sec
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_EMG) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_COIL_TRIP;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_POWER) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] = P0;
+			if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL2] < cmp_time2) {
+				myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL2] == cmp_time2) {
+				myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_POWER;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		}
+
+		myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_FAN_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_REF_FAIL] = P0;
+		return 0;
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] = P0;
+		myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL2] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_DOOR_OPEN) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_DOOR_OPEN;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_OVER_TEMP) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_OVER_TEMP;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_AIR_PRESS) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_AIR;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_EOCR) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_REF;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_FAN) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_FAN_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FAN_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_FAN_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FAN_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FAN;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_FAN_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_FIRE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_REF_ERROR) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_REF_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_REF_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_REF_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_REF_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_REF_ERROR;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_REF_FAIL] = P0;
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_Chamber_4(int chamber_group)
+{ //lki_111010
+	unsigned char cmp_time1, cmp_time2;
+	int rtn=0, timer2;
+	S_MSG_VAL SendMsg;
+
+	cmp_time1 = 100; //1sec
+	cmp_time2 = 30; //30sec
+	timer2 = 30000; //30sec
+
+	if(chamber_group == 1 || chamber_group == 2) {
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_EMG) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_COIL_TRIP;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] = P0;
+		}
+
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_OVER_TEMP) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] 
+				== cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_OVER_TEMP;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL] = P0;
+		}
+
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_AIR_PRESS) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_AIR;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL] = P0;
+		}
+
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_EOCR) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_REF;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL] = P0;
+		}
+
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_FIRE) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] = P0;
+		}
+		
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_LEAK) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_LEAK;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL] = P0;
+		}
+
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_CP_TRIP) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL] 
+				== cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_CP_TRIP;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL] = P0;
+		}
+
+		if(Read_InPoint(1, 0, I_JIG_CHAMBER_POWER) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_POWER;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL] = P0;
+		}
+
+	}
+	
+	if(chamber_group == 2) {
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_EMG) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_COIL_TRIP;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2] = P0;
+		}
+
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_OVER_TEMP) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL_2] 
+				== cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_OVER_TEMP;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_OVER_TEMP_FAIL_2] = P0;
+		}
+
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_AIR_PRESS) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL_2] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_AIR;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_AIR_FAIL_2] = P0;
+		}
+
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_EOCR) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL_2] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_REF;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_EOCR_FAIL_2] = P0;
+		}
+
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_FIRE) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2] = P0;
+		}
+		
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_LEAK) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL_2] == cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_LEAK;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_LEAK_FAIL_2] = P0;
+		}
+
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_CP_TRIP) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL_2] 
+				== cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_CP_TRIP;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_CP_TRIP_FAIL_2] = P0;
+		}
+
+		if(Read_InPoint(2, 0, I_JIG_CHAMBER_POWER) == P1) {
+			if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL_2] < cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL_2]++;
+			} else if(myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL_2] 
+				== cmp_time1) {
+				myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL_2]++;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_CHAMBER_POWER;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				rtn = -1;
+				return rtn;
+			}
+		} else {
+			myDio->signal[DIO_SIG_CHAMBER_POWER_FAIL_2] = P0;
+		}
+	
+	}
+
+	return rtn;
+}
+
+int I_In_FlagCheck_Chamber_5(void)
+{ //lki_111010
+	unsigned char cmp_time1, cmp_time2;
+	int rtn=0, timer2;
+	S_MSG_VAL SendMsg;
+
+	cmp_time1 = 100; //1sec
+	cmp_time2 = 30; //30sec
+	timer2 = 30000; //30sec
+
+	if(Read_InPoint(0, 0, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			Select_OutPoint(0, 0, O_MARS_LIGHT, ON);
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] = P0;
+	}
+	if(Read_InPoint(0, 0, I_JIG_EXT_OT) == P1) {
+		if(myDio->signal[DIO_SIG_EXT_OT_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_EXT_OT_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_EXT_OT_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_EXT_OT_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_EXT_OT;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			Select_OutPoint(0, 0, O_MARS_LIGHT, ON);
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_EXT_OT_FAIL] = P0;
+	}
+	return rtn;
+}
+//jhkw_191216s
+int I_In_FlagCheck_Chamber_8(int chamber_count)
+{
+	unsigned char cmp_time1;
+	int rtn=0, ch;
+	S_MSG_VAL SendMsg;
+
+	cmp_time1 = 100; //1sec
+
+	ch = 1;
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL] = P0;
+	}
+	
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_FIRE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_EMG) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_EMG;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_ETC) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_ETC;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_DOOR_OPEN) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_DOOR_OPEN;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL] = P0;
+	}
+
+	ch = 2;
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_2] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_2]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_2] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_2]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_2] = P0;
+	}
+	
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_FIRE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_2] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_EMG) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_EMG;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_2] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_ETC) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_2] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_2]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_2] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_2]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_ETC;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_2] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_DOOR_OPEN) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_2] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_2]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_2] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_2]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_DOOR_OPEN;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_2] = P0;
+	}
+	ch = 3;
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_3] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_3]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_3] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_3]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_3] = P0;
+	}
+	
+	if(chamber_count < ch) {
+		return 0;
+	}
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_FIRE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_3] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_3]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_3] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_3]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_3] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_EMG) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_3] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_3]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_3] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_3]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_EMG;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_3] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_ETC) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_3] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_3]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_3] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_3]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_ETC;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_3] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_DOOR_OPEN) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_3] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_3]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_3] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_3]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_DOOR_OPEN;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_3] = P0;
+	}
+
+	ch = 4;
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_SMOKE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_4] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_4]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_4] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_4]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_SMOKE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_SMOKE_FAIL_4] = P0;
+	}
+	
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_FIRE) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_4] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_4]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_4] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_4]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_CHAMBER_FIRE;
+			SendMsg.val[1] = ch;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			rtn = -1;
+			return rtn;
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_FIRE_FAIL_4] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_EMG) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_4] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_4]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_4] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_4]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_EMG;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_EMG_FAIL_4] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_ETC) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_4] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_4]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_4] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_4]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_ETC;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_ETC_FAIL_4] = P0;
+	}
+
+	if(Read_InPoint(0, ch, I_JIG_CHAMBER_DOOR_OPEN) == P1) {
+		if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_4] < cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_4]++;
+		} else if(myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_4] == cmp_time1) {
+			myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_4]++;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_CH_PAUSE;
+			SendMsg.val[0] = C_CD_FAULT_CHAMBER_DOOR_OPEN;
+			SendMsg.val[1] = ch-1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+	} else {
+		myDio->signal[DIO_SIG_CHAMBER_DOOR_OPEN_FAIL_4] = P0;
+	}
+
+	return rtn;
+}
+//jhkw_191216e
+
+int I_In_FlagCheck_Fan(void)
+{
+	unsigned char tmp;
+	int rtn=0, group, ch, count;
+	S_MSG_VAL SendMsg;
+	
+	if(myPs->misc.fan_delay_time2 + myPs->misc.fan_run_count + myPs->misc.fan_stop_count < 1000) { //phb_221223s //shh_230607s
+		myDio->misc.fan_scan_time = myPs->misc.timer_1sec;
+		return rtn;
+	}
+	if(myPs->misc.timer_1sec - myDio->misc.fan_scan_time < 1){
+		return rtn;
+	}else{
+		myDio->misc.fan_scan_time = myPs->misc.timer_1sec;	
+	}
+	
+	group = 0; ch = 0; count = 0;
+	//DC_FAN Error Standardization-001 Start - shhw_241209
+	switch(myData->AppControl.config.systemModel) {
+		//I_FAN_MC_FAIL 1EA, I_FAN_ERROR 1EA - TYPE1(Only for 2PPSCSA046)
+		//22PPSCSA046 Seosan
+		case C_SKI_120V_425A_300A_200A_100A_192KW:      //phb_230105 
+        case C_SKI_120V_425A_300A_200A_100A_192KW_2:    //phb_230105 
+        case C_SKI_120V_425A_300A_200A_100A_192KW_3:    //phb_230105
+			for(ch=0; ch < myPs->config.installedCh; ch++) {
+				if((Read_InPoint(group, ch+1, I_FAN_MC_FAIL) == ON) && 
+					(Read_InPoint(group, ch+1, I_FAN_ERROR) == OFF)) {
+					count++;
+				}
+				else if((Read_InPoint(group, ch+1, I_FAN_MC_FAIL) == OFF) && 
+					(Read_InPoint(group, ch+1, I_FAN_ERROR) == ON)) {
+					count++;
+				}
+				else{
+				}
+			}
+			break;
+		//I_FAN_MC_FAIL 1EA, I_FAN_ERROR 2EA - TYPE3
+		case C_SKI_1200V_500A_400A_300A_200A_600KW: //phb_230116 //22PPSCSA047 Seosan 
+		case C_SKI_1500V_350A_300A_200A_100A_450KW: //phb_230117 //22PPSCSA048 Seosan  
+		case C_SKI_260V_425A_250A_50A_442KW: //shh_240620 //24PPSCSA010 SKOY 
+			//shh_240719s - I_FAN_ERROR  2EA Error FIX
+			if(Read_InPoint(group, 1, I_FAN_MC_FAIL) == ON) {
+				if(Read_InPoint(group, 1, I_FAN_ERROR) == OFF) count++;
+				if(Read_InPoint(group, 2, I_FAN_ERROR) == OFF) count++;
+			
+			} else if(Read_InPoint(group, 1, I_FAN_MC_FAIL) == OFF) {
+				if(Read_InPoint(group, 1, I_FAN_ERROR) == ON) count++;  
+				if(Read_InPoint(group, 2, I_FAN_ERROR) == ON) count++;
+			} else{
+			}
+			//shh_240719e
+			break;
+		//shh_250224s
+		//DC FAN BD 2EA - TYPE4					
+		case C_SKI_1000V_400A_200A_100A_450KW:	//sec_230103
+		case C_SKI_1000V_400A_200A_100A_450KW_2:	//phb_240418 [23PPSCSA050]
+		case C_SKI_1000V_400A_200A_100A_450KW_3:	//phb_240418 [23PPSCSA050]
+		//DC FAN BD1 - I_FAN_MC_FAIL 1EA + I_FAN_ERROR 1EA
+		//DC FAN BD2 - I_FAN_MC_FAIL 1EA + I_FAN_ERROR 1EA
+			for(ch = 0 ; ch < 2; ch++) {
+				if(Read_InPoint(group, ch+1, I_FAN_MC_FAIL) == ON) {
+					if(Read_InPoint(group, ch+1, I_FAN_ERROR) == OFF) count++;
+				} else if(Read_InPoint(group, ch+1, I_FAN_MC_FAIL) == OFF) {
+					if(Read_InPoint(group, ch+1, I_FAN_ERROR) == ON) count++;  
+				} 
+			}
+			break;
+		//shh_250224e
+		default:
+		//I_FAN_MC_FAIL 1EA, I_FAN_ERROR 1EA - TYPE2
+		//23PPSCSA029,30,52, 24PPSCSA001, ETC - 180V/600A/4CH
+		//23PPSCSA051 - 450V/100A/4CH
+			if(Read_InPoint(group, 1, I_FAN_MC_FAIL) == ON) {
+				if(Read_InPoint(group, 1, I_FAN_ERROR) == OFF) count++;
+			} else if(Read_InPoint(group, 1, I_FAN_MC_FAIL) == OFF) {
+				if(Read_InPoint(group, 1, I_FAN_ERROR) == ON) count++;  
+			} else{
+			}
+			break;
+	}
+	//DC_FAN Error Standardization-001 End
+	if(count == 0) {
+		myDio->signal[DIO_SIG_FAN_ERROR] = P0;
+    	myDio->misc.fan_err_time = myPs->misc.timer_1sec;
+	}
+	else {
+		if(myPs->misc.timer_1sec - myDio->misc.fan_err_time >= myDio->config.fan_err_detect_time){
+			if(myDio->signal[DIO_SIG_FAN_ERROR] == P0){
+				if(myPs->code == M_CD_FAULT_FAN
+					|| myPs->code == M_CD_FAULT_AC_POWER_SHORT
+					|| myPs->code == M_CD_FAULT_AC_POWER_LONG
+					|| myPs->code == M_CD_FAULT_MAIN_EMG_SWITCH
+					|| myPs->code == M_CD_FAULT_SUB_EMG_SWITCH
+					|| myPs->code == M_CD_FAULT_MAIN_PS) {
+					tmp = 0;
+				} else {
+					tmp = 1;
+				}
+				if(tmp ==1) {
+					myDio->signal[DIO_SIG_FAN_ERROR] = P1;
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_FAN;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					rtn = -1;
+				}
+			}
+		}else {
+			myDio->signal[DIO_SIG_FAN_ERROR] = P0;		//phb_221223e /shh_230607e
+		} 
+	}
+	
+/*
+	if((myPs->misc.timer_1sec - myPs->misc.fan_fail_detect_time) <= 10) {
+		myPs->misc.fan_fail_detect_time2 = myPs->misc.timer_1sec;
+		return rtn;
+	}
+
+	group = 0; ch = 0; count = 0;
+	for(ch=0; ch < 10; ch++) {
+		if(Read_InPoint(group, ch+1, I_FAN_FAIL) == ON) {
+			count++;
+		}
+	}
+
+	if(count == 0) {
+		myPs->misc.fan_fail_detect_time2 = myPs->misc.timer_1sec;
+		myDio->signal[DIO_SIG_FAN_FAIL] = P0;
+	} else {
+		if((myPs->misc.timer_1sec - myPs->misc.fan_fail_detect_time2) <= 10) {
+			return rtn;
+		}
+
+		if(myDio->signal[DIO_SIG_FAN_FAIL] < P2) {
+			myDio->signal[DIO_SIG_FAN_FAIL]++;
+		} else {
+			if(myPs->signal[M_SIG_FAN_ACTIVE] == P10) {
+				if(myPs->code == M_CD_FAULT_FAN
+					|| myPs->code == M_CD_FAULT_AC_POWER_SHORT
+					|| myPs->code == M_CD_FAULT_AC_POWER_LONG
+					|| myPs->code == M_CD_FAULT_MAIN_EMG_SWITCH
+					|| myPs->code == M_CD_FAULT_SUB_EMG_SWITCH
+					|| myPs->code == M_CD_FAULT_MAIN_PS) {
+					tmp = 0;
+				} else {
+					tmp = 1;
+				}
+				if(tmp == 1) {
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_FAN;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+					rtn = -1;
+					myPs->signal[M_SIG_FAN_ACTIVE] = P11;
+				}
+			} else {
+				myDio->signal[DIO_SIG_FAN_FAIL] = P0;
+				//kjg_100302 if(myPs->code == M_CD_FAULT_FAN) myPs->code = M_CD_NONE;
+			}
+		}
+	}
+*/
+	return rtn;
+}
+
+void I_OutScan(void)
+{
+	unsigned char flag, pn;
+	int outByte, bit, point, byte_index, addr;
+	
+	for(outByte=0; outByte < MAX_DIO_IO_BYTES; outByte++) {
+		byte_index = outByte;
+
+		flag = 0x01;
+		for(bit=0; bit < BITS_PER_BYTE; bit++) {
+			point = byte_index * BITS_PER_BYTE + bit;
+
+			if(myDio->function_set.out_set[point].use == USE) {
+				pn = myDio->function_set.out_set[point].pn;
+
+				if(myDio->out.function[point] == ON) {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] |= flag;
+					} else {
+						myDio->out.bytes[byte_index] &= ~flag;
+					}
+				} else {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] &= ~flag;
+					} else {
+						myDio->out.bytes[byte_index] |= flag;
+					}
+				}
+			}
+			flag = flag << 1;
+		}
+
+		addr = myDio->function_set.out_address[byte_index];
+		if(addr == 0) continue;
+
+		outb(myDio->out.bytes[byte_index], addr);
+	}
+}
+
+void M_InScan(void)
+{
+	unsigned char flag, input, pn;
+	int sensCount, inByte, position, point, byte_index, addr;
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	for(inByte=0; inByte < MAX_DIO_MI_BYTES; inByte++) {
+		byte_index = MAX_DIO_II_BYTES + inByte;
+		addr = myDio->function_set.in_address[byte_index];
+		if(addr == 0) continue;
+
+		input = inb(addr);
+		myDio->in.bytes[byte_index] = input;
+		
+		flag = 0x01;
+		for(position=0; position < BITS_PER_BYTE; position++) {
+			point = byte_index * BITS_PER_BYTE + position;
+			
+			if(myDio->function_set.in_set[point].use == USE) {
+				pn = myDio->function_set.in_set[point].pn;
+				sensCount = (int)myDio->function_set.in_set[point].count;
+
+				myDio->in.function[point]
+					= InCheck(point, input & flag, pn, sensCount);
+			}
+			flag = flag << 1;
+		}
+	}
+}
+
+void M_In_FlagCheck(void)
+{
+	/*Simplication - shh_250417*/
+	switch(myData->AppControl.config.systemModel) {
+		case C_SKI_20V_300A_200A_100A_12KW:		//shh_231204	
+		case C_SKI_20V_300A_200A_100A_12KW_2:	//shh_231204
+		case C_SKI_30V_600A_400A_200A_100A_36KW:	//ksh_250418
+		case C_SKI_50V_500A_250A_25KW:	//ktg_190715
+		case C_SK_60V_300A_10A:
+		case C_SKI_100V_100A_10A_10KW:  //jhk_120329
+		case C_SKI_100V_300A_150A_50A_10A_60KW: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_2: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_3: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_4: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_5: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_6: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_7: //kjh_120527
+		case C_SKI_100V_300A_150A_50A_10A_60KW_8: //kjh_120527
+		case C_SKI_400V_100A_10A_40KW: //jhk_120112
+		case C_SK_450V_200A_10A_90KW:
+		case C_DAEWOO_450V_200A_10A_90KW:
+		case C_DAEWOO_450V_200A_10A_90KW_2:
+		case C_DAEWOO_450V_200A_50A_90KW: //kjh_150518
+		case C_DAEWOO_450V_200A_50A_90KW_2:	//jhk_150710
+		case C_SKI_450V_200A_100A_90KW:		//sec_221223
+		case C_PNE_450V_250A_10A_115KW:
+		case C_DAEHWA_600V_400A_200A_100A_200KW:	//jhk_170120
+		case C_DAEHWA_750V_300A_100A_150KW:			//jhk_170203
+		//case C_SKE_600V_400A_100A_50A_25A_240KW:	//jhkw_130924
+		//case C_SKI_1200V_250A_100A_50A_300KW:	//jhk_131209
+			//inverter 1ea
+			M_In_FlagCheck_Pack(1);
+			break;
+		case C_SKI_450V_100A_50A_25A_90KW:		//phb_240507
+			//inverter 1ea + TR1_FUSE, Only use for 23PPSCSA051
+			M_In_FlagCheck_Pack_TR1_FUSE(1);
+			break;
+		case C_NORTHVOLT_60V_400A_200A_96KW:	//khj_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_2:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_3:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_4:	//ktg_191203
+		case C_SK_450V_200A_10A_180KW:
+		case C_SKC_600V_200A_100A_50A_240KW: //jhkw_120807
+		case C_SKC_600V_200A_100A_50A_240KW_2: //jhkw_121019
+			//inverter 2ea
+			M_In_FlagCheck_Pack(2);
+			break;
+		case C_SK_450V_200A_10A_360KW:
+			//inverter 4ea
+			M_In_FlagCheck_Pack(4);
+			break;
+		case C_SKI_50V_500A_400A_200A_100A_100KW:	//jhk_180119
+		case C_SKI_50V_500A_400A_200A_100A_100KW_2:	//jhk_180119
+		case C_SKI_50V_1000A_500A_300A_100KW:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_2:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_3:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_4:	//ktg_190711
+		case C_SKI_60V_400A_200A_100A_96KW:		//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_2:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_3:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_4:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_5:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_6:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_7:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_8:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_9:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_10:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_11:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_12:	//ktg_190319
+		case C_DAEHWA_60V_500A_250A_50A_60KW:	//jhk_160913
+		case C_DAEHWA_60V_500A_250A_50A_60KW_2:	//jhk_160913
+		case C_SKI_120V_400A_100A_192KW:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_2:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_3:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_4:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_5:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_6:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_7:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_8:	//jhk_170628
+		case C_SKI_120V_400A_200A_100A_50A_192KW:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_2:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_3:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_4:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_5:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_6:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_7:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_8:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_9:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_10:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_11:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_12:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_13:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_14:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_15:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_16:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_17:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_18:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_192KW:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_2:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_3:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_4:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_5:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_6:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_7:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_8:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_9:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_10:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_11:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_12:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_13:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_14:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_15:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_16:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_17:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_18:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_19:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_20:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_21:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_22:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_23:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_24:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_25:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_26:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_27:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_28:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_29:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_30:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_31:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_32:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_33:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_34:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_35:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_36:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_37:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_38:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_39:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_40:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_41:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_42:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_43:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_44:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_45:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_46:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_47:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_48:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_49:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_50:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_51:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_52:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_53:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_54:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_55:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_56:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_57:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_58:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_59:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_60:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_61:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_62:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_63:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_64:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_65:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_66:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_67:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_68:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_69:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_70:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_71:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_72:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_73:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_74:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_75:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_76:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_77:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_78:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_79:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_80:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_81:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_82:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_83:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_84:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_85:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_86:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_87:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_88:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_89:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_90:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_91:	//khj_200308
+		////////////////////////////////////////////////////////
+		case C_SKI_120V_400A_200A_100A_192KW_92:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_93:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_94:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_95:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_96:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_97:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_98:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_99:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_100:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_101:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_102:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_103:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_104:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_105:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_106:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_107:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_108:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_109:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_110:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_111:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_112:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_113:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_114:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_115:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_116:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_117:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_118:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_119:	//khj_200308
+		////////////////////////////////////////////////////////
+		case C_SKI_120V_400A_200A_100A_192KW_120:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_121:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_122:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_123:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_124:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_125:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_126:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_127:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_128:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_129:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_130:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_131:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_132:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_133:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_134:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_135:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_136:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_137:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_138:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_139:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_140:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_141:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_142:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_143:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_144:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_145:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_146:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_147:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_148:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_149:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_150:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_151:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_152:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_153:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_154:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_155:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_156:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_157:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_158:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_159:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_160:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_161:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_162:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_163:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_164:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_165:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_166:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_167:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_168:	//ktg_200410
+		case C_SKI_120V_400A_200A_100A_192KW_169:	//ktg_200410
+		case C_TEST_120V_400A_200A_100A_192KW:		//shh_200723
+		case C_SKI_120V_400A_200A_100A_192KW_170:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_171:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_172:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_173:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_174:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_175:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_176:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_177:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_178:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_179:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_180:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_181:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_182:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_183:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_184:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_185:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_186:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_187:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_188:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_189:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_190:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_191:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_192:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_193:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_194:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_195:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_196:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_197:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_198:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_199:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_200:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_201:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_202:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_203:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_204:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_205:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_206:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_207:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_208:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_209:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_210:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_211:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_212:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_213:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_214:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_215:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_216:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_217:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_218:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_219:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_220:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_221:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_222:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_223:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_224:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_225:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_226:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_227:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_228:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_229:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_230:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_231:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_232:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_233:	//ktg_200908
+		case C_SKI_120V_400A_200A_100A_192KW_234:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_235:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_236:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_237:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_238:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_239:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_240:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_241:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_242:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_243:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_244:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_245:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_246:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_247:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_248:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_249:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_250:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_251:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_252:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_253:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_254:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_255:	//shh_220113
+		case C_SKI_120V_425A_200A_100A_50A_192KW:       //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_2:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_3:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_4:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_5:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_6:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_7:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_8:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_9:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_10:    //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_11:    //phb_230206
+		case C_SKI_120V_425A_300A_200A_100A_192KW:      //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_2:    //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_3:    //phb_230105
+		case C_SKI_180V_425A_200A_100A_192KW:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_2:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_3:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_4:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_5:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_6:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_7:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_8:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_9:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_10:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_11:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_12:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_13:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_14:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_15:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_16:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_17:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_18:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_19:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_20:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_21:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_22:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_23:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_24:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_25:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_26:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_27:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_28:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_29:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_30:	//sec_221221
+			//inverter 1ea inv_Block_2ea
+			M_In_FlagCheck_Pack(2);
+			break;
+		case C_SKI_180V_600A_300A_100A_320KW:       //phb_230220
+		case C_SKI_450V_150A_100A_50A_260KW:	//sec_221215
+		case C_SKI_450V_150A_100A_50A_260KW_2:	//sec_221215
+		case C_SKI_500V_450A_200A_450KW:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_2:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_3:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_4:		//ktg_200410
+		case C_SKI_500V_450A_200A_450KW_5:		//ktg_200410
+		case C_SKI_500V_450A_200A_450KW_6:		//ktg_200410
+		case C_SKE_600V_400A_100A_50A_25A_240KW:	//jhkw_130924
+		case C_DAEHWA_800V_200A_50A_160KW:	//jhk_160831
+		case C_SKI_1200V_250A_100A_50A_300KW:	//jhk_131209
+		//inv_Dsp 1ea inv_block 2ea
+			M_In_FlagCheck_Pack(2);
+			break;
+		case C_SKI_180V_600A_300A_100A_320KW_2:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_3:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_4:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_5:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_6:		//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_7:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_8:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_9:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_10:	//shh_231004		
+		case C_SKI_180V_600A_300A_100A_320KW_11:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_12:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_13:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_14:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_15:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_16:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_17:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_18:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_19:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_20:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_21:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_22:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_23:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_24:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_25:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_26:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_27:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_28:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_29:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_30:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_31:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_32:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_33:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_34:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_35:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_36:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_37:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_38:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_39:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_40:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_41:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_42:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_43:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_44:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_45:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_46:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_47:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_48: 	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_49:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_50:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_51:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_52:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_53:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_54:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_55:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_56:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_57:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_58:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_59:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_60:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_61:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_62:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_63:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_64:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_65:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_66:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_67:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_68:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_69:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_70:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_71:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_72:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_73:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_74:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_75:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_76:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_77:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_78:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_79:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_80:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_81:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_82:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_83:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_84:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_85:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_86:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_87:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_88:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_89:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_90:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_91:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_92:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_93:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_94:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_95:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_96:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_97:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_98:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_99:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_100:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_101:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_102:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_103:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_104:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_105:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_106:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_107:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_108:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_109:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_110:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_111:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_112:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_113:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_114:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_115:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_116:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_117:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_118:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_119:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_120:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_121:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_122:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_123:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_124:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_125:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_126:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_127:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_128:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_129:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_130:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_131:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_132:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_133:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_134:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_135:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_136:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_137:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_138:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_139:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_140:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_141:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_142:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_143:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_144:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_145:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_146:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_147:	//shh_240326
+			//inv_Dsp 1ea inv_block 2ea + TR1_FUSE, Only use for 23PPSCSA029
+			M_In_FlagCheck_Pack_TR1_FUSE(2);
+			break;
+		case C_SKI_260V_425A_200A_442KW:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_2:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_3:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_4:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_5:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_6:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_7:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_8:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_9:	//shh_211020
+		case C_SKI_260V_425A_250A_50A_442KW: //shh_240620
+		case C_SKI_1000V_400A_200A_100A_450KW:	//sec_230103
+		case C_SKI_1000V_400A_200A_100A_450KW_2:	//sec_230426	//phb_240418
+		case C_SKI_1000V_400A_200A_100A_450KW_3:	//phb_240418
+		case C_SKI_1200V_500A_400A_300A_200A_600KW:     //phb_230116
+		case C_SKI_1500V_350A_300A_200A_100A_450KW:     //phb_230117
+		case C_SKI_1500V_400A_100A_500KW:	//jhk_180610
+			//inv_Dsp 2ea inv_block 4ea
+			M_In_FlagCheck_Pack(4);
+			break;
+		case C_SKI_2000V_300A_200A_100A_50A_600KW:  //phb_230320
+			//inv_Dsp 3ea inv_block 6ea
+			M_In_FlagCheck_Pack(6);  //phb_230324
+			break;
+		default:
+			break;
+	}
+}
+
+void M_In_FlagCheck_Pack(int inverter_count)
+{
+	int group, ch;
+	S_MSG_VAL SendMsg;
+
+	//if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+	//kjhw_140417s
+	if(myDio->signal[DIO_SIG_REMOTE_PS] == P199) {
+		myDio->misc.delayCount = 0;
+		return;
+	}
+
+	if(myDio->signal[DIO_SIG_REMOTE_PS] == P200) { 
+		myDio->misc.delayCount++;
+		//if(myDio->misc.delayCount < 1000) return; //10sec
+		//if(myDio->misc.delayCount < 200) return; //2sec //kjhw_140630
+		//if(myDio->misc.delayCount < 2000) return; //20sec //jhkw_140901
+		//----shh_240719s
+		//this code changed(bug fix)
+		//Because High Voltage Pack Cycler got Under Voltage Error
+		//when users turned off Cycler normally pusing system switch 
+		if(myDio->misc.delayCount < 6000) return; //40s -> 60s(Group Manager's order)  
+		//if(myDio->misc.delayCount < 4000) return; //20s -> 40s 
+		//---shh_240719s
+		myDio->misc.delayCount = 0;
+	} else {
+		if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+	}
+	//kjhw_140417e
+
+	group = 0;
+
+	//jhkw_170917s
+	/*
+	if(Read_InPoint(group, 1, I_MCCB_FAIL) == ON) { //lki_111010
+		if(myDio->signal[DIO_SIG_MCCB_FAIL1] == P0) {
+			myDio->signal[DIO_SIG_MCCB_FAIL1] = P1;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_MCCB;
+			SendMsg.val[1] = 10 + 1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+		return;
+	} else {
+		myDio->signal[DIO_SIG_MCCB_FAIL1] = P0;
+	}
+	*/
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_MCCB_FAIL) == ON) { //lki_111010
+			if(myDio->signal[DIO_SIG_MCCB_FAIL1] == P0) {
+				myDio->signal[DIO_SIG_MCCB_FAIL1] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MCCB;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MCCB_FAIL1] = P0;
+		}
+	}
+	//jhkw_170917e
+	
+	for(ch=0; ch < inverter_count; ch++) {		//phb_230710s
+		if(Read_InPoint(group, ch+1, I_DC_LINK_FUSE_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_DC_LINK_FUSE_FAIL1+ch] == P0) {
+				myDio->signal[DIO_SIG_DC_LINK_FUSE_FAIL1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_DC_LINK_FUSE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_DC_LINK_FUSE_FAIL1+ch] = P0;
+		}
+	}
+	//phb_230710e
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_FUSE_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_FUSE_FAIL1+ch] == P0) {
+				myDio->signal[DIO_SIG_FUSE_FAIL1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_FUSE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_FUSE_FAIL1+ch] = P0;
+		}
+	}
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_HV_FAULT) == ON) {
+			if(myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] == P0) {
+				myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_UPPER_VOLTAGE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_PRE_CHARGE) == OFF) {
+			if(myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] == P0) {
+				myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_LOWER_VOLTAGE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_OT) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+
+	//jhkw_131004s
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_OC) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_OC;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_ETC) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_ETC;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+	//jhkw_131004e
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_POWER_TRANS_OT) == ON) {
+			if(myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_POWER_TRANS_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_POWER_REACTOR_OT) == ON) {
+			if(myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_POWER_REACTOR_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_R_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_R1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_R1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_R1+ch] = P0;
+		}
+
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_S_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_S1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_S1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 2;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_S1+ch] = P0;
+		}
+
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_T_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_T1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_T1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 3;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_T1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < myPs->config.installedCh; ch++) {
+		if(Read_InPoint(group, ch+1, I_CABLE_FAIL) == ON) {
+			myDio->signal[DIO_SIG_CABLE_FAIL1+ch] = P1;
+		} else {
+			myDio->signal[DIO_SIG_CABLE_FAIL1+ch] = P0;
+		}
+	}
+}
+//Only use for 22PPSCSA029 //shhw_231013s
+void M_In_FlagCheck_Pack_TR1_FUSE(int inverter_count) 
+{
+	int group, ch;
+	S_MSG_VAL SendMsg;
+
+	//if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+	//kjhw_140417s
+	if(myDio->signal[DIO_SIG_REMOTE_PS] == P199) {
+		myDio->misc.delayCount = 0;
+		return;
+	}
+
+	if(myDio->signal[DIO_SIG_REMOTE_PS] == P200) { 
+		myDio->misc.delayCount++;
+		//if(myDio->misc.delayCount < 1000) return; //10sec
+		//if(myDio->misc.delayCount < 200) return; //2sec //kjhw_140630
+		//if(myDio->misc.delayCount < 2000) return; //20sec //jhkw_140901
+		//this code changed(bug fix)
+		//Because High Voltage Pack Cycler got Under Voltage Error
+		//when users turned off Cycler normally pusing system switch 
+		//Group Manager's order 40s -> 60s
+		if(myDio->misc.delayCount < 6000) return;	//shh_241022
+		//if(myDio->misc.delayCount < 4000) return; //20s -> 40s -shh_240719
+		myDio->misc.delayCount = 0;
+	} else {
+		if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+	}
+	//kjhw_140417e
+
+	group = 0;
+
+	//jhkw_170917s
+	/*
+	if(Read_InPoint(group, 1, I_MCCB_FAIL) == ON) { //lki_111010
+		if(myDio->signal[DIO_SIG_MCCB_FAIL1] == P0) {
+			myDio->signal[DIO_SIG_MCCB_FAIL1] = P1;
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_MCCB;
+			SendMsg.val[1] = 10 + 1;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		}
+		return;
+	} else {
+		myDio->signal[DIO_SIG_MCCB_FAIL1] = P0;
+	}
+	*/
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_MCCB_FAIL) == ON) { //lki_111010
+			if(myDio->signal[DIO_SIG_MCCB_FAIL1] == P0) {
+				myDio->signal[DIO_SIG_MCCB_FAIL1] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MCCB;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MCCB_FAIL1] = P0;
+		}
+	}
+	//jhkw_170917e
+	
+	for(ch=0; ch < inverter_count; ch++) {		//phb_230710s
+		if(Read_InPoint(group, ch+1, I_DC_LINK_FUSE_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_DC_LINK_FUSE_FAIL1+ch] == P0) {
+				myDio->signal[DIO_SIG_DC_LINK_FUSE_FAIL1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_DC_LINK_FUSE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_DC_LINK_FUSE_FAIL1+ch] = P0;
+		}
+	}
+	//phb_230710e
+	for(ch=0; ch < inverter_count + 1; ch++) {	//FUSE 2EA , TR1_FUSE 1EA
+	//for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_FUSE_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_FUSE_FAIL1+ch] == P0) {
+				myDio->signal[DIO_SIG_FUSE_FAIL1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_FUSE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_FUSE_FAIL1+ch] = P0;
+		}
+	}
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_HV_FAULT) == ON) {
+			if(myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] == P0) {
+				myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_UPPER_VOLTAGE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_PRE_CHARGE) == OFF) {
+			if(myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] == P0) {
+				myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_LOWER_VOLTAGE;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_OT) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+
+	//jhkw_131004s
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_OC) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_OC;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_ETC) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_ETC;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+	//jhkw_131004e
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_POWER_TRANS_OT) == ON) {
+			if(myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_POWER_TRANS_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_POWER_REACTOR_OT) == ON) {
+			if(myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_POWER_REACTOR_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_R_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_R1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_R1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_R1+ch] = P0;
+		}
+
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_S_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_S1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_S1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 2;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_S1+ch] = P0;
+		}
+
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_T_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_T1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_T1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 3;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			return;
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_T1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < myPs->config.installedCh; ch++) {
+		if(Read_InPoint(group, ch+1, I_CABLE_FAIL) == ON) {
+			myDio->signal[DIO_SIG_CABLE_FAIL1+ch] = P1;
+		} else {
+			myDio->signal[DIO_SIG_CABLE_FAIL1+ch] = P0;
+		}
+	}
+}
+//shhw_231013e
+/*
+void M_In_FlagCheck_Pack(int inverter_count) //kjhw_150331_ttttt
+{
+	int group, ch;
+	int tmp, count;
+	S_MSG_VAL SendMsg;
+
+	//if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+	//kjhw_140417s
+	if(myDio->signal[DIO_SIG_REMOTE_PS] == P199) {
+		myDio->misc.delayCount = 0;
+		return;
+	}
+
+	if(myDio->signal[DIO_SIG_REMOTE_PS] == P200) { 
+		myDio->misc.delayCount++;
+		//if(myDio->misc.delayCount < 1000) return; //10sec
+		//if(myDio->misc.delayCount < 200) return; //2sec //kjhw_140630
+		if(myDio->misc.delayCount < 2000) return; //20sec //jhkw_140901
+		myDio->misc.delayCount = 0;
+	} else {
+		if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+	}
+	//kjhw_140417e
+
+	group = 0;
+	tmp = 0;
+	count = 0;
+
+	if(Read_InPoint(group, 1, I_MCCB_FAIL) == ON) { //lki_111010
+		if(myDio->signal[DIO_SIG_MCCB_FAIL1] == P0) {
+			myDio->signal[DIO_SIG_MCCB_FAIL1] = P1;
+//			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//			SendMsg.msg = MSG_IO_MODULE_EXIT;
+//			SendMsg.val[0] = M_CD_FAULT_MCCB;
+//			SendMsg.val[1] = 10 + 1;
+//			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			tmp += 1;
+			count++;
+		}
+		//return; //kjhw_150331_tttt
+	} else {
+		myDio->signal[DIO_SIG_MCCB_FAIL1] = P0;
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_FUSE_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_FUSE_FAIL1+ch] == P0) {
+				myDio->signal[DIO_SIG_FUSE_FAIL1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_FUSE;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 2;
+				count++;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_FUSE_FAIL1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_HV_FAULT) == ON) {
+			if(myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] == P0) {
+				myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_UPPER_VOLTAGE;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 3;
+				count++;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_UPPER_VOLTAGE1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_PRE_CHARGE) == OFF) {
+			if(myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] == P0) {
+				myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_LOWER_VOLTAGE;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 4;
+				count++;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_LOWER_VOLTAGE1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_OT) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_OT;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 5;
+				count++;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+
+	//jhkw_131004s
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_OC) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_OC;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 6;
+				count++;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_ETC) == ON) {
+			if(myDio->signal[DIO_SIG_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_OT1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_ETC;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 7;
+				count++;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_OT1+ch] = P0;
+		}
+	}
+	//jhkw_131004e
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_POWER_TRANS_OT) == ON) {
+			if(myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] = P1;
+//				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+//				SendMsg.msg = MSG_IO_MODULE_EXIT;
+//				SendMsg.val[0] = M_CD_FAULT_POWER_TRANS_OT;
+//				SendMsg.val[1] = 10 * (ch+1) + 1;
+//				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 10000000;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_POWER_TRANS_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_POWER_REACTOR_OT) == ON) {
+			if(myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] == P0) {
+				myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_POWER_REACTOR_OT;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				tmp += 100000000;
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_POWER_REACTOR_OT1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < inverter_count; ch++) {
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_R_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_R1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_R1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 1;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_R1+ch] = P0;
+		}
+
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_S_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_S1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_S1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 2;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_S1+ch] = P0;
+		}
+
+		if(Read_InPoint(group, ch+1, I_INVERTER_MODULE_T_FAIL) == ON) {
+			if(myDio->signal[DIO_SIG_MAIN_PS_T1+ch] == P0) {
+				myDio->signal[DIO_SIG_MAIN_PS_T1+ch] = P1;
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_MAIN_PS;
+				SendMsg.val[1] = 10 * (ch+1) + 3;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+			//return; //kjhw_150331_tttt
+		} else {
+			myDio->signal[DIO_SIG_MAIN_PS_T1+ch] = P0;
+		}
+	}
+
+	for(ch=0; ch < myPs->config.installedCh; ch++) {
+		if(Read_InPoint(group, ch+1, I_CABLE_FAIL) == ON) {
+			myDio->signal[DIO_SIG_CABLE_FAIL1+ch] = P1;
+		} else {
+			myDio->signal[DIO_SIG_CABLE_FAIL1+ch] = P0;
+		}
+	}
+}*/
+
+void M_OutScan(void)
+{
+	unsigned char flag, pn;
+	int outByte, bit, point, byte_index, addr;
+	
+	for(outByte=0; outByte < MAX_DIO_MO_BYTES; outByte++) {
+		byte_index = MAX_DIO_IO_BYTES + outByte;
+
+		flag = 0x01;
+		for(bit=0; bit < BITS_PER_BYTE; bit++) {
+			point = byte_index * BITS_PER_BYTE + bit;
+
+			if(myDio->function_set.out_set[point].use == USE) {
+				pn = myDio->function_set.out_set[point].pn;
+
+				if(myDio->out.function[point] == ON) {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] |= flag;
+					} else {
+						myDio->out.bytes[byte_index] &= ~flag;
+					}
+				} else {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] &= ~flag;
+					} else {
+						myDio->out.bytes[byte_index] |= flag;
+					}
+				}
+			}
+			flag = flag << 1;
+		}
+
+		addr = myDio->function_set.out_address[byte_index];
+		if(addr == 0) continue;
+
+		outb(myDio->out.bytes[byte_index], addr);
+	}
+}
+
+void C_InScan(void)
+{
+	unsigned char flag, input, pn;
+	int sensCount, inByte, position, point, byte_index, addr;
+	
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	for(inByte=0; inByte < MAX_DIO_CI_BYTES; inByte++) {
+		byte_index = MAX_DIO_II_BYTES + MAX_DIO_MI_BYTES + inByte;
+		addr = myDio->function_set.in_address[byte_index];
+		if(addr == 0) continue;
+
+		input = inb(addr);
+		myDio->in.bytes[byte_index] = input;
+		
+		flag = 0x01;
+		for(position=0; position < BITS_PER_BYTE; position++) {
+			point = byte_index * BITS_PER_BYTE + position;
+			
+			if(myDio->function_set.in_set[point].use == USE) {
+				pn = myDio->function_set.in_set[point].pn;
+				sensCount = (int)myDio->function_set.in_set[point].count;
+
+				myDio->in.function[point]
+					= InCheck(point, input & flag, pn, sensCount);
+			}
+			flag = flag << 1;
+		}
+	}
+}
+
+void C_In_FlagCheck(void)
+{
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	if(myData->AppControl.config.systemModel == C_LGC_500V_20A)
+		C_In_Flag_RippleSwitch();
+}
+
+void C_In_Flag_RippleSwitch(void)
+{
+	int group, ch;
+
+	group = 0; ch = 0;
+
+	if(myData->cData[ch].op.state != C_STANDBY) return;
+
+	if(Read_InPoint(group, ch+1, I_RIPPLE_SWITCH) == ON) {
+		if(myDio->signal[DIO_SIG_RIPPLE_SWITCH] == P0) {
+			myDio->signal[DIO_SIG_RIPPLE_SWITCH] = P1;
+		}
+		if(myDio->signal[DIO_SIG_RIPPLE_SWITCH] == P10) {
+			myDio->signal[DIO_SIG_RIPPLE_SWITCH] = P11;
+		}
+	} else {
+		if(myDio->signal[DIO_SIG_RIPPLE_SWITCH] == P1) {
+			myDio->signal[DIO_SIG_RIPPLE_SWITCH] = P10;
+		}
+		if(myDio->signal[DIO_SIG_RIPPLE_SWITCH] == P11) {
+			myDio->signal[DIO_SIG_RIPPLE_SWITCH] = P0;
+		}
+	}
+}
+
+void C_OutScan(void)
+{
+	unsigned char flag, pn, div_val, tmp;
+	int outByte, bit, point, byte_index, addr, div_addr;
+	
+	for(outByte=0; outByte < MAX_DIO_CO_BYTES; outByte++) {
+		byte_index = MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES + outByte;
+
+		flag = 0x01;
+		for(bit=0; bit < BITS_PER_BYTE; bit++) {
+			point = byte_index * BITS_PER_BYTE + bit;
+
+			if(myDio->function_set.out_set[point].use == USE) {
+				pn = myDio->function_set.out_set[point].pn;
+
+				if(myDio->out.function[point] == ON) {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] |= flag;
+					} else {
+						myDio->out.bytes[byte_index] &= ~flag;
+					}
+				} else {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] &= ~flag;
+					} else {
+						myDio->out.bytes[byte_index] |= flag;
+					}
+				}
+			}
+			flag = flag << 1;
+		}
+
+		addr = myDio->function_set.out_address[byte_index];
+		if(addr == 0) continue;
+
+		switch(myData->AppControl.config.systemModel) {
+			case C_EIG_5V_50A_5A:
+			case C_EIG_5V_50A_5A_2:
+			case C_LGC_5V_200A_75A_15A:
+			case F_SDI_5V_50A_5A: //kjg_w
+			case F_SDI_5V_400A_200A_100A_10A:
+			case F_SDI_5V_400A_200A_100A_10A_2:
+				div_val = 0x01;
+				div_addr = myData->addr_map.BD_BASE_ADDR
+					+ myData->addr_map.BD_ADDR_DIV;
+
+				tmp = addr - myData->addr_map.BD_BASE_ADDR - 0x10;
+				tmp /= (0x10);
+				div_val = div_val << tmp;
+				outb(div_val, div_addr);
+
+				addr = (addr & 0x0F);
+				addr += myData->addr_map.BD_BASE_ADDR;
+				break;
+			case C_ENERLAND_5V_250A:
+			case C_ENERLAND_5V_250A_50A_5A:
+			case C_ENERLAND_5V_250A_50A_5A_2:
+				div_val = 0x01;
+				div_addr = myData->addr_map.BD_BASE_ADDR
+					+ myData->addr_map.BD_ADDR_DIV;
+				outb(div_val, div_addr);
+				break;
+			default:
+				div_addr = 0;
+				break;
+		}
+
+		outb(myDio->out.bytes[byte_index], addr);
+
+		if(div_addr != 0) {
+			outb(0x00, div_addr);
+		}
+	}
+}
+
+void E_InScan(void)
+{
+	unsigned char flag, input, pn, div_val;
+	int sensCount, inByte, position, point, byte_index, addr, div_addr;
+	
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	for(inByte=0; inByte < MAX_DIO_EI_BYTES; inByte++) {
+		byte_index = MAX_DIO_II_BYTES + MAX_DIO_MI_BYTES
+			+ MAX_DIO_CI_BYTES + inByte;
+		addr = myDio->function_set.in_address[byte_index];
+		if(addr == 0) continue;
+
+		switch(myData->AppControl.config.systemModel) {
+			case F_SDI_5V_50A_5A:
+				if(addr == 0x652) {
+					div_val = 0x01;
+				} else if(addr == 0x662) {
+					div_val = 0x02;
+				} else if(addr == 0x672) {
+					div_val = 0x04;
+				} else {
+					break;
+				}
+				addr = 0x652;
+
+				div_addr = 0x650;
+				outb(div_val, div_addr);
+				usleep(2);
+				break;
+			case F_SDI_5V_400A_200A_100A_10A:
+			case F_SDI_5V_400A_200A_100A_10A_2:
+				if(addr == 0x651) {
+					div_val = 0x01;
+				} else if(addr == 0x652) {
+					div_val = 0x02;
+				} else if(addr == 0x653) {
+					div_val = 0x04;
+				} else if(addr == 0x654) {
+					div_val = 0x01;
+				} else if(addr == 0x655) {
+					div_val = 0x02;
+				} else if(addr == 0x656) {
+					div_val = 0x04;
+				} else {
+					break;
+				}
+
+				div_addr = 0x650;
+				outb(div_val, div_addr);
+				usleep(2);
+				break;
+			default:
+				div_val = 0;
+				div_addr = 0;
+				break;
+		}
+
+		input = inb(addr);
+		myDio->in.bytes[byte_index] = input;
+		
+		flag = 0x01;
+		for(position=0; position < BITS_PER_BYTE; position++) {
+			point = byte_index * BITS_PER_BYTE + position;
+			
+			if(myDio->function_set.in_set[point].use == USE) {
+				pn = myDio->function_set.in_set[point].pn;
+				sensCount = (int)myDio->function_set.in_set[point].count;
+
+				myDio->in.function[point]
+					= InCheck(point, input & flag, pn, sensCount);
+			}
+			flag = flag << 1;
+		}
+	}
+}
+
+void E_In_FlagCheck(void)
+{
+	int group, ch;
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	group = 0; ch = 0;
+
+	if(Read_InPoint(group, ch, I_EXTERNAL1) == ON) {
+		if(myDio->signal[DIO_SIG_IN_EXTERNAL1] == P0) {
+			myDio->signal[DIO_SIG_IN_EXTERNAL1] = P1;
+		}
+	} else {
+		myDio->signal[DIO_SIG_IN_EXTERNAL1] = P0;
+	}
+
+	if(Read_InPoint(group, ch, I_EXTERNAL2) == ON) {
+		if(myDio->signal[DIO_SIG_IN_EXTERNAL2] == P0) {
+			myDio->signal[DIO_SIG_IN_EXTERNAL2] = P1;
+		}
+	} else {
+		myDio->signal[DIO_SIG_IN_EXTERNAL2] = P0;
+	}
+
+	if((myDio->signal[DIO_SIG_IN_EXTERNAL1] == P1)
+		&& (myDio->signal[DIO_SIG_IN_EXTERNAL2] == P0)) {
+		myDio->signal[DIO_SIG_IN_EXTERNAL1] = P2;
+	} else if((myDio->signal[DIO_SIG_IN_EXTERNAL1] == P2)
+		&& (myDio->signal[DIO_SIG_IN_EXTERNAL2] == P1)) {
+		myDio->signal[DIO_SIG_IN_EXTERNAL1] = P3;
+	}
+
+	ch = 1;
+	if(Read_InPoint(group, ch, I_CHARGER_WAKEUP) == ON) {
+		myDio->signal[DIO_SIG_IN_CHARGER_WAKEUP] = P1;
+	} else {
+		myDio->signal[DIO_SIG_IN_CHARGER_WAKEUP] = P0;
+	}
+}
+
+void E_OutScan(void)
+{
+	unsigned char flag, pn, div_val;
+	int outByte, bit, point, byte_index, addr, div_addr;
+	
+	for(outByte=0; outByte < MAX_DIO_EO_BYTES; outByte++) {
+		byte_index = MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES
+			+ MAX_DIO_CO_BYTES + outByte;
+
+		flag = 0x01;
+		for(bit=0; bit < BITS_PER_BYTE; bit++) {
+			point = byte_index * BITS_PER_BYTE + bit;
+
+			if(myDio->function_set.out_set[point].use == USE) {
+				pn = myDio->function_set.out_set[point].pn;
+
+				if(myDio->out.function[point] == ON) {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] |= flag;
+					} else {
+						myDio->out.bytes[byte_index] &= ~flag;
+					}
+				} else {
+					if(pn == ACTIVE_HIGH) {
+						myDio->out.bytes[byte_index] &= ~flag;
+					} else {
+						myDio->out.bytes[byte_index] |= flag;
+					}
+				}
+			}
+			flag = flag << 1;
+		}
+
+		addr = myDio->function_set.out_address[byte_index];
+		if(addr == 0) continue;
+
+		switch(myData->AppControl.config.systemModel) {
+			case F_SDI_5V_50A_5A:
+				if(addr == 0x651) {
+					div_val = 0x01;
+				} else if(addr == 0x661) {
+					div_val = 0x02;
+				} else if(addr == 0x671) {
+					div_val = 0x04;
+				} else {
+					break;
+				}
+				addr = 0x651;
+
+				div_addr = 0x650;
+				outb(div_val, div_addr);
+				usleep(2);
+				break;
+			case F_SDI_5V_400A_200A_100A_10A:
+			case F_SDI_5V_400A_200A_100A_10A_2:
+				if(addr == 0x651) {
+					div_val = 0x01;
+				} else if(addr == 0x652) {
+					div_val = 0x02;
+				} else if(addr == 0x653) {
+					div_val = 0x04;
+				} else if(addr == 0x654) {
+					div_val = 0x01;
+				} else if(addr == 0x655) {
+					div_val = 0x02;
+				} else if(addr == 0x656) {
+					div_val = 0x04;
+				} else {
+					break;
+				}
+
+				div_addr = 0x650;
+				outb(div_val, div_addr);
+				usleep(2);
+				break;
+			default:
+				div_val = 0;
+				div_addr = 0;
+				break;
+		}
+
+		outb(myDio->out.bytes[byte_index], addr);
+	}
+}
+
+void CheckWDT(void)
+{
+	unsigned char wdt;
+
+	if(myDio->config.dio_Control_Flag == P0) return;
+
+	switch(myDio->config.watchdogType) {
+		case 0:
+			break;
+		case 1:
+			wdt = 0;
+			/*kjgw wdt = inb(WDT_ADDR_READ) & WDT_BIT_ERROR;
+			if(wdt) {
+				if(myPs->signal[M_SIG_SEND_ERROR_CODE] == P0) {
+					myPs->signal[M_SIG_SEND_ERROR_CODE] = P12;
+					myPs->code = M_CD_FAULT_CPU_WATCHDOG;
+					send_msg(MODULE_TO_MAIN, MSG_MODULE_MAIN_EMG_STATUS,
+						(int)myPs->code, 0);
+				}
+				outb(WDT_BIT_CLEAR, WDT_ADDR_WRITE);
+				outb(0x00, WDT_ADDR_WRITE);
+			}*/
+			break;
+		case 2: //kjg_logic_type_140324
+			if(myData->mData.signal[M_SIG_WDT_PHASE] == P0) {
+		   		myData->mData.signal[M_SIG_WDT_PHASE] = P1;
+			}
+			wdt = inb(0x60F);
+				//7:set_wdt_start, 6:set_wdt_clear, 5:none, 4:wdt_state,
+				//3~0:set_wdt_time(1:10ms, 3:30ms, 10:100ms, 15:150ms, max:15)
+			//if((wdt & 0x08) == 0x08) printk("ShutDown by WDT\n"); //kjhw_180219
+			break;
+		default:
+			break;
+	}
+}
+
+void EnableWDT(void)
+{
+	unsigned char wdt;
+
+	switch(myDio->config.watchdogType) {
+		case 0:
+			break;
+		case 1:
+			//kjgw	outb(WDT_BIT_READY, WDT_ADDR_WRITE);
+
+			switch(myData->AppControl.config.sbcType) {
+				case SBC_HS_6637:
+					wdt = inb(WDT_ADDR_ENABLE_HS_6637);
+					break;
+				case SBC_WEB_6580:
+					outb(0x05, WDT_ADDR_ENABLE_WEB_6580); //5sec
+					break;
+				case SBC_HS_4020:
+					break;
+				case SBC_WAFER_E669:
+					outb(0x05, WDT_ADDR_ENABLE_WAFER_E669); //5sec
+					wdt = inb(WDT_ADDR_ENABLE_WAFER_E669);
+					break;
+				case SBC_WAFER_LX800: //kjgw
+					outb(0x05, WDT_ADDR_ENABLE_WAFER_LX800); //5sec
+					wdt = inb(WDT_ADDR_ENABLE_WAFER_LX800);
+					break;
+				case SBC_WAFER_MARK533:
+					outb(0x05, WDT_ADDR_ENABLE_WAFER_MARK); //5sec
+					wdt = inb(WDT_ADDR_ENABLE_WAFER_MARK);
+					break;
+				case SBC_EM104_A5362: //kjgw
+					break;
+				default:	break;
+			}
+			break;
+		case 2: //kjg_logic_type_140324
+			//kjg_180523 outb(0x03, 0x60F); //set_wdt_time_30ms
+			//outb(0x83, 0x60F); //set_wdt_start, set_wdt_time_30ms //kjhw_180219
+			outb(0x0F, 0x60F); //set_wdt_time_150ms
+			outb(0x8F, 0x60F); //set_wdt_start, set_wdt_time_150ms
+			break;
+		default:
+			break;
+	}
+}
+
+void DisableWDT(void)
+{
+	unsigned char wdt;
+
+	switch(myDio->config.watchdogType) {
+		case 0:
+			break;
+		case 1:
+			switch(myData->AppControl.config.sbcType) {
+				case SBC_HS_6637:
+					wdt = inb(WDT_ADDR_DISABLE_HS_6637);
+					break;
+				case SBC_WEB_6580:
+					outb(0x00, WDT_ADDR_DISABLE_WEB_6580);
+					break;
+				case SBC_HS_4020:
+					break;
+				case SBC_WAFER_E669:
+					wdt = inb(WDT_ADDR_DISABLE_WAFER_E669);
+					break;
+				case SBC_WAFER_LX800: //kjgw
+					outb(0x00, WDT_ADDR_DISABLE_WAFER_LX800);
+					break;
+				case SBC_WAFER_MARK533:
+					wdt = inb(WDT_ADDR_DISABLE_WAFER_MARK);
+					break;
+				case SBC_EM104_A5362: //kjgw
+					break;
+				default:	break;
+			}
+
+			//kjgw	outb(WDT_BIT_UNREADY, WDT_ADDR_WRITE);
+			break;
+		case 2: //kjg_logic_type_140324
+		   	myData->mData.signal[M_SIG_WDT_PHASE] = P2;
+			//kjg_180523 outb(0x03, 0x60F); //set_wdt_stop, set_wdt_time_30ms
+			outb(0x0F, 0x60F); //set_wdt_stop, set_wdt_time_150ms
+			break;
+		default:
+			break;
+	}
+}
+
+void RefreshWDT(void)
+{
+	unsigned char wdt;
+
+	switch(myDio->config.watchdogType) {
+		case 0:
+			break;
+		case 1:
+			switch(myData->AppControl.config.sbcType) {
+				case SBC_HS_6637:
+					wdt = inb(WDT_ADDR_REFRESH_HS_6637);
+					break;
+				case SBC_WEB_6580:
+					outb(0x05, WDT_ADDR_REFRESH_WEB_6580); //5sec
+					break;
+				case SBC_HS_4020:
+					break;
+				case SBC_WAFER_E669:
+					wdt = inb(WDT_ADDR_REFRESH_WAFER_E669);
+					break;
+				case SBC_WAFER_LX800: //kjgw
+					outb(0x05, WDT_ADDR_REFRESH_WAFER_LX800);
+					break;
+				case SBC_WAFER_MARK533:
+					wdt = inb(WDT_ADDR_REFRESH_WAFER_MARK);
+					break;
+				case SBC_EM104_A5362: //kjgw
+					break;
+				default:
+					break;
+			}
+			break;
+		case 2: //kjg_logic_type_140324
+			if(myData->mData.signal[M_SIG_WDT_PHASE] == P1) {
+				//kjg_180523 outb(0xC3, 0x60F);
+				//	//set_wdt_start, set_wdt_clear, set_wdt_time_30ms
+				//outb(0x83, 0x60F); //set_wdt_start, set_wdt_time_30ms
+				outb(0xCF, 0x60F);
+					//set_wdt_start, set_wdt_clear, set_wdt_time_150ms
+				outb(0x8F, 0x60F); //set_wdt_start, set_wdt_time_150ms
+			} else if(myData->mData.signal[M_SIG_WDT_PHASE] == P2) {
+				//kjg_180523 outb(0x03, 0x60F); //set_wdt_stop, set_wdt_time_30ms
+				outb(0x0F, 0x60F); //set_wdt_stop, set_wdt_time_150ms
+			}
+			break;
+		default:
+			break;
+	}
+}	
+
+void Clear_OutPort(void)
+{
+	unsigned char div_val;
+	int byte_index, addr, div_addr, tmp;
+
+	for(byte_index=0; byte_index < MAX_DIO_OUT_BYTES; byte_index++) {
+		addr = myDio->function_set.out_address[byte_index];
+		if(addr == 0) continue;
+
+		div_addr = 0;
+		switch(myData->AppControl.config.systemModel) {
+			case C_EIG_5V_50A_5A:
+			case C_EIG_5V_50A_5A_2:
+			case C_LGC_5V_200A_75A_15A:
+				div_val = 0x01;
+				if((byte_index >= (MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES))
+					&& (byte_index <
+					(MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES + MAX_DIO_CO_BYTES))) {
+					div_addr = myData->addr_map.BD_BASE_ADDR
+						+ myData->addr_map.BD_ADDR_DIV;
+
+					tmp = addr - myData->addr_map.BD_BASE_ADDR - 0x10;
+					tmp /= (0x10);
+					div_val = div_val << tmp;
+					outb(div_val, div_addr);
+
+					addr = (addr & 0x0F);
+					addr += myData->addr_map.BD_BASE_ADDR;
+				}
+
+				outb(0x00, addr);
+				if(div_addr != 0) outb(0x00, div_addr);
+				break;
+			case F_SDI_5V_50A_5A: //kjg_w
+			case F_SDI_5V_400A_200A_100A_10A:
+			case F_SDI_5V_400A_200A_100A_10A_2:
+				div_val = 0x01;
+				if((byte_index >= (MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES))
+					&& (byte_index <
+					(MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES + MAX_DIO_CO_BYTES))) {
+					div_addr = myData->addr_map.BD_BASE_ADDR
+						+ myData->addr_map.BD_ADDR_DIV;
+
+					tmp = addr - myData->addr_map.BD_BASE_ADDR - 0x10;
+					tmp /= (0x10);
+					div_val = div_val << tmp;
+					outb(div_val, div_addr);
+
+					addr = (addr & 0x0F);
+					addr += myData->addr_map.BD_BASE_ADDR;
+				} else if((byte_index >= (MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES
+					+ MAX_DIO_CO_BYTES)) && (byte_index <
+					(MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES + MAX_DIO_CO_BYTES
+					+ MAX_DIO_EO_BYTES))) {
+					if(addr == 0x651) {
+						outb(0x01, 0x650);
+					} else if(addr == 0x652) {
+						outb(0x02, 0x650);
+					} else if(addr == 0x653) {
+						outb(0x04, 0x650);
+					} else if(addr == 0x654) {
+						outb(0x01, 0x650);
+					} else if(addr == 0x655) {
+						outb(0x02, 0x650);
+					} else if(addr == 0x656) {
+						outb(0x04, 0x650);
+					}
+				}
+
+				outb(0x00, addr);
+				if(div_addr != 0) outb(0x00, div_addr);
+				break;
+			case C_ENERLAND_5V_250A:
+			case C_ENERLAND_5V_250A_50A_5A:
+			case C_ENERLAND_5V_250A_50A_5A_2:
+				div_val = 0x01;
+				if((byte_index >= (MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES))
+					&& (byte_index <
+					(MAX_DIO_IO_BYTES + MAX_DIO_MO_BYTES + MAX_DIO_CO_BYTES))) {
+					div_addr = myData->addr_map.BD_BASE_ADDR
+						+ myData->addr_map.BD_ADDR_DIV;
+
+					outb(div_val, div_addr);
+				}
+
+				outb(0x00, addr);
+				if(div_addr != 0) outb(0x00, div_addr);
+				break;
+			default:
+				div_addr = 0;
+				outb(0x00, addr);
+				break;
+		}
+	}
+
+	switch(myData->AppControl.config.systemModel) {
+		case F_SDI_5V_50A_5A:
+		case F_SDI_5V_400A_200A_100A_10A:
+		case F_SDI_5V_400A_200A_100A_10A_2:
+			outb(0x00, 0x064F); //io board reset
+			break;
+		default:	break;
+	}
+}
+
+void PNE_AC_Power_Fail_Detect(void)
+{
+	/*Simplication - shh_250417*/
+	switch(myData->AppControl.config.systemModel) {
+		case C_SKI_50V_500A_250A_25KW:	//ktg_190715
+		case C_SKI_50V_500A_400A_200A_100A_100KW:	//jhk_180119
+		case C_SKI_50V_500A_400A_200A_100A_100KW_2:	//jhk_180119
+		case C_SKI_50V_1000A_500A_300A_100KW:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_2:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_3:	//ktg_190530
+		case C_SKI_50V_1000A_500A_300A_100KW_4:	//ktg_190711
+		case C_SKI_60V_400A_200A_100A_96KW:		//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_2:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_3:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_4:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_5:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_6:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_7:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_8:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_9:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_10:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_11:	//ktg_190319
+		case C_SKI_60V_400A_200A_100A_96KW_12:	//ktg_190319
+		case C_DAEHWA_60V_500A_250A_50A_60KW:	//jhk_160913
+		case C_DAEHWA_60V_500A_250A_50A_60KW_2:	//jhk_160913
+		case C_SKI_120V_400A_100A_192KW:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_2:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_3:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_4:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_5:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_6:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_7:	//jhk_170628
+		case C_SKI_120V_400A_100A_192KW_8:	//jhk_170628
+		case C_SKI_120V_400A_200A_100A_50A_192KW:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_2:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_3:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_4:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_5:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_6:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_7:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_8:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_9:		//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_10:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_11:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_12:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_13:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_14:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_15:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_16:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_17:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_50A_192KW_18:	//jhk_180206
+		case C_SKI_120V_400A_200A_100A_192KW:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_2:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_3:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_4:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_5:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_6:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_7:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_8:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_9:		//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_10:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_11:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_12:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_13:	//ktg_190308
+		case C_SKI_120V_400A_200A_100A_192KW_14:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_15:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_16:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_17:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_18:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_19:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_20:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_21:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_22:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_23:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_24:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_25:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_26:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_27:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_28:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_29:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_30:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_31:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_32:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_33:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_34:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_35:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_36:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_37:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_38:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_39:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_40:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_41:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_42:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_43:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_44:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_45:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_46:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_47:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_48:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_49:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_50:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_51:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_52:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_53:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_54:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_55:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_56:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_57:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_58:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_59:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_60:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_61:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_62:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_63:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_64:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_65:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_66:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_67:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_68:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_69:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_70:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_71:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_72:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_73:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_74:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_75:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_76:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_77:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_78:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_79:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_80:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_81:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_82:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_83:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_84:	//ktg_190805
+		case C_SKI_120V_400A_200A_100A_192KW_85:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_86:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_87:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_88:	//ktg_191210
+		case C_SKI_120V_400A_200A_100A_192KW_89:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_90:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_91:	//khj_200308
+		////////////////////////////////////////////////////////
+		case C_SKI_120V_400A_200A_100A_192KW_92:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_93:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_94:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_95:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_96:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_97:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_98:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_99:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_100:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_101:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_102:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_103:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_104:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_105:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_106:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_107:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_108:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_109:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_110:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_111:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_112:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_113:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_114:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_115:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_116:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_117:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_118:	//khj_200308
+		case C_SKI_120V_400A_200A_100A_192KW_119:	//khj_200308
+		////////////////////////////////////////////////////////
+	    //case C_SKI_120V_400A_200A_100A_192KW_169:	//ktg_200410 //shh_240730
+		//case C_TEST_120V_400A_200A_100A_192KW:		//shh_200723
+		case C_SKI_120V_400A_200A_100A_192KW_170:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_171:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_172:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_173:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_174:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_175:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_176:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_177:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_178:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_179:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_180:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_181:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_182:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_183:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_184:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_185:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_186:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_187:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_188:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_189:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_190:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_191:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_192:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_193:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_194:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_195:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_196:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_197:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_198:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_199:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_200:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_201:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_202:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_203:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_204:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_205:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_206:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_207:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_208:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_209:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_210:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_211:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_212:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_213:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_214:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_215:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_216:	//shh_200905
+		case C_SKI_120V_400A_200A_100A_192KW_217:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_218:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_219:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_220:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_221:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_222:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_223:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_224:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_225:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_226:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_227:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_228:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_229:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_230:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_231:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_232:	//shh_200914
+		case C_SKI_120V_400A_200A_100A_192KW_233:	//ktg_200908
+		case C_SKI_120V_400A_200A_100A_192KW_234:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_235:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_236:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_237:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_238:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_239:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_240:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_241:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_242:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_243:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_244:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_245:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_246:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_247:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_248:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_249:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_250:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_251:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_252:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_253:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_254:	//shh_220113
+		case C_SKI_120V_400A_200A_100A_192KW_255:	//shh_220113
+		/*22PPSCSA062 -S SKON China - 11Set	//shh_250417s
+		case C_SKI_120V_425A_200A_100A_50A_192KW:       //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_2:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_3:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_4:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_5:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_6:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_7:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_8:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_9:     //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_10:    //phb_230206
+        case C_SKI_120V_425A_200A_100A_50A_192KW_11:    //phb_230206
+		*/									//shh_250417e								
+		case C_NORTHVOLT_200V_400A_200A_160KW:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_2:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_3:	//ktg_191203
+		case C_NORTHVOLT_200V_400A_200A_160KW_4:	//ktg_191203
+		case C_SKI_500V_450A_200A_450KW:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_2:		//khj_200308
+		case C_SKI_500V_450A_200A_450KW_3:		//khj_200308
+		//case C_SKI_500V_450A_200A_450KW_4:		//ktg_200410 //shh_240730s
+		//case C_SKI_500V_450A_200A_450KW_5:		//ktg_200410
+		//case C_SKI_500V_450A_200A_450KW_6:		//ktg_200410 //shh_240730e
+		case C_SKE_600V_400A_100A_50A_25A_240KW:	//jhkw_130924
+		case C_DAEHWA_600V_400A_200A_100A_200KW:	//jhk_170120
+		case C_DAEHWA_750V_300A_100A_150KW:	//jhk_170203
+		case C_DAEHWA_800V_200A_50A_160KW:	//jhk_160831
+		case C_SKI_1200V_250A_100A_50A_300KW:	//jhk_131209
+			PNE_AC_Power_Fail_Detect_6();   //Inverter_1ea
+			break;
+		case C_SKI_120V_425A_300A_200A_100A_192KW:      //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_2:    //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_3:    //phb_230105
+		case C_SKI_180V_425A_200A_100A_192KW:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_2:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_3:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_4:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_5:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_6:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_7:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_8:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_9:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_10:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_11:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_12:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_13:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_14:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_15:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_16:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_17:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_18:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_19:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_20:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_21:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_22:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_23:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_24:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_25:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_26:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_27:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_28:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_29:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_30:	//sec_221221
+		case C_SKI_180V_600A_300A_100A_320KW:       //phb_230220
+		case C_SKI_180V_600A_300A_100A_320KW_2:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_3:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_4:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_5:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_6:		//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_7:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_8:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_9:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_10:	//shh_231004		
+		case C_SKI_180V_600A_300A_100A_320KW_11:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_12:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_13:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_14:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_15:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_16:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_17:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_18:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_19:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_20:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_21:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_22:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_23:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_24:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_25:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_26:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_27:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_28:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_29:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_30:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_31:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_32:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_33:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_34:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_35:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_36:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_37:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_38:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_39:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_40:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_41:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_42:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_43:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_44:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_45:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_46:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_47:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_48: 	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_49:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_50:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_51:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_52:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_53:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_54:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_55:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_56:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_57:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_58:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_59:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_60:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_61:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_62:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_63:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_64:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_65:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_66:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_67:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_68:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_69:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_70:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_71:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_72:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_73:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_74:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_75:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_76:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_77:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_78:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_79:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_80:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_81:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_82:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_83:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_84:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_85:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_86:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_87:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_88:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_89:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_90:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_91:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_92:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_93:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_94:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_95:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_96:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_97:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_98:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_99:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_100:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_101:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_102:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_103:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_104:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_105:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_106:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_107:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_108:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_109:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_110:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_111:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_112:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_113:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_114:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_115:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_116:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_117:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_118:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_119:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_120:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_121:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_122:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_123:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_124:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_125:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_126:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_127:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_128:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_129:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_130:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_131:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_132:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_133:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_134:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_135:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_136:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_137:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_138:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_139:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_140:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_141:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_142:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_143:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_144:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_145:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_146:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_147:	//shh_240326
+		case C_SKI_260V_425A_200A_442KW:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_2:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_3:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_4:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_5:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_6:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_7:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_8:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_9:	//shh_211020
+		case C_SKI_260V_425A_250A_50A_442KW: //shh_240620
+		case C_SKI_450V_100A_50A_25A_90KW:	//phb_240507 
+		case C_SKI_450V_200A_100A_90KW:		//sec_221223
+		case C_SKI_450V_150A_100A_50A_260KW:	//sec_221215
+		case C_SKI_450V_150A_100A_50A_260KW_2:	//sec_221215
+		//case C_SKI_500V_450A_200A_450KW:		//khj_200308
+		//case C_SKI_500V_450A_200A_450KW_2:		//khj_200308
+		//case C_SKI_500V_450A_200A_450KW_3:		//khj_200308
+		case C_SKI_1000V_400A_200A_100A_450KW:	//sec_230103
+		case C_SKI_1000V_400A_200A_100A_450KW_2:	//sec_230426	//phb_240418
+		case C_SKI_1000V_400A_200A_100A_450KW_3:	//phb_240418
+		case C_SKI_1200V_500A_400A_300A_200A_600KW:     //phb_230116
+		case C_SKI_1500V_350A_300A_200A_100A_450KW:     //phb_230117
+		case C_SKI_1500V_400A_100A_500KW:	//jhk_180610
+		case C_SKI_2000V_300A_200A_100A_50A_600KW:  //phb_230320
+			PNE_AC_Power_Fail_Detect_8();	//AC_Power_Fail_BD_2ea
+			break;
+		default:
+			//shhw_241021s
+			if(myData->AppControl.config.systemModel != C_SKI_AUX_BOX2)
+			{	//only check in normal pack cycler
+				PNE_AC_Power_Fail_Detect_6();   //Inverter_1ea
+			}
+			//PNE_AC_Power_Fail_Detect_6();   //Inverter_1ea
+			//shhw_241021e
+			break;
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_1(void)
+{
+	unsigned char tmp, ac_fail_flag, ac_fail_flag2;
+	S_MSG_VAL SendMsg;
+
+	ac_fail_flag = 0;
+	ac_fail_flag2 = 0;
+
+	tmp = (unsigned char)inb(0x629) & 0x80;
+	if(tmp == 128) { //fail
+		ac_fail_flag = 1;
+	} else {
+		ac_fail_flag = 0;
+	}
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	if(ac_fail_flag == 1) { //fail
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	} else {
+		myDio->misc.ac_power_detect2++;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+	}
+	if(myDio->misc.ac_power_detect3 >= (100 + 70)) {
+		myDio->misc.ac_power_detect3 = (105 + 70);
+	}
+	if(myDio->misc.ac_power_detect3 >= (50 + 70)) {
+		if(ac_fail_flag == 1) { //fail
+			if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+				if(myDio->misc.powerFailTimer
+					>= myDio->config.powerFailTimeout1) { //0sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+					//to Pause : short power fail
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				}
+			} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1
+				&& ac_fail_flag2 == 1) {
+				myDio->misc.powerFailTimer++;
+				if(myDio->misc.powerFailTimer
+					>= myDio->config.powerFailTimeout2) { //10sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+					//to Shutdown : long power fail
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				}
+			}
+		}
+	}
+
+	if(myDio->misc.ac_power_detect2 == 500) {
+		myDio->misc.ac_power_detect2 = 550;
+		myDio->misc.ac_power_detect1 = 0;
+		myDio->misc.ac_power_detect3 = 0;
+	} else if(myDio->misc.ac_power_detect2 == 551) {
+		myDio->misc.ac_power_detect2 = 550;
+	}
+
+	if(myDio->misc.ac_power_detect2 >= 450) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+		}
+		myDio->misc.powerFailTimer = 0;
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_2(void)
+{
+	unsigned char tmp, ac_fail_flag;
+	S_MSG_VAL SendMsg;
+
+	ac_fail_flag = 0;
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+
+	tmp = (unsigned char)inb(0x611) & 0x01;
+	if(tmp == 1) { //fail
+		ac_fail_flag = 1;
+	} else {
+		ac_fail_flag = 0;
+	}
+
+	if(ac_fail_flag == 1) { //fail
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	} else {
+		myDio->misc.ac_power_detect2++;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+	}
+	if(myDio->misc.ac_power_detect3 >= (100 + 70)) {
+		myDio->misc.ac_power_detect3 = (105 + 70);
+	}
+	if(myDio->misc.ac_power_detect3 >= (50 + 70)) {
+		if(ac_fail_flag == 1) { //fail
+			if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+				if(myDio->misc.powerFailTimer
+					>= myDio->config.powerFailTimeout1) { //0sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+					//to Pause : short power fail
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				}
+			} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+				myDio->misc.powerFailTimer++;
+				if(myDio->misc.powerFailTimer
+					>= myDio->config.powerFailTimeout2) { //10sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+					//to Shutdown : long power fail
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				}
+			}
+		}
+	}
+
+	if(myDio->misc.ac_power_detect2 == 500) {
+		myDio->misc.ac_power_detect2 = 550;
+		myDio->misc.ac_power_detect1 = 0;
+		myDio->misc.ac_power_detect3 = 0;
+	} else if(myDio->misc.ac_power_detect2 == 551) {
+		myDio->misc.ac_power_detect2 = 550;
+	}
+
+	if(myDio->misc.ac_power_detect2 >= 450) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+		}
+		myDio->misc.powerFailTimer = 0;
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_3(void)
+{
+	unsigned char tmp, ac_fail_flag;
+	S_MSG_VAL SendMsg;
+
+	ac_fail_flag = 0;
+
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) return;
+	if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) return;
+
+	tmp = (unsigned char)inb(0x610);
+	if((tmp & 0x01) == 1) { //fail
+		ac_fail_flag = 1;
+	} else {
+		ac_fail_flag = 0;
+	}
+
+	if(ac_fail_flag == 1) { //fail
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	} else {
+		myDio->misc.ac_power_detect2++;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+	}
+	if(myDio->misc.ac_power_detect3 >= (100 + 70)) {
+		myDio->misc.ac_power_detect3 = (105 + 70);
+	}
+	if(myDio->misc.ac_power_detect3 >= (50 + 70)) {
+		if(ac_fail_flag == 1) { //fail
+			if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+				if(myDio->misc.powerFailTimer
+					>= myDio->config.powerFailTimeout1) { //0sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+					//to Pause : short power fail
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				}
+			} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+				myDio->misc.powerFailTimer++;
+				if(myDio->misc.powerFailTimer
+					>= myDio->config.powerFailTimeout2) { //10sec
+					myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+					//to Shutdown : long power fail
+					memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+					SendMsg.msg = MSG_IO_MODULE_EXIT;
+					SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+					SendMsg.val[1] = 0;
+					send_msg(IO_TO_MODULE, (char *)&SendMsg);
+				}
+			}
+		}
+	}
+
+	if(myDio->misc.ac_power_detect2 == 500) {
+		myDio->misc.ac_power_detect2 = 550;
+		myDio->misc.ac_power_detect1 = 0;
+		myDio->misc.ac_power_detect3 = 0;
+	} else if(myDio->misc.ac_power_detect2 == 551) {
+		myDio->misc.ac_power_detect2 = 550;
+	}
+
+	if(myDio->misc.ac_power_detect2 >= 450) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+		}
+		myDio->misc.powerFailTimer = 0;
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_4(void)
+{
+	unsigned char tmp;
+	int i, j=500;
+	long fail_count;
+	S_MSG_VAL SendMsg;
+
+	tmp = (unsigned char)inb(0x611) & 0x01; //0:normal, 1:fail
+	i = (int)myDio->misc.in_buf_index1;
+	myDio->misc.in_buf[0][i] = tmp;
+	i++;
+	if(i >= j) myDio->misc.in_buf_index1 = 0;
+	else myDio->misc.in_buf_index1 = (short int)i;
+
+	tmp = 0;
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) tmp = 1;
+	if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) tmp = 1;
+	if(tmp == 1) {
+		memset((char *)&myDio->misc.in_buf[0][0], 0, sizeof(char));
+		myDio->misc.in_buf_index1 = 0;
+		return;
+	}
+
+	fail_count = 0;
+	for(i=0; i < j; i++) {
+		if(myDio->misc.in_buf[0][i] != 0) fail_count++;
+	}
+
+	if(fail_count == 0) {
+		myDio->misc.ac_power_detect2++;
+		if(myDio->misc.ac_power_detect2 >= (long)j) {
+			myDio->misc.ac_power_detect1 = 0;
+			myDio->misc.ac_power_detect2 = 0;
+			myDio->misc.ac_power_detect3 = 0;
+
+			if(Read_InPoint(0, 0, I_NO_POWER_OFF) == 0) { //power off
+				if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+					myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+				}
+			} else { //Don't power off
+				myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+			}
+		}
+	} else if(fail_count >= (myDio->config.powerFailTimeout1 + 20)) {
+		//fail 120ms
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+		if(myDio->misc.ac_power_detect3 >= 300000) { //5min
+			myDio->misc.ac_power_detect3 = 300000;
+		}
+	}
+
+	if(myDio->misc.ac_power_detect1 != 0) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+			//to Pause : short power fail
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			if(myDio->misc.ac_power_detect3
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+		}
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_5(void)
+{ //lki_111010
+	unsigned char tmp;
+	int i, j=500;
+	long fail_count;
+	S_MSG_VAL SendMsg;
+
+	tmp = (unsigned char)inb(0x611) & 0x04; //0:normal, 1:fail
+	i = (int)myDio->misc.in_buf_index1;
+	myDio->misc.in_buf[0][i] = tmp;
+	i++;
+	if(i >= j) myDio->misc.in_buf_index1 = 0;
+	else myDio->misc.in_buf_index1 = (short int)i;
+
+	tmp = 0;
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) tmp = 1;
+	if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) tmp = 1;
+	if(tmp == 1) {
+		memset((char *)&myDio->misc.in_buf[0][0], 0, sizeof(char));
+		myDio->misc.in_buf_index1 = 0;
+		return;
+	}
+
+	fail_count = 0;
+	for(i=0; i < j; i++) {
+		if(myDio->misc.in_buf[0][i] != 0) fail_count++;
+	}
+
+	if(fail_count == 0) {
+		myDio->misc.ac_power_detect2++;
+		if(myDio->misc.ac_power_detect2 >= (long)j) {
+			myDio->misc.ac_power_detect1 = 0;
+			myDio->misc.ac_power_detect2 = 0;
+			myDio->misc.ac_power_detect3 = 0;
+
+			if(Read_InPoint(0, 0, I_NO_POWER_OFF) == 0) { //power off
+				if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+					myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+				}
+			} else { //Don't power off
+				myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+			}
+		}
+	} else if(fail_count >= (myDio->config.powerFailTimeout1 + 20)) {
+		//fail 120ms
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+		if(myDio->misc.ac_power_detect3 >= 300000) { //5min
+			myDio->misc.ac_power_detect3 = 300000;
+		}
+	}
+
+	if(myDio->misc.ac_power_detect1 != 0) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+			//to Pause : short power fail
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			if(myDio->misc.ac_power_detect3
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+		}
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_6(void)
+{ //lki_111010
+	unsigned char tmp;
+	int i, j=100; //shh_250417 - bugFix[j=500 -> 100]
+	long fail_count;
+	S_MSG_VAL SendMsg;
+
+	tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 1:fail
+	i = (int)myDio->misc.in_buf_index1;
+	myDio->misc.in_buf[0][i] = tmp;
+	i++;
+	if(i >= j) myDio->misc.in_buf_index1 = 0;
+	else myDio->misc.in_buf_index1 = (short int)i;
+
+	tmp = 0;
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) tmp = 1;
+	if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) tmp = 1;
+	if(tmp == 1) {
+		memset((char *)&myDio->misc.in_buf[0][0], 0, sizeof(char));
+		myDio->misc.in_buf_index1 = 0;
+		return;
+	}
+
+	fail_count = 0;
+	for(i=0; i < j; i++) {
+		if(myDio->misc.in_buf[0][i] != 0) fail_count++;
+	}
+
+	if(fail_count == 0) {
+		myDio->misc.ac_power_detect2++;
+		if(myDio->misc.ac_power_detect2 >= (long)j) {
+			myDio->misc.ac_power_detect1 = 0;
+			myDio->misc.ac_power_detect2 = 0;
+			myDio->misc.ac_power_detect3 = 0;
+
+			if(Read_InPoint(0, 0, I_NO_POWER_OFF) == 0) { //power off
+				if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+					myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+				}
+			} else { //Don't power off
+				myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+			}
+		}
+	} else if(fail_count >= (myDio->config.powerFailTimeout1 + 20)) {
+		//fail 120ms
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+		//if(myDio->misc.ac_power_detect3 >= 300000) { //5min
+		//	myDio->misc.ac_power_detect3 = 300000;
+		//}
+		if(myDio->misc.ac_power_detect3 >= 30000) { //5min
+			myDio->misc.ac_power_detect3 = 30000;
+		}
+		//kjhw_181215 1count = 10msec
+	}
+
+	if(myDio->misc.ac_power_detect1 != 0) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+			//to Pause : short power fail
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			//if(myDio->misc.ac_power_detect3
+			if((myDio->misc.ac_power_detect3 * 10) //kjhw_181215
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+		}
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_7(void)
+{ //lki_111010
+	unsigned char tmp;
+	int i, j=500;
+	long fail_count;
+	S_MSG_VAL SendMsg;
+
+	tmp = (unsigned char)inb(0x621) & 0x20; //0:normal, 1:fail
+	i = (int)myDio->misc.in_buf_index1;
+	myDio->misc.in_buf[0][i] = tmp;
+	i++;
+	if(i >= j) myDio->misc.in_buf_index1 = 0;
+	else myDio->misc.in_buf_index1 = (short int)i;
+
+	tmp = 0;
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) tmp = 1;
+	if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) tmp = 1;
+	if(tmp == 1) {
+		memset((char *)&myDio->misc.in_buf[0][0], 0, sizeof(char));
+		myDio->misc.in_buf_index1 = 0;
+		return;
+	}
+
+	fail_count = 0;
+	for(i=0; i < j; i++) {
+		if(myDio->misc.in_buf[0][i] != 0) fail_count++;
+	}
+
+	if(fail_count == 0) {
+		myDio->misc.ac_power_detect2++;
+		if(myDio->misc.ac_power_detect2 >= (long)j) {
+			myDio->misc.ac_power_detect1 = 0;
+			myDio->misc.ac_power_detect2 = 0;
+			myDio->misc.ac_power_detect3 = 0;
+
+			if(Read_InPoint(0, 0, I_NO_POWER_OFF) == 0) { //power off
+				if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+					myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+				}
+			} else { //Don't power off
+				myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+			}
+		}
+	} else if(fail_count >= (myDio->config.powerFailTimeout1 + 20)) {
+		//fail 120ms
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+		if(myDio->misc.ac_power_detect3 >= 300000) { //5min
+			myDio->misc.ac_power_detect3 = 300000;
+		}
+	}
+
+	if(myDio->misc.ac_power_detect1 != 0) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+			//to Pause : short power fail
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+			SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			if(myDio->misc.ac_power_detect3
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+		}
+	}
+}
+
+void PNE_AC_Power_Fail_Detect_8(void)
+{ //lki_111010
+	unsigned char tmp;
+	unsigned char ch_val = 0;	//shhw_221227 //shh_230608
+	int i, j=100; //shh_250417 - bugFix[j=500 -> 100]
+	long fail_count;
+	unsigned char scan_period;	//shh_230111 //shh_230608
+
+	S_MSG_VAL SendMsg;
+	
+	scan_period = (unsigned char)myDio->config.scan_period;	//shh_230111 //shh_230608
+
+	switch(myData->AppControl.config.systemModel) {
+		case C_SKI_120V_425A_300A_200A_100A_192KW:      //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_2:    //phb_230105
+        case C_SKI_120V_425A_300A_200A_100A_192KW_3:    //phb_230105
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail       LINE_F1
+            if(tmp == 0x40) {
+                ch_val = 11;
+                tmp = (unsigned char)inb(0x624) & 0x40; //0:normal, 0x40:fail   LINE_F2
+                if(tmp == 0x40) ch_val = 12;
+            }
+            break;
+		case C_SKI_180V_425A_200A_100A_192KW:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_2:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_3:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_4:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_5:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_6:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_7:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_8:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_9:		//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_10:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_11:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_12:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_13:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_14:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_15:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_16:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_17:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_18:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_19:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_20:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_21:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_22:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_23:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_24:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_25:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_26:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_27:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_28:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_29:	//sec_221221
+		case C_SKI_180V_425A_200A_100A_192KW_30:	//sec_221221
+		case C_SKI_180V_600A_300A_100A_320KW:       //phb_230220
+		case C_SKI_180V_600A_300A_100A_320KW_2:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_3:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_4:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_5:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_6:		//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_7:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_8:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_9:		//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_10:	//shh_231004		
+		case C_SKI_180V_600A_300A_100A_320KW_11:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_12:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_13:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_14:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_15:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_16:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_17:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_18:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_19:	//shh_231004	
+		case C_SKI_180V_600A_300A_100A_320KW_20:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_21:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_22:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_23:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_24:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_25:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_26:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_27:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_28:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_29:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_30:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_31:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_32:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_33:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_34:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_35:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_36:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_37:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_38:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_39:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_40:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_41:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_42:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_43:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_44:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_45:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_46:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_47:	//shh_231004
+		case C_SKI_180V_600A_300A_100A_320KW_48: 	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_49:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_50:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_51:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_52:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_53:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_54:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_55:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_56:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_57:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_58:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_59:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_60:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_61:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_62:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_63:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_64:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_65:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_66:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_67:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_68:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_69:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_70:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_71:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_72:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_73:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_74:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_75:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_76:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_77:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_78:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_79:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_80:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_81:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_82:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_83:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_84:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_85:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_86:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_87:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_88:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_89:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_90:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_91:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_92:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_93:	//shh_240130
+		case C_SKI_180V_600A_300A_100A_320KW_94:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_95:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_96:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_97:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_98:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_99:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_100:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_101:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_102:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_103:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_104:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_105:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_106:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_107:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_108:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_109:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_110:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_111:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_112:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_113:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_114:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_115:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_116:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_117:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_118:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_119:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_120:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_121:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_122:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_123:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_124:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_125:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_126:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_127:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_128:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_129:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_130:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_131:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_132:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_133:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_134:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_135:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_136:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_137:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_138:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_139:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_140:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_141:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_142:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_143:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_144:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_145:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_146:	//shh_240326
+  		case C_SKI_180V_600A_300A_100A_320KW_147:	//shh_240326
+			tmp = (unsigned char)inb(0x622) & 0x40; 	//LIN_F1
+			if(tmp == 0x40) {
+				ch_val = 11;
+				//DIO EXT -> DIO BD2(624 -> 628) //shh_250108
+				tmp = (unsigned char)inb(0x628) & 0x40; //LIN_F2
+				if(tmp == 0x40) ch_val = 12;
+			}
+			break;
+		case C_SKI_450V_100A_50A_25A_90KW:		//phb_240507
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail		LINE_F1
+			if(tmp == 0x40) {
+				ch_val = 11;
+				tmp = (unsigned char)inb(0x624) & 0x40; //0:normal, 0x40:fail	LINE_F2
+				if(tmp == 0x40) ch_val = 12;
+			}
+			break;
+		case C_SKI_260V_425A_200A_442KW:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_2:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_3:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_4:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_5:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_6:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_7:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_8:	//shh_211020
+		case C_SKI_260V_425A_200A_442KW_9:	//shh_211020
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 1:fail
+			if(tmp == 0x40) {
+			} else {
+				tmp = (unsigned char)inb(0x628) & 0x80; //0:normal, 1:fail
+			}
+			break;
+		case C_SKI_260V_425A_250A_50A_442KW: //shh_240620
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail	LINE_F1 IN
+			if(tmp == 0x40) {
+				ch_val = 11;
+				tmp = (unsigned char)inb(0x621) & 0x40; //0:normal, 0x40:fail	LINE_F3 OUT
+				if(tmp == 0x40) ch_val = 12;
+			} else {
+				tmp = (unsigned char)inb(0x628) & 0x80; //0:normal, 0x80:fail	LINE_F2 IN
+				if(tmp == 0x80) {
+					ch_val = 21;
+					tmp = (unsigned char)inb(0x623) & 0x40; //0:normal, 0x40:fail	LINE_F4 OUT
+					if(tmp == 0x40) ch_val = 22;
+				}
+			}
+			break;
+		case C_SKI_450V_200A_100A_90KW:		//sec_221223
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail		LINE_F1
+			if(tmp == 0x40) {
+				ch_val = 11;
+				tmp = (unsigned char)inb(0x621) & 0x40; //0:normal, 0x40:fail	LINE_F2
+				if(tmp == 0x40) ch_val = 12;
+			} 
+		   	tmp = ch_val;	
+			break;
+		case C_SKI_450V_150A_100A_50A_260KW:	//sec_221215
+		case C_SKI_450V_150A_100A_50A_260KW_2:	//sec_221215
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail	LINE_F1
+			if(tmp == 0x40) {
+				ch_val = 11;
+				tmp = (unsigned char)inb(0x628) & 0x20; //0:normal, 0x20:fail	LINE_F2
+				if(tmp == 0x20) ch_val = 12;
+			} else {
+				tmp = (unsigned char)inb(0x623) & 0x40; //0:normal, 0x40:fail	LINE_F3
+				if(tmp == 0x40) {
+					ch_val = 21;
+					tmp = (unsigned char)inb(0x628) & 0x08; //0:normal, 0x08:fail	LINE_F4
+					if(tmp == 0x08) ch_val = 22;
+				}
+			}
+		   	tmp = ch_val;	
+			break;
+		case C_SKI_1000V_400A_200A_100A_450KW:	//sec_230103
+		//case C_SKI_1000V_400A_200A_100A_450KW_2:	//sec_230426	//phb_240418
+		case C_SKI_1000V_400A_200A_100A_450KW_3:	//phb_240418
+			tmp = (unsigned char)inb(0x628) & 0x08; //0:normal, 0x08:fail	LINE_F1_1
+			if(tmp == 0x08) {
+				ch_val = 11;
+				tmp = (unsigned char)inb(0x628) & 0x04; //0:normal, 0x04:fail	LINE_F1
+				if(tmp == 0x04) ch_val = 12;
+			} else {
+				tmp = (unsigned char)inb(0x628) & 0x02; //0:normal, 0x02:fail	LINE_F2_1
+				if(tmp == 0x02) {
+					ch_val = 21;
+					tmp = (unsigned char)inb(0x628) & 0x01; //0:normal, 0x01:fail	LINE_F2
+					if(tmp == 0x01) ch_val = 22;
+				}
+			}
+			break;
+		case C_SKI_1000V_400A_200A_100A_450KW_2:	//sec_230426	//phb_240418 
+			tmp = (unsigned char)inb(0x628) & 0x08; //0:normal, 0x08:fail	LINE_F1_1
+			if(tmp == 0x08) {
+				ch_val = 11;
+				tmp = (unsigned char)inb(0x628) & 0x04; //0:normal, 0x04:fail	LINE_F1
+				if(tmp == 0x04) ch_val = 12;
+			} else {
+				tmp = (unsigned char)inb(0x628) & 0x20; //0:normal, 0x02:fail	LINE_F2_1
+				if(tmp == 0x20) {
+					ch_val = 21;
+					tmp = (unsigned char)inb(0x628) & 0x10; //0:normal, 0x01:fail	LINE_F2
+					if(tmp == 0x10) ch_val = 22;
+				}
+			}
+			break;
+		case C_SKI_1200V_500A_400A_300A_200A_600KW:     //phb_230116
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail   LINE_F1
+            if(tmp == 0x40) {
+                ch_val = 11;
+                tmp = (unsigned char)inb(0x623) & 0x20; //0:normal, 0x20:fail   LINE_F2
+                if(tmp == 0x20) ch_val = 12;
+            } else {
+                tmp = (unsigned char)inb(0x628) & 0x40; //0:normal, 0x40:fail   LINE_F3
+                if(tmp == 0x40) {
+                    ch_val = 21;
+                    tmp = (unsigned char)inb(0x628) & 0x80; //0:normal, 0x80:fail   LINE_F4
+                    if(tmp == 0x80) ch_val = 22;
+				}
+			}
+		   	tmp = ch_val;	
+			break;
+		case C_SKI_1500V_350A_300A_200A_100A_450KW:     //phb_230117
+			tmp = (unsigned char)inb(0x622) & 0x40; //0:normal, 0x40:fail   LINE_F1
+            if(tmp == 0x40) {
+                ch_val = 11;
+                tmp = (unsigned char)inb(0x623) & 0x40; //0:normal, 0x20:fail   AC_INPUT_LINE_F1
+                if(tmp == 0x40) ch_val = 12;
+            } else {
+                tmp = (unsigned char)inb(0x623) & 0x20; //0:normal, 0x40:fail   LINE_F2
+                if(tmp == 0x20) {
+                    ch_val = 21;
+                    tmp = (unsigned char)inb(0x623) & 0x80; //0:normal, 0x80:fail   AC_INPUT_LINE_F2
+                    if(tmp == 0x80) ch_val = 22;
+                }
+            }
+		   	tmp = ch_val;	
+            break;
+		case C_SKI_2000V_300A_200A_100A_50A_600KW:  //phb_230320
+			tmp = (unsigned char)inb(0x628) & 0x02; //0:normal, 0x40:fail    
+            if(tmp == 0x02) {
+			} else {
+                tmp = (unsigned char)inb(0x629) & 0x02; //0:normal, 1:fail
+            }
+            break;
+		default:
+			tmp = (unsigned char)inb(0x624) & 0x02; //0:normal, 1:fail
+			if(tmp == 0x02) {
+			} else {
+				tmp = (unsigned char)inb(0x625) & 0x02; //0:normal, 1:fail
+			}
+			break;
+	}
+	i = (int)myDio->misc.in_buf_index1;
+	myDio->misc.in_buf[0][i] = tmp;
+	i++;
+	if(i >= j) myDio->misc.in_buf_index1 = 0;
+	else myDio->misc.in_buf_index1 = (short int)i;
+
+	tmp = 0;
+	if(myDio->misc.delayTimer < myDio->config.dioDelay) tmp = 1;
+	if(myDio->signal[DIO_SIG_REMOTE_PS] != P100) tmp = 1;
+	if(tmp == 1) {
+		memset((char *)&myDio->misc.in_buf[0][0], 0, sizeof(char));
+		myDio->misc.in_buf_index1 = 0;
+		return;
+	}
+
+	fail_count = 0;
+	for(i=0; i < j; i++) {
+		if(myDio->misc.in_buf[0][i] != 0) fail_count++;
+	}
+
+	if(fail_count == 0) {
+		myDio->misc.ac_power_detect2++;
+		if(myDio->misc.ac_power_detect2 >= (long)j) {
+			myDio->misc.ac_power_detect1 = 0;
+			myDio->misc.ac_power_detect2 = 0;
+			myDio->misc.ac_power_detect3 = 0;
+
+			if(Read_InPoint(0, 0, I_NO_POWER_OFF) == 0) { //power off
+				if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+					myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+				}
+			} else { //Don't power off
+				myDio->signal[DIO_SIG_POWER_FAIL] = P0;
+			}
+		}
+	} else if(fail_count >= (myDio->config.powerFailTimeout1 + 20)) {
+		//fail 120ms
+		myDio->misc.ac_power_detect1 = 1;
+		myDio->misc.ac_power_detect2 = 0;
+	}
+
+	if(myDio->misc.ac_power_detect1 == 1) {
+		myDio->misc.ac_power_detect3++;
+		if(myDio->misc.ac_power_detect3 * scan_period >= 300000) { //5min	//shh_230111 //shh_230608
+			myDio->misc.ac_power_detect3 = 300000;
+		}
+	}
+
+	if(myDio->misc.ac_power_detect1 != 0) {
+		if(myDio->signal[DIO_SIG_POWER_FAIL] == P0) {
+			myDio->signal[DIO_SIG_POWER_FAIL] = P1;
+			//to Pause : short power fail
+			memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+			SendMsg.msg = MSG_IO_MODULE_EXIT;
+			SendMsg.val[0] = M_CD_FAULT_AC_POWER_SHORT;
+				SendMsg.val[1] = ch_val;	//shhw_221227 //shh_230608
+				//SendMsg.val[1] = 0;
+			send_msg(IO_TO_MODULE, (char *)&SendMsg);
+		} else if(myDio->signal[DIO_SIG_POWER_FAIL] == P1) {
+			if(myDio->misc.ac_power_detect3 * scan_period	//shh_230111 //shh_230608
+				>= myDio->config.powerFailTimeout2) { //10sec
+				myDio->signal[DIO_SIG_POWER_FAIL] = P2;
+				//to Shutdown : long power fail
+				memset((char *)&SendMsg, 0, sizeof(S_MSG_VAL));
+				SendMsg.msg = MSG_IO_MODULE_EXIT;
+				SendMsg.val[0] = M_CD_FAULT_AC_POWER_LONG;
+				SendMsg.val[1] = ch_val;	//shhw_221227 //shh_230608
+				//SendMsg.val[1] = 0;
+				send_msg(IO_TO_MODULE, (char *)&SendMsg);
+			}
+		}
+	}
+}
+

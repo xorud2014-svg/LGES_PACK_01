@@ -1,0 +1,614 @@
+Document start
+
+Element SAFETYLIST started
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute CHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute =&gt;
+	Attribute value
+	Attribute 1234
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute CHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute I
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 3452g
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute CHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute W
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 434
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute CHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute WH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 4523
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute CHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute AH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 2345
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute DISCHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &lt;=
+	Attribute value
+	Attribute 45
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute DISCHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute I
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 4344
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute DISCHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute W
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 2342
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute DISCHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute WH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 234
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute DISCHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute AH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 532
+
+Element CHILD started
+	Attribute device
+	Attribute DAQ
+	Attribute group
+	Attribute V_LINE
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 54325
+
+Element CHILD started
+	Attribute device
+	Attribute DAQ
+	Attribute group
+	Attribute TEMP_LINE
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute TEMP
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 4532
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 5432
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute I
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 543
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute W
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 4543
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute WH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 56321
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute AH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 657
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute SOC
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 453
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute MAXCELLV
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 8765
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute MINCELLV
+	Attribute op
+	Attribute &lt;=
+	Attribute value
+	Attribute 54
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute MAXTEMP
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 76543
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute MINTEMP
+	Attribute op
+	Attribute &lt;=
+	Attribute value
+	Attribute 65
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute MODULE
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 443
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute MODULE
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute TEMP
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 5454
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute CELL
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 254
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute CELL
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute TEMP
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 6545
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute FLAG
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute BMSFAULT
+	Attribute op
+	Attribute ==
+	Attribute value
+	Attribute 1
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute FLAG
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute BMSWARNING
+	Attribute op
+	Attribute ==
+	Attribute value
+	Attribute 1
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute FLAG
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute BMSNORMAL
+	Attribute op
+	Attribute &lt;&gt;
+	Attribute value
+	Attribute 1
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute FLAG
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute RELAYSTATE
+	Attribute op
+	Attribute ==
+	Attribute value
+	Attribute 1
+kjg 22 
+Element FINISHLIST started
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute BASE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 1234
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute BASE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute I
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 3232
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute BASE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute W
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 4242
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute BASE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute WH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 45
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute BASE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute AH
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 34
+
+Element CHILD started
+	Attribute device
+	Attribute DATA
+	Attribute group
+	Attribute STEP
+	Attribute range
+	Attribute 1
+	Attribute target
+	Attribute SOC
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 56
+
+Element CHILD started
+	Attribute device
+	Attribute DATA
+	Attribute group
+	Attribute TIME
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute STEPTIME
+	Attribute op
+	Attribute ==
+	Attribute value
+	Attribute 3  12000000
+
+Element CHILD started
+	Attribute device
+	Attribute DATA
+	Attribute group
+	Attribute TIME
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute SCHEDULETIME
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute  2300000000
+
+Element CHILD started
+	Attribute device
+	Attribute DAQ
+	Attribute group
+	Attribute V_LINE
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 4321
+
+Element CHILD started
+	Attribute device
+	Attribute DAQ
+	Attribute group
+	Attribute TEMP_LINE
+	Attribute range
+	Attribute ALL
+	Attribute target
+	Attribute TEMP
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 453
+
+Element CHILD started
+	Attribute device
+	Attribute CAN
+	Attribute group
+	Attribute PACK
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 43
+kjg 7 
+Element SAFETYLIST started
+
+Element CHILD started
+	Attribute device
+	Attribute CHANNEL
+	Attribute group
+	Attribute CHARGE
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute V
+	Attribute op
+	Attribute &gt;=
+	Attribute value
+	Attribute 544543
+kjg 1 
+Element RECORDLIST started
+
+Element CHILD started
+	Attribute device
+	Attribute DATA
+	Attribute group
+	Attribute TIME
+	Attribute range
+	Attribute 
+	Attribute target
+	Attribute RUNTIME
+	Attribute op
+	Attribute ==
+	Attribute value
+	Attribute        1100
+kjg 1 Document end
+XML version 1.0, encoding (null)
+Parsing complete

@@ -1,0 +1,443 @@
+COA1_Client_Receive_Data_V100F_TimeSch
+
+TestCond_Header
+totalStep : 39
+totalPatternCount : 3
+totalTimeSchCount : 0
+reserved : 0
+reserverd1[2] : 0, 0
+
+TestCond_Step
+
+Step_Header : 1
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 2
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 3
+type : 2
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 4
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 5
+type : 1
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 6
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 7
+type : 2
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 8
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 9
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 10
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 11
+type : 9
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 12
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 13
+type : 9
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 14
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 15
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 16
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 17
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 18
+type : 1
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 19
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 20
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 21
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 22
+type : 1
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 23
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 24
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 25
+type : 7
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 26
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 27
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 28
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 29
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 30
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 31
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 32
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 33
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 34
+type : 9
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 35
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 36
+type : 2
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 37
+type : 3
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 38
+type : 8
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+Step_Header : 39
+type : 6
+stepNo : 0
+timeInit : 0
+reserved : 0
+wait_day : 0
+wait_hour : 0
+wait_min : 0
+wait_sec : 0
+reserved2[0][1] : 0, 0
+
+TestCond_ETC
+test_cond_file_size : 0
+test_cond_file_checksum : 0

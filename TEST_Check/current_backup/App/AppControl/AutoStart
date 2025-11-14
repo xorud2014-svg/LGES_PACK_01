@@ -1,0 +1,8 @@
+#!/bin/bash
+BOOT_FLAG="`cat /root/system_data/config/parameter/AppControl_Config | awk '{if(NR==1) print $3}'`"
+
+if [ "$BOOT_FLAG" = "0" ]; then
+	echo $"AutoStart NG"
+else
+	./bootOnStart
+fi

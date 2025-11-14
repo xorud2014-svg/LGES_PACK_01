@@ -1,0 +1,195 @@
+
+15.02.2000
+
+I have just decided to put here all questions I have got and the answers. 
+It is very uncomplete at the moment.
+--
+Tomasz Motylewski, motyl@stan.chemie.unibas.ch
+
+
+On Mon, 7 Feb 2000, Erik Ivanenko wrote:
+
+> What I don't understand is how the kernel can provide an
+> arbitrary amount of memory, without a pre-determined being
+> configured into it at compile time.  What restricts the   
+> amount of memory I can allocate?
+  
+The restriction is the amount of physical RAM minus the minimum amount of RAM
+the system needs to work at all (for Linux I would estimate it for about 
+4-6MB depending on how many processes you are running).
+    
+Assuming that you are using some version of my "mbuff" driver, when you 
+allocate a block, the kernel first grabs the free pages, then if there is not
+enough of them, starts freeing more, by reducing buffers, disk cache and 
+finally by swaping out to disk some user data and code. For sure this is not
+RT operation - it may take 10's of seconds to get something like 100 MB out  
+of 128 MB RAM machine. The routine used - vmalloc is the  same as used for   
+memory allocation for user space programs. The only magic is making it 
+mappable and having functions translating logical(virtual) addresses back to
+physical memory addresses. The block you get from vmalloc is not physically  
+continuous - but the pointer you get to the virtual address makes it look so.
+	  
+> 
+> If there is a document that contains this I have not
+> located, please advise!  Much of the trouble with getting up
+> to speed on these things, is finding the appropriate docs.
+
+Get http://www.realtimelinux.org/documentation/mbuff.pdf
+
+
+From: David Wolfe <dwolfe@gforcetech.com>
+To: motyl@lodz.pdi.net
+Date: Mon, 27 Dec 1999 22:37:42 -0500
+Subject: mbuff Questions
+
+> 1. The existence of two API's(?): The following calls both seem to
+>    work fine in kernel space:
+> 
+>        /* Init shared memory */
+>        my_shm = mbuff_alloc("test_shm", sizeof(*my_shm));
+> 
+>     or,
+> 
+>        /* Init shared memory */
+>        ret = shm_allocate("test_shm", sizeof(*my_shm), (void**)&my_shm);
+> 
+>    I am wondering whether the mbuff_* or shm_* functions are currently
+>    the 'preferred' interface for kernel code.  What's the difference?
+
+Really no difference. shm_allocate is there for historical reasons. It also
+gives out more information about what has happened.
+
+> 2. Handshaking/Synchronization:  There are no examples showing how to
+>    achieve mutual exclusion of a shared mbuff area.  I got some ideas
+>    from Fred Proctor's paper, but it's not specific to your driver, so
+>    I'm wondering if there's a preferred method for mbuff.  Also, his
+>    paper only talks about sharing memory between RTLinux and regular
+>    Linux, which is easier because Linux can't ever interrupt RTLinux in
+>    the middle of a read or write operation.  I might want to share mem-
+>    ory between RTLinux processes using mbuff.  Is this a Bad Idea, and,
+>    if not, how do I make sure the processes don't overwrite eachother's
+>    changes?  (I realize this is the topic of much research, and maybe
+>    it's not realistic to expect a lot of detailed help from the docu-
+>    mentation for a driver.  I only mention it because it is taking me
+>    "more than a minute" to figure out.  That is, of course, no fault of 
+>    yours! :-)
+
+
+From: David Wolfe <dwolfe@gforcetech.com>
+To: motyl@stan.chemie.unibas.ch
+Date: Sat, 25 Dec 1999 01:58:06 -0500
+Subject: Stack Dump from mbuff
+
+Tomasz,
+
+I thought you might like to see this.  I was trying to use your mbuff
+driver and the following occurred:
+----
+root(6):[/usr/src/rtlinux-2.0/rtl/drivers/mbuff]% insmod mbuff.o
+Unable to handle kernel NULL pointer dereference at virtual address
+0000000c
+current->tss.cr3 = 07e46000, %cr3 = 07e46000
+*pde = 00000000
+Oops: 0000
+CPU:    0
+EIP:    0010:[<c80139bb>]
+EFLAGS: 00010202
+eax: 00000000   ebx: 00100000   ecx: c70e4000   edx: 00000320
+esi: c8016000   edi: c8016000   ebp: 0000001f   esp: c70e5f08
+ds: 0018   es: 0018   ss: 0018
+Process insmod (pid: 448, process nr: 6, stackpage=c70e5000)
+Stack: c8014178 00000000 c8013302 00100000 c8013000 00000000 c801304e
+c7cfd120
+       c80138c4 c8014000 00100000 c8014178 c8013f40 000000fe c01198bb
+c70e4000
+       0804ec98 c8013000 bffffc70 c8014000 c801417c c70e5f78 c70e5f70
+00000005
+Call Trace: [<c8014178>] [<c8013302>] [<c8013000>] [<c801304e>]
+[<c80138c4>] [<c8014000>] [<c8014178>]
+       [<c8013f40>] [<c01198bb>] [<c8013000>] [<c8014000>] [<c801417c>]
+[<c8013048>] [<c0109200>] [<c8013000>]
+Code: 8b 40 0c 8b 14 90 85 d2 74 3b 81 e2 00 f0 ff ff 89 f8 c1 e8
+zsh: segmentation fault  insmod mbuff.o
+----
+root(7):[/usr/src/rtlinux-2.0/rtl/drivers/mbuff]% uname -a
+Linux zaphod 2.2.13-rtl2.0 #1 SMP Wed Dec 22 09:37:56 EST 1999 i686
+unknown
+
+=====
+This is a result of compiling module without -D__SMP__ and using it with SMP kernel.
+
+
+On Tue, 15 Feb 2000, Markus Kempf wrote:
+
+> I have a question about using your shared memory driver. I want to use
+> it with RT-Linux. You write  in the manual that "mbuff_alloc should be
+> called by each process" and warn "do not call it from real time". So
+> what have I to do in the RT-module ?
+
+"From real time" means "while executing real time ISR or real time task". 
+Not the whole real time module executes with real time priority. You can
+safely call mbuff_alloc in init_module function. 
+
+The point is that mbuff_alloc can not preempt the other kernel tasks. Real
+time tasks and ISR can.
+
+
+On Tue, 15 Feb 2000, Philip N Daly wrote:
+
+> Is there any correlation between the initial pointer obtained in the
+> kernel module and the one from user space? The reason I ask is that 
+
+No, unfortunately not. Do not store pointers in shm, store offsets since the
+beginning. In this way you can for example save it to a file, and it will be  
+still valid after you restore it. Where you need a pointer, use 
+sub_ptr=shm+shm->sub_offset.
+
+It would be possible to get the area in the kernel at specified 
+virtual address, but would require hacking vmalloc -> portability problems.
+
+> If the kernel pointer could be passed as an integer or lnog on a fifo 
+> and the user side could figure out where in memory to look, that would
+> be the easiest way to go.
+
+Just reserve the first word of the shm for this purpose.
+   
+I really do not understand why LabView needs to pass pointers? The structures
+you are pessing need to be copied anyway?
+
+
+=======================================================================
+
+WARNING
+
+All versions od mbuff have a known bug occuring when a program having mapped
+areas forks. Do not do it for now. Attach to shared memory areas after 
+the fork in parent and child if neccesary.
+
+====================================================================
+> From: Stephane Bouchard <sbouchard@ieee.org>
+> Date: Tue, 04 Apr 2000 23:51:22 -0400
+> Subject: [rtl] mbuff on C++
+>
+>  I have make a small test program using the mbuff driver in a C++
+>  application and Qt. The following thing append:
+>  if I make lsmod, the number of used mbuff is not good.
+>
+>  I send you a small application (insmod mbuff before running). This
+>  application use one area of memory but with lsmod, I see 3 in the used column.
+
+OK, this is correct. 1 point for allocating the memory, second for having it
+memory mapped, and the third (initially unexpected) for having the file open.
+I have found out that the close(fd) calls mbuff_close(...) only after
+all the areas have been unmapped. So every mbuff_alloc increases
+usage count by 3, every mbuff_attach (for the same buffer) by 2.
+===================================================================
+On Wed, 23 Feb 2000, William Montgomery wrote:
+
+> Could you provide a mechanism for allocating memory suitable for DMA
+> (i.e. physically consecutive addresses)?
+
+Unfortunately this would require different allocation mechanism. Continuous
+blocks are limited by memory fragmentation. If you need more than 64 KB,
+probably you will need to use the old mem=xxxx boot parameter method and them
+mmap /dev/mem
+

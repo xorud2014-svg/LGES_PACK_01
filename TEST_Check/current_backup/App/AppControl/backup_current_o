@@ -1,0 +1,7 @@
+#!/bin/bash
+DATE="`date '+%y%m%d_t%H%M'`"
+MODEL_NAME_FILE=/root/system_data/config/parameter/AppControl_Config
+
+cd /project/system_mcts
+tar cfz `cat $MODEL_NAME_FILE | awk '{if(NR==1) print $3}'`_backup_current_`cat $MODEL_NAME_FILE | awk '{if(NR==2) print $3}'`_current_$DATE.tar.gz current/*
+echo "backup_current end."

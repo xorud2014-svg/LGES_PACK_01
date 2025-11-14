@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd /var/log
+
+tail -f messages

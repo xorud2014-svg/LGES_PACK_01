@@ -1,0 +1,92 @@
+#ifndef __FCH_CONTROL_DEF_H__
+#define __FCH_CONTROL_DEF_H__
+
+//FCH Command
+#define FCH_CMD_RST					0x0001
+#define FCH_CMD_RST_REPLY			0x1001
+#define FCH_CMD_CHK					0x0002
+#define FCH_CMD_CHK_REPLY			0x1002
+#define FCH_CMD_EMG1				0x0003
+#define FCH_CMD_EMG1_REPLY			0x1003
+#define FCH_CMD_SYSTEM_MODEL		0x0004
+#define FCH_CMD_SYSTEM_MODEL_REPLY	0x1004
+#define FCH_CMD_FIRMWARE_VERSION	0x0005
+#define FCH_CMD_FIRMWARE_VERSION_REPLY	0x1005
+
+#define FCH_CMD_WR1					0x0011
+#define FCH_CMD_WR1_REPLY			0x1011
+#define FCH_CMD_RD1					0x0012
+#define FCH_CMD_RD1_REPLY			0x1012
+
+#define FCH_CMD_DA_VALUE1			0x0021
+#define FCH_CMD_DA_VALUE1_REPLY		0x1021
+#define FCH_CMD_DA_VALUE2			0x0022
+#define FCH_CMD_DA_VALUE2_REPLY		0x1022
+#define FCH_CMD_DA_VALUE3			0x0023
+#define FCH_CMD_DA_VALUE3_REPLY		0x1023
+#define FCH_CMD_DA_VALUE4			0x0024
+#define FCH_CMD_DA_VALUE4_REPLY		0x1024
+
+#define FCH_CMD_AD_VALUE1			0x0031
+#define FCH_CMD_AD_VALUE1_REPLY		0x1031
+#define FCH_CMD_AD_VALUE2			0x0032
+#define FCH_CMD_AD_VALUE2_REPLY		0x1032
+#define FCH_CMD_AD_VALUE3			0x0033
+#define FCH_CMD_AD_VALUE3_REPLY		0x1033
+#define FCH_CMD_AD_VALUE4			0x0034
+#define FCH_CMD_AD_VALUE4_REPLY		0x1034
+#define FCH_CMD_AD_VALUE5			0x0035
+#define FCH_CMD_AD_VALUE5_REPLY		0x1035
+
+#define FCH_CMD_AH_WH				0x0041
+#define FCH_CMD_AH_WH_REPLY			0x1041
+#define FCH_CMD_AVG_V_I				0x0042
+#define FCH_CMD_AVG_V_I_REPLY		0x1042
+#define FCH_CMD_MAX_V_I				0x0043
+#define FCH_CMD_MAX_V_I_REPLY		0x1043
+#define FCH_CMD_MIN_V_I				0x0044
+#define FCH_CMD_MIN_V_I_REPLY		0x1044
+#define FCH_CMD_ETC1				0x0045
+#define FCH_CMD_ETC1_REPLY			0x1045
+#define FCH_CMD_ETC2				0x0046
+#define FCH_CMD_ETC2_REPLY			0x1046
+
+#define FCH_CMD_TEST_COND1			0x0051
+#define FCH_CMD_TEST_COND1_REPLY	0x1051
+#define FCH_CMD_TEST_COND2			0x0052
+#define FCH_CMD_TEST_COND2_REPLY	0x1052
+#define FCH_CMD_TEST_COND3			0x0053
+#define FCH_CMD_TEST_COND3_REPLY	0x1053
+#define FCH_CMD_TEST_COND4			0x0054
+#define FCH_CMD_TEST_COND4_REPLY	0x1054
+#define FCH_CMD_TEST_COND5			0x0055
+#define FCH_CMD_TEST_COND5_REPLY	0x1055
+
+#define FCH_CMD_CALI_UPDATE			0x0061
+#define FCH_CMD_CALI_UPDATE_REPLY	0x1061
+
+//FCH Signal
+#define FCH_SIG_GET_PHASE1			0
+#define FCH_SIG_GET_PHASE2			1
+
+//out_byte1
+#define FCH_OUT_SWITCH_RUN_H		0x01
+#define FCH_OUT_SWITCH_RANGE1		0x02
+#define FCH_OUT_SWITCH_RUN_L		0x04
+#define FCH_OUT_SWITCH_RANGE2		0x08
+#define FCH_OUT_SR_OPEN				0x10
+#define FCH_OUT_CABLE_CHECK_P		0x20
+#define FCH_OUT_CABLE_CHECK_N		0x40
+
+//out_byte2
+//reserved
+
+//in_byte1
+#define FCH_IN_FAIL_OV				0x01
+#define FCH_IN_FAIL_OC				0x02
+#define FCH_IN_FAIL_V_P				0x04
+#define FCH_IN_FAIL_V_N				0x08
+#define FCH_IN_FAIL_OT				0x10
+#define FCH_IN_CABLE_CHECK			0x20
+
+#endif

@@ -1,0 +1,310 @@
+#!/bin/bash
+
+#Comment Area-----------------------------------------------------------------
+#Date: 2024-12-27
+#version: 0.003
+#Editor: shh
+#-----------------------------------------------------------------------------
+
+###Script Area----------------------------------------------------------------
+
+##variable
+flag_process=0
+flag_directory=0
+tmp=0
+
+function checkProcess1()
+{ 
+	##Check process - before Script Running##
+
+	lsmod > CheckProcess1
+	check_process1=$(grep -c "rt*" CheckProcess1)
+	rm -f CheckProcess1
+	if [[ $check_process1 -ne 0 ]] #'ne' == '!='
+	then
+		echo "Warning"
+		echo "It can't run 'PortingSet Bash' while forceStar is running"
+		#flag_process1=1
+		exit 1 #end script
+	fi
+}
+
+function checkCFset()
+{
+	##Check CF Card Setting##
+
+	#001- Check CF Card Partition
+	filesystems=$(df -h | awk '{print $1}' | tail -n +2)
+
+	check_items=("/dev/hda1" "/dev/hda3" "none")
+
+	ng="false"
+
+	for item in "${check_items[@]}"; do
+    	if ! echo "$filesystems" | grep -q "^$item$"; then
+        	echo "NG: $item is missing."
+        	ng="true"
+			echo "Warning"
+			echo "CF Card Partition NG"
+			exit 1 #end script
+    	fi
+        	#echo "$item is OK."
+	done
+			
+	echo "CF Card Partition .....OK"
+	
+	#002- Check /etc/fstab file
+	
+	#cd cd /etc
+	fstab_file="/etc/fstab"
+
+	#target File
+	target="/dev/hda3"
+
+	#Search '/dev/hda3' state
+	if grep -q "^[[:space:]]*#.*$target" "$fstab_file"; then
+		echo "Warning"
+    	echo "Commented: $target is commented out in $fstab_file."
+		echo "fstab setting NG"
+		exit 1 #end script
+	elif grep -q "^[[:space:]]*$target" "$fstab_file"; then
+    	echo "fstab setting .....OK"
+	else
+		echo "Warning"
+    	echo "Missing: $target does not exist in $fstab_file."
+		echo "fstab setting NG"
+		exit 1 #end script
+	fi
+	
+	echo "CF Card Set................OK"
+	echo " "
+	
+}
+
+function checkSbcDir() 
+{	
+	##Check current directory##
+	cd /project/system_mcts/
+
+	if [ -e "current" ]; then
+		#echo "Check current directory complete"
+		echo "current directory .....OK"
+	else
+		echo "Warning"
+		echo "It doesen't exist current directory"
+		echo "Check current directory"
+		echo "current directory NG"
+		exit 1 #end script
+	fi
+
+	##Check config directory##
+	cd /root/system_data
+
+	if [ -e "config" ]; then
+		#echo "Check config directory complete"
+		echo "config directory .....OK"
+		echo " " #\n
+	else
+		echo "Warning"
+		echo "It doesen't exist config directory"
+		echo "Check config directory"
+		echo "config directory NG"
+		exit 1 #end script
+	fi
+}
+
+function checkProcess2()
+{ 
+	##Check process##
+
+	lsmod > CheckProcess2
+	check_process2=$(grep -c "rt*" CheckProcess2)
+	rm -f CheckProcess2
+	if [[ $check_process2 -ne 0 ]] #'ne' == '!='
+	then
+		flag_process=1
+	fi
+}
+
+function checkCommDir() 
+{
+	##Check common directory##
+
+	#001 Check log directory
+	cd /root/system_data
+	if [[ -e log ]] #-e : if file is exist, it is true
+	then
+		#echo "Checking log directory is done"
+		tmp=0
+	else
+		flag_directory=2
+	fi
+
+	#002 Check pattern directory
+	cd /root/system_data/config
+	if [[ -e pattern ]] #-s : if file is not empty, it is true
+	then
+		#echo "Checking pattern directory is done"
+		tmp=0
+	else
+		flag_directory=3
+	fi
+
+	#003 Check resultData directory
+	cd /extended_partition
+	if [[ -e resultData ]] 
+	then
+		#echo "Checking resultData directory is done"
+		tmp=0
+	else
+		flag_directory=4
+	fi
+
+	#004 Check monitoringData directory
+	cd /extended_partition
+	if [[ -e monitoringData ]] 
+	then
+		#echo "Checking monitoringData directory is done"
+		tmp=0
+	else
+		flag_directory=5
+	fi
+
+	#005 Check START_INFO
+	cd /root
+	if [[ -e START_INFO ]]
+	then
+		#echo "Checking START_INFO directory is done"
+		tmp=0
+	else
+		flag_directory=6
+	fi
+
+	##Check NG or OK
+	if [[ $flag_directory -eq 0 ]]
+	then
+		echo "SBC RawData Directory .....OK"
+		echo " " #\n
+	else
+		echo "SBC RawData Directory .....NG"
+		echo " " #\n
+	fi
+
+}
+
+function clearOldSet()
+{
+	##Clear SBC Set(ChAttribute, AuxSetData, can_comm)##
+
+	#redirection ChAttribute
+	cd /root/system_data/config/parameter
+
+	> ChAttribute
+
+	echo "Clear ChAttribute complete"
+	echo " " #\n
+
+	#redirection AuxSetData
+	cd /root/system_data/config/parameter
+
+	> AuxSetData
+
+	echo "Clear AuxSetData complete"
+	echo " " #\n
+
+	#redirection AuxSetData
+	cd /root/system_data/config/parameter/can_comm
+
+	for i in $(seq 1 8); do
+	#for i in {1..8}; do
+		> CanReceiveSetData0$i
+		> CanTransmitSetData0$i
+	done
+
+	echo "Clear can_comm complete"
+	echo " " #\n
+
+}
+
+function setBash()
+{
+	##Bash Setting##
+
+	cd /root/system_data/config/parameter
+
+	cp -rf bashrc /root/.bashrc
+
+	echo "Set Bashrc complete"
+	echo " " #\n
+
+}
+
+function forceStart()
+{
+
+	##Judge to run forceStart##
+
+	cd /project/system_mcts/current/App/AppControl 
+
+	if [[ $flag_process -eq 1 ]]
+	then
+	echo "forceStart is already running"
+	elif [[ $flag_directory -gt 1 && $flag_process -eq 0 ]]
+	then
+	echo "Run 'dir_create' before 'forceStart' "
+	./dir_create
+	./mcts 0
+	else
+	./mcts 0
+	fi
+
+	}
+
+function debugStart() 
+{
+	##Debug Area##
+	
+	#echo "check_flag: $check_flag"
+	#echo "process: $check_process"
+	#echo "log: $check_log"
+	#echo "pattern : $check_pattern" 
+	#echo "resultData: $check_resultData" 
+	#echo "monitoringData: $check_monitoringData" 
+	#echo "START_INFO: $CheckStartInfo" 
+	echo "check_flag"
+
+}
+###Script Area----------------------------------------------------------------
+
+
+###Call Functions Area--------------------------------------------------------
+
+#001
+checkProcess1
+
+#002
+checkCFset
+
+#003
+checkSbcDir 
+
+#004
+checkProcess2
+
+#005
+checkCommDir 
+
+#006
+clearOldSet
+
+#007
+setBash
+
+#008
+forceStart
+
+#009
+#debugStart  
+
+
+###Call Functions Area--------------------------------------------------------

@@ -1,0 +1,52 @@
+
+1. scan1>> dio
+	dio board test
+2. scan1>> fch_dio
+	fch board dio test
+3. scan1>> fch_ad_da
+	fch board ad da test
+4. scan1>> quit
+	test program exit
+
+--- org
+1. scan1>> f_wr ch val1 val2
+	2bytes output
+	ch : channel number 1base
+	val1, val2 : hex value output
+
+2. scan1>> f_rd ch
+	1byte input
+	ch : channel number 1base
+
+3. scan1>> f_da1 ch val1 val2
+	da_v1, da_i1 output
+	ch : channel number 1base
+	val1 : da_v1 output voltage
+	val2 : da_i1 output voltage
+
+4. scan1>> f_da2 ch val1 val2
+	da_v2, da_i2 output
+	ch : channel number 1base
+	val1 : da_v2 output voltage
+	val2 : da_i2 output voltage
+
+5. scan1>> f_ad_ref1 ch
+	ad +5V, -5V reference
+	ch : channel number 1base
+
+6. scan1>> f_ad_ref2 ch
+	ad 0V, temp reference
+	ch : channel number 1base
+
+7. scan1>> f_ad1 ch
+	ad Vs, Is
+	ch : channel number 1base
+
+8. scan1>> f_ad2 ch
+	ad Vp, Vc
+	ch : channel number 1base
+
+9. scan1>> f_ad3 ch
+	ad Vb, Vspare
+	ch : channel number 1base
+

@@ -1,0 +1,614 @@
+COA1_Client_Receive_Data_V100D
+
+TestCond_Header
+totalStep : 4
+totalPatternCount : 0
+reserverd1[2] : 0, 0
+
+Common_Safety
+faultLowerV : 5000
+faultUpperV : 180000
+faultCompAuxV : 500
+faultUpperI : 600000
+faultLowerTemp : 0
+faultUpperTemp : 0
+faultUpper_AmpareHour : 0
+faultUpperP : 32000
+faultUpper_WattHour : 30000
+
+CAN_Common_Safety
+index, Division, Compare_Type, Data_Type, Value
+01, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0.000000
+
+Aux_Common_Safety
+index, Division, Compare_Type, Data_Type, Value
+01, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0.000000
+
+reserved2[4] : 50000000, 100000, 0
+current_AH : 10000000
+initial_AH : 1000000
+crate_factor : 178500000
+
+TestCond_Step
+
+Step_Header : 1
+type : 7
+stepNo : 1
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+
+Step_Reference[0][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 0
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+Sequence_Charge_flag : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0.000000, 0
+02, 0, 0, 0, 0, 0.000000, 0
+03, 0, 0, 0, 0, 0.000000, 0
+04, 0, 0, 0, 0, 0.000000, 0
+05, 0, 0, 0, 0, 0.000000, 0
+06, 0, 0, 0, 0, 0.000000, 0
+07, 0, 0, 0, 0, 0.000000, 0
+08, 0, 0, 0, 0, 0.000000, 0
+09, 0, 0, 0, 0, 0.000000, 0
+10, 0, 0, 0, 0, 0.000000, 0
+
+pattern_max_refI : 0, pattern_min_refI 0
+
+reserved2[2] : 0, 0
+
+Step_CompV[0]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[0]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[0][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[0][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+
+Step_Header : 2
+type : 3
+stepNo : 2
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+
+Step_Reference[1][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 1
+endTime : 0
+V_Upper : 160000
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 10251
+V_Lower_Branch_CycleCount : 10251
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 10251
+CVTime_Branch_AccCycleCountId : 10251
+CVTime_day : 0
+CVTime : 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 20000
+AmpareHour_Branch_MultiCycleCountId : 10251
+WattHour_Branch_MultiCycleCount_Branch : 10251
+ValueRate_Branch : 10251
+AccCycleCount_Branch : 0
+Sequence_Charge_flag : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 10251, 0.000000
+02, 0, 0, 0, 10251, 0.000000
+03, 0, 0, 0, 10251, 0.000000
+04, 0, 0, 0, 10251, 0.000000
+05, 0, 0, 0, 10251, 0.000000
+06, 0, 0, 0, 10251, 0.000000
+07, 0, 0, 0, 10251, 0.000000
+08, 0, 0, 0, 10251, 0.000000
+09, 0, 0, 0, 10251, 0.000000
+10, 0, 0, 0, 10251, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 10251, 0.000000, 0
+02, 0, 0, 0, 10251, 0.000000, 0
+03, 0, 0, 0, 10251, 0.000000, 0
+04, 0, 0, 0, 10251, 0.000000, 0
+05, 0, 0, 0, 10251, 0.000000, 0
+06, 0, 0, 0, 10251, 0.000000, 0
+07, 0, 0, 0, 10251, 0.000000, 0
+08, 0, 0, 0, 10251, 0.000000, 0
+09, 0, 0, 0, 10251, 0.000000, 0
+10, 0, 0, 0, 10251, 0.000000, 0
+
+pattern_max_refI : 0, pattern_min_refI 0
+
+reserved2[2] : 0, 0
+
+Step_CompV[1]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[1]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 100
+deltaV : 10000
+deltaI : 5000
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[1][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[1][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 170000
+faultLowerV : 1
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+
+Step_Header : 3
+type : 8
+stepNo : 3
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+
+Step_Reference[2][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 1
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+Sequence_Charge_flag : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0.000000, 0
+02, 0, 0, 0, 0, 0.000000, 0
+03, 0, 0, 0, 0, 0.000000, 0
+04, 0, 0, 0, 0, 0.000000, 0
+05, 0, 0, 0, 0, 0.000000, 0
+06, 0, 0, 0, 0, 0.000000, 0
+07, 0, 0, 0, 0, 0.000000, 0
+08, 0, 0, 0, 0, 0.000000, 0
+09, 0, 0, 0, 0, 0.000000, 0
+10, 0, 0, 0, 0, 0.000000, 0
+
+pattern_max_refI : 0, pattern_min_refI 0
+
+reserved2[2] : 0, 0
+
+Step_CompV[2]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[2]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[2][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[2][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+
+Step_Header : 4
+type : 6
+stepNo : 4
+mode : 0
+testEnd : 0
+subStep : 1
+reserved1 : 0
+cycle_pause : 0
+patternIndex : 0
+
+Step_Reference[3][0]
+refV_upper : 0
+refV_lower : 0
+refI : 0
+refP : 0
+refR : 0
+rangeI : 0
+ValueRate_Compare : 0
+ValueRate : 0
+endTime_day : 0
+endTime : 0
+V_Upper : 0
+Current : 0
+AmpareHour_SumAmpareHour : 0
+V_Upper_Branch_CycleCount_Branch : 0
+V_Lower_Branch_CycleCount : 0
+DeltaV : 0
+Power : 0
+WattHour_SumWattHour : 0
+Time_Branch_AccCycleCount : 0
+CVTime_Branch_AccCycleCountId : 0
+CVTime_day : 0
+CVTime : 0
+ValueRate_Item : 0
+V_Lower_MultiCycleCount : 0
+AmpareHour_Branch_MultiCycleCountId : 0
+WattHour_Branch_MultiCycleCount_Branch : 0
+ValueRate_Branch : 0
+AccCycleCount_Branch : 0
+Sequence_Charge_flag : 0
+
+Step_CAN
+index, Division, Compare_Type, Data_Type, Branch, Value
+01, 0, 0, 0, 0, 0.000000
+02, 0, 0, 0, 0, 0.000000
+03, 0, 0, 0, 0, 0.000000
+04, 0, 0, 0, 0, 0.000000
+05, 0, 0, 0, 0, 0.000000
+06, 0, 0, 0, 0, 0.000000
+07, 0, 0, 0, 0, 0.000000
+08, 0, 0, 0, 0, 0.000000
+09, 0, 0, 0, 0, 0.000000
+10, 0, 0, 0, 0, 0.000000
+
+Step_Aux
+index, Division, Compare_Type, Data_Type, Branch, Value, delay_time
+01, 0, 0, 0, 0, 0.000000, 0
+02, 0, 0, 0, 0, 0.000000, 0
+03, 0, 0, 0, 0, 0.000000, 0
+04, 0, 0, 0, 0, 0.000000, 0
+05, 0, 0, 0, 0, 0.000000, 0
+06, 0, 0, 0, 0, 0.000000, 0
+07, 0, 0, 0, 0, 0.000000, 0
+08, 0, 0, 0, 0, 0.000000, 0
+09, 0, 0, 0, 0, 0.000000, 0
+10, 0, 0, 0, 0, 0.000000, 0
+
+pattern_max_refI : 0, pattern_min_refI 0
+
+reserved2[2] : 0, 0
+
+Step_CompV[3]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_CompI[3]
+lowerVlaue, upperValue, time
+0, 0, 0
+0, 0, 0
+0, 0, 0
+
+Step_DeltaV
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_DeltaI
+lowerValue : 0
+upperValue : 0
+time : 0
+
+Step_Record
+time : 0
+deltaV : 0
+deltaI : 0
+deltaT : 0
+deltaP : 0
+reserved : 0
+
+Step_EDLC
+capacitanceV1 : 0
+capacitanceV2 : 0
+startT_Z : 0
+endT_Z : 0
+startT_LC : 0
+endT_LC : 0
+
+Step_Grade[3][0]
+item : 0
+gradeStepCount : 0
+reserved1 : 0
+
+Step_Grade_Step[3][0][0]
+gradeCode : 0
+reserved1 : 0
+reserved2 : 0
+lowerValue : 0
+upperValue : 0
+
+TestCond_Step_Fault
+faultUpperV : 0
+faultLowerV : 0
+faultUpperI : 0
+faultLowerI : 0
+faultUpper_AmpareHour : 0
+faultLower_AmpareHour : 0
+faultUpperZ : 0
+faultLowerZ : 0
+faultUpperTemp : 0
+faultLowerTemp : 0
+pattern_time_type : 0
+can_comm_step_check_flag : 1
+fault_can_check_flag : 0
+can_tx_stop : 0
+pattern_max_val : 0.000000
+pattern_file_size : 0
+pattern_file_checksum : 0
+
+TestCond_ETC
+test_cond_file_size : 17352
+test_cond_file_checksum : 7588

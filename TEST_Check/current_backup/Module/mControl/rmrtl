@@ -1,0 +1,20 @@
+#!/bin/sh
+CAN_TYPE="`cat /root/system_data/config/parameter/can_comm/CanConfig | awk '{if(NR==6) print $3}'`"
+
+rmmod mControl
+if [ "$CAN_TYPE" = "0" ]; then
+	rmmod rt_can
+fi
+rmmod rt_com
+
+if lsmod | grep -q psc; then
+	rmmod psc
+fi
+rmmod rtl_sched
+rmmod rtl_fifo
+if lsmod | grep -q rtl_posixio; then
+	rmmod rtl_posixio
+fi
+rmmod rtl_time
+rmmod rtl
+exit 0

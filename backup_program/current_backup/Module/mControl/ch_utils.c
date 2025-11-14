@@ -13552,6 +13552,43 @@ void cOutSwitch_P75_Pack1(int ch, int slot)
 
 	val2 = myCh->misc.cmd_i[0];
 
+	// SOC Tracking & Sequence Charge for Master/Slave channels
+	idxStepNo = myCh->op.idxStepNo;
+	master_ch = find_master_ch(ch);
+	idx = IDX_COM_OBJ_ATTRIBUTE_COUNT;
+	attr_count = myTestCond->common_object[idx];
+	if(myData->ChAttribute[ch].chNo_master != 0) {
+		if(myTestCond->local_object[idxStepNo]
+			[IDX_LOC_OBJ_SOC_TRACKING_FLAG] == P1){
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				val2 = cFind_SOC_Tracking_Current(ch);
+				val2 = val2 / attr_count;
+				myCh->misc.cmd_i[0] = val2;
+				myData->cData[master_ch].misc.cmd_i[0] = val2;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[0] = val2;
+				}
+			}
+		} else if(myTestCond->local_object[idxStepNo]
+			[IDX_LOC_OBJ_SEQUENCE_CHARGE_FLAG] == P1) {
+			if(myCh->op.stepMode == MODE_CP) {
+			} else {
+				val2 = cFind_Sequence_Charge_Current(ch);
+				val2 = val2 / attr_count;
+				myCh->misc.cmd_i[0] = val2;
+				myData->cData[master_ch].misc.cmd_i[0] = val2;
+				for(i=0; i < MAX_SLAVE_CH; i++) {
+					j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+					if(j <= 0) continue;
+					myData->cData[j].misc.cmd_i[0] = val2;
+				}
+			}
+		}
+	}
+
 	gc_can_flag = ac_can_flag = 0;	//csk_190108s
 	if(myCh->op.stepMode == MODE_CC) {
 		module_ch = find_master_ch(ch);

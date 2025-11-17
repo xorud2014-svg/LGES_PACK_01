@@ -8244,12 +8244,18 @@ void cStepDischarge(int ch)
 	long val;
 	double tmp1;
 	int idx; //kjhw_150821
+	S_USER_DEFINE_MODE user_mode;	//shht_241117 SOC Tracking for Discharge
 
 	tmp1 = 0.0;
 	idxStepNo = myCh->op.idxStepNo;
 
 	switch(myCh->op.phase) {
 		case P0:
+			//shht_241117s - USER_DEFINE_MODE for stepMode initialization
+			user_mode = cFind_User_Define_Mode(ch);
+			myCh->op.stepMode = (unsigned char)user_mode.mode;
+			//shht_241117e
+
 			myCh->op.ocv = myCh->op.Vsens;
 			myCh->op.grade = 0;
 			myCh->op.runTime_day = 0;
@@ -9462,6 +9468,7 @@ void cStepRest(int ch)
 	long val;
 	double tmp1;
 	int idx; //kjhw_150821
+	S_USER_DEFINE_MODE user_mode;	//shht_241117 SOC Tracking for Rest
 
 	if(ch < myPs->config.chInGroup[0]) group = 0;
 	else group = 1;
@@ -9472,6 +9479,11 @@ void cStepRest(int ch)
 
 	switch(myCh->op.phase) {
 		case P0:
+			//shht_241117s - USER_DEFINE_MODE for stepMode initialization
+			user_mode = cFind_User_Define_Mode(ch);
+			myCh->op.stepMode = (unsigned char)user_mode.mode;
+			//shht_241117e
+
 			myCh->op.ocv = myCh->op.Vsens;
 			myCh->op.grade = 0;
 

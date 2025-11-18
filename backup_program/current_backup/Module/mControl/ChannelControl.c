@@ -885,6 +885,7 @@ void cStandby_sig_run(int ch)
 	double tmp1; //kjhw_131108
 	long attr_count, ratioV, ratioI; //kjh_211021
 	double ratioP; //kjh_211021
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
 
 	S_MSG_VAL SendMsg;
 
@@ -1013,8 +1014,12 @@ void cStandby_sig_run(int ch)
 
 	idx = IDX_LOC_OBJ_TYPE;
 	myCh->op.stepType = (unsigned char)myTestCond->local_object[idxStepNo][idx];
-	idx = IDX_LOC_OBJ_MODE;
-	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+//20181219 KHK------------------------------------
+//	idx = IDX_LOC_OBJ_MODE;
+//	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+	user_mode = cFind_User_Define_Mode(ch);
+	myCh->op.stepMode = (unsigned char)user_mode.mode;
+//-------------------------------------------------
 
 	idx = IDX_LOC_OBJ_ATTRIBUTE;
 	myCh->op.attribute
@@ -5674,6 +5679,7 @@ void cPause_sig_goto_step(int ch)
 	unsigned char rangeV, rangeI; //kjhw_150210
 	long ratioV, ratioI; //kjh_211021
 	double ratioP; //kjh_211021
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
 
 	if(ch < myPs->config.chInGroup[0]) group = 0;
 	else group = 1;
@@ -5756,8 +5762,12 @@ void cPause_sig_goto_step(int ch)
 	idxStepNo = myCh->op.idxStepNo;
 	idx = IDX_LOC_OBJ_TYPE;
 	myCh->op.stepType = (unsigned char)myTestCond->local_object[idxStepNo][idx];
-	idx = IDX_LOC_OBJ_MODE;
-	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+//20181219 KHK------------------------------------
+//	idx = IDX_LOC_OBJ_MODE;
+//	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+	user_mode = cFind_User_Define_Mode(ch);
+	myCh->op.stepMode = (unsigned char)user_mode.mode;
+//-------------------------------------------------
 	idx = IDX_LOC_OBJ_RANGE_V;
 	myCh->op.rangeV = (unsigned char)myTestCond->local_object[idxStepNo][idx];
 	idx = IDX_LOC_OBJ_RANGE_I;
@@ -17925,6 +17935,7 @@ void cStepCycle_1(int ch)
 	double tmp1;
 	long ratioV, ratioI; //kjh_211021
 	double ratioP; //kjh_211021
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
 	//COA_VER_100F~
 	S_MSG_VAL SendMsg;	//kjh_160418
 
@@ -18035,8 +18046,12 @@ void cStepCycle_1(int ch)
 	idxStepNo = myCh->op.idxStepNo;
 	idx = IDX_LOC_OBJ_TYPE;
 	myCh->op.stepType = (unsigned char)myTestCond->local_object[idxStepNo][idx];
-	idx = IDX_LOC_OBJ_MODE;
-	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+//20181219 KHK------------------------------------
+//	idx = IDX_LOC_OBJ_MODE;
+//	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+	user_mode = cFind_User_Define_Mode(ch);
+	myCh->op.stepMode = (unsigned char)user_mode.mode;
+//-------------------------------------------------
 	idx = IDX_LOC_OBJ_RANGE_V;
 	myCh->op.rangeV = (unsigned char)myTestCond->local_object[idxStepNo][idx];
 	idx = IDX_LOC_OBJ_RANGE_I;

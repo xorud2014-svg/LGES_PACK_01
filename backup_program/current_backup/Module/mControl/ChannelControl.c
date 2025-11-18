@@ -35237,10 +35237,15 @@ void cSaveCond(int ch)
 
 void cSoftFeedback(int ch)
 {
+	S_USER_DEFINE_MODE user_mode;
+	short int idxStepNo;
+
 	if(myCh->signal[C_SIG_SOFT_FEEDBACK_DELAY] != 0) { //kjg_170810
 		myCh->signal[C_SIG_SOFT_FEEDBACK_DELAY]--;
 		return;
 	}
+
+	idxStepNo = myCh->op.idxStepNo;
 
 	switch(myData->AppControl.config.systemModel) {
 		case C_KATECH_20V_1000A_500A_100A: //csk_120312
@@ -35279,6 +35284,31 @@ void cSoftFeedback(int ch)
 				case STEP_PATTERN:
 					cSoftFeedback_A2(ch);
 					break;
+				case STEP_CHARGE:
+//20181219 KHK----------------------------------------
+					user_mode = cFind_User_Define_Mode(ch);
+					if(user_mode.org_mode == MODE_USER) {
+						if(user_mode.mode == MODE_CC_CV
+							|| user_mode.mode == MODE_CV) {
+							cSoftFeedback_Charge_SOC_Tracking(ch);
+						} else {
+							cSoftFeedback_A1(ch);
+						}
+					} else {
+						if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_SOC_TRACKING_FLAG]
+							== P0 || myCh->op.stepMode == MODE_CP) {
+							if(myTestCond->local_object[idxStepNo][IDX_LOC_OBJ_SEQUENCE_CHARGE_FLAG] == P1) {
+								cSoftFeedback_Charge_SOC_Tracking(ch);
+							} else {
+								cSoftFeedback_A1(ch);
+							}
+
+						} else {
+							cSoftFeedback_Charge_SOC_Tracking(ch);
+						}
+					}
+//----------------------------------------------------
+					break;
 				default:
 					cSoftFeedback_A1(ch);
 					break;
@@ -35286,6 +35316,94 @@ void cSoftFeedback(int ch)
 			break;
 	}
 }
+
+void cSoftFeedback_Charge_SOC_Tracking(int ch)
+{
+	short int scan_ch, idxStepNo;
+	int group;
+	long val1, val2, val3, check_t1, check_t2, check_t2a, check_t3, check_t3a;
+	//long val; //kjh_160623
+	double v_cmp_p, v_cmp_n, i_cmp_p, i_cmp_n, p_cmp_p, p_cmp_n, tmp1, tmp2;
+	double v_cmp_p2, v_cmp_n2;
+
+	switch(myData->AppControl.config.systemModel) {
+		default:
+			if(ch < myPs->config.chInGroup[0]) group = 0;
+			else group = 1;
+			break;
+	}
+
+	myGroup = &(myData->gData[group]);
+
+	if(ch == 0) scan_ch = myGroup->misc.scan_ch[ch];
+	else scan_ch = myGroup->misc.scan_ch[ch] + 12;
+
+    idxStepNo = myCh->op.idxStepNo;
+
+	val2 = myCh->misc.cmd_i[0];
+
+	switch(myCh->op.stepType) {
+		case STEP_CHARGE:
+			val1 = myCh->misc.cmd_v[0];
+			break;
+		case STEP_DISCHARGE:
+		case STEP_Z:
+			val1 = myCh->misc.cmd_v[1];
+			break;
+		case STEP_PATTERN: //kjhw_140106
+			if(val2 >= 0) val1 = myCh->misc.cmd_v[0]; //charge
+			else val1 = myCh->misc.cmd_v[1]; //discharge
+			break;
+		default:
+			val1 = myCh->misc.cmd_v[0];
+			break;
+	}
+	v_cmp_p = (double)myPs->config.maxV[myCh->op.rangeV] * 0.002;
+	v_cmp_n = v_cmp_p * (-1.0);
+	v_cmp_p2 = (double)myPs->config.maxV[myCh->op.rangeV] * 0.0001;
+	v_cmp_n2 = v_cmp_p2 * (-1.0);
+	i_cmp_p = (double)myPs->config.maxI[myCh->op.rangeI] * 0.05;
+	i_cmp_n = i_cmp_p * (-1.0);
+
+	//p_cmp_p = (double)val3 * 2.0;
+	p_cmp_p = (double)val3 * 0.15; //kjhw_150616
+	p_cmp_n = p_cmp_p * (-1.0);
+
+	switch(myData->AppControl.config.systemModel) { //kjhw_180325
+		default:
+			check_t1 = 0; //30ms kjg_100520
+			check_t2 = 5; //50ms
+			check_t2a = 100 * (long)myPs->misc.increment_period; //10ms
+			check_t3 = 90 * (long)myPs->misc.increment_period; //90ms
+			check_t3a = 100 * (long)myPs->misc.increment_period; //20ms
+			break;
+	}
+	switch(myCh->op.stepType) {
+		case STEP_CHARGE:
+			if(myPs->config.soft_feedback1[2] == 0) return;
+			if(myCh->misc.cv_select != P0) return; //kjg_121022
+			if(myCh->op.stepMode == MODE_CC
+				|| myCh->op.stepMode == MODE_CV
+				|| myCh->op.stepMode == MODE_CC_CV) {
+				tmp1 = (double)val1 - (double)myCh->misc.tmpVsens;
+				tmp2 = (double)val2 - (double)myCh->misc.tmpIsens;
+				//if(tmp1 > v_cmp_p) { //CC Area
+					if(myPs->config.soft_feedback1[1] == 0) return;
+					if(myCh->misc.cv_select != P0) return; //kjg_121022
+					myCh->misc.fbCountI++;
+					if((myCh->misc.fbCountI * myPs->config.scan_period)
+						>= check_t2a) {
+						myCh->misc.fbCountV = 0;
+						myCh->misc.fbCountI = 0;
+						cCalCmdI(ch, val2, 0, myCh->op.rangeI);
+					}
+				//}
+			}
+			break;
+		default: break;
+	}
+}
+//-----------------------------------------------------------------------------------------
 
 void cSoftFeedback_A1(int ch)
 {

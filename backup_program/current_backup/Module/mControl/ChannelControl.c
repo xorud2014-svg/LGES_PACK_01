@@ -4399,6 +4399,7 @@ void cPause_sig_continue(int ch)
 	double tmp1;
 	long attr_count, ratioV, ratioI; //kjh_211021
 	double ratioP; //kjh_211021
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
 
 	if(ch < myPs->config.chInGroup[0]) group = 0;
 	else group = 1;
@@ -4436,9 +4437,13 @@ void cPause_sig_continue(int ch)
 		idx = IDX_LOC_OBJ_TYPE;
 		myCh->op.stepType
 			= (unsigned char)myTestCond->local_object[idxStepNo][idx];
-		idx = IDX_LOC_OBJ_MODE;
-		myCh->op.stepMode
-			= (unsigned char)myTestCond->local_object[idxStepNo][idx];
+//20181219 KHK------------------------------------
+//		idx = IDX_LOC_OBJ_MODE;
+//		myCh->op.stepMode
+//			= (unsigned char)myTestCond->local_object[idxStepNo][idx];
+		user_mode = cFind_User_Define_Mode(ch);
+		myCh->op.stepMode = (unsigned char)user_mode.mode;
+//-------------------------------------------------
 		idx = IDX_LOC_OBJ_RANGE_V;
 		myCh->op.rangeV
 			= (unsigned char)myTestCond->local_object[idxStepNo][idx];
@@ -4973,6 +4978,7 @@ void cPause_sig_next_step(int ch)
 	unsigned char rangeV, rangeI; //kjhw_150210
 	long ratioV, ratioI; //kjh_211021
 	double ratioP; //kjh_211021
+	S_USER_DEFINE_MODE user_mode; //20181219 KHK
 
 	if(ch < myPs->config.chInGroup[0]) group = 0;
 	else group = 1;
@@ -5056,8 +5062,12 @@ void cPause_sig_next_step(int ch)
 	idxStepNo = myCh->op.idxStepNo;
 	idx = IDX_LOC_OBJ_TYPE;
 	myCh->op.stepType = (unsigned char)myTestCond->local_object[idxStepNo][idx];
-	idx = IDX_LOC_OBJ_MODE;
-	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+//20181219 KHK------------------------------------
+//	idx = IDX_LOC_OBJ_MODE;
+//	myCh->op.stepMode = (unsigned char)myTestCond->local_object[idxStepNo][idx];
+	user_mode = cFind_User_Define_Mode(ch);
+	myCh->op.stepMode = (unsigned char)user_mode.mode;
+//-------------------------------------------------
 	idx = IDX_LOC_OBJ_RANGE_V;
 	myCh->op.rangeV = (unsigned char)myTestCond->local_object[idxStepNo][idx];
 	idx = IDX_LOC_OBJ_RANGE_I;

@@ -19501,7 +19501,18 @@ void cOutSwitch_P87_Pack1(int ch, int slot)
 		}	//kjhw_150914e
 	} else {
 		val2 = cmd_val / attr_count;
-
+		//jhkw_201102s
+		master_ch = find_master_ch(ch);
+		if(myData->ChAttribute[ch].chNo_master != 0) {
+			val2 = cFind_SOC_Tracking_Limit_Current(ch, val2);
+			myData->cData[master_ch].misc.cmd_p[0] = val2;
+			for(i=0; i < MAX_SLAVE_CH; i++) {
+				j = myData->ChAttribute[master_ch].chNo_slave[i] - 1;
+				if(j <= 0) continue;
+				myData->cData[j].misc.cmd_p[0] = val2;
+			}
+		}
+		//jhkw_201102e
 		if(cmd_val >= 0) { //kjh_211021s
 			tmp1 = (double)(val1_max / ratioV) * (double)(val2_max / ratioI)
 				/ ratioP;
